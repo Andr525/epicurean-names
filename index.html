@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Epicurean House @ The Chocolate Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garant:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#1C0F0A;font-family:'Inter',sans-serif;color:#F7F0E6;min-height:100vh}
+.app{background:#1C0F0A;min-height:100vh}
+.screen{display:none;flex-direction:column;align-items:center;padding:2rem 1.2rem 3rem}
+.screen.active{display:flex}
+.logo-title{font-family:'Cormorant Garant',serif;font-size:2rem;font-weight:300;color:#C9A84C;letter-spacing:.08em;line-height:1.2;text-align:center}
+.logo-sub{font-family:'Cormorant Garant',serif;font-size:.95rem;font-style:italic;color:#D4896A;letter-spacing:.12em;text-align:center;margin-top:.25rem}
+.divider{display:flex;align-items:center;gap:.6rem;margin:.8rem 0;width:100%;max-width:380px}
+.divider::before,.divider::after{content:'';flex:1;height:.5px;background:#C9A84C44}
+.divider span{color:#C9A84C;font-size:14px;letter-spacing:.2em}
+.panel{background:#2A1810;border:.5px solid #C9A84C44;border-radius:16px;padding:1.4rem;width:100%;max-width:440px}
+.slabel{font-size:10px;letter-spacing:.15em;color:#C9A84C;text-transform:uppercase;margin-bottom:.7rem}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.65rem 1.4rem;border-radius:8px;font-family:'Inter',sans-serif;font-size:.83rem;cursor:pointer;transition:all .18s;border:none;width:100%}
+.btn-gold{background:#C9A84C;color:#1C0F0A;margin-top:.9rem;font-weight:500}
+.btn-gold:hover{background:#DDB95C}
+.btn-outline{background:transparent;border:.5px solid #C9A84C55;color:#F7F0E6;margin-top:.55rem}
+.btn-outline:hover{border-color:#C9A84C;background:#C9A84C11}
+.btn-reset{background:transparent;border:.5px solid #7A6A5A55;color:#7A6A5A;border-radius:7px;padding:.3rem .8rem;font-size:.72rem;cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s;white-space:nowrap}
+.btn-reset:hover{border-color:#D4896A88;color:#D4896A}
+.lang-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;width:100%;max-width:420px;margin-top:1rem}
+.btn-lang{background:#2A1810;border:.5px solid #C9A84C33;color:#F7F0E6;border-radius:10px;padding:.85rem;display:flex;flex-direction:column;align-items:center;gap:.25rem;cursor:pointer;transition:all .18s}
+.btn-lang:hover,.btn-lang.sel{border-color:#C9A84C;background:#C9A84C1A}
+.btn-lang .ln{font-family:'Cormorant Garant',serif;font-size:1.05rem;color:#C9A84C}
+.btn-lang .ls{font-size:.72rem;color:#D4896A}
+input[type=text],input[type=tel]{width:100%;background:#1C0F0A;border:.5px solid #C9A84C44;border-radius:8px;padding:.65rem 1rem;color:#F7F0E6;font-family:'Inter',sans-serif;font-size:.88rem;outline:none;transition:border .18s}
+input:focus{border-color:#C9A84C}
+input::placeholder{color:#7A6A5A}
+.tag{padding:.3rem .75rem;border-radius:20px;font-size:.76rem;border:.5px solid #C9A84C33;color:#D4896A;cursor:pointer;transition:all .18s;background:transparent;display:inline-block}
+.tag.on{background:#C9A84C1A;border-color:#C9A84C;color:#C9A84C}
+.tag-grid{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.5rem}
+.tabs{display:flex;gap:.35rem;background:#2A1810;border-radius:10px;padding:.28rem;width:100%;max-width:520px;margin-bottom:.9rem}
+.tab{flex:1;padding:.5rem;text-align:center;font-size:.79rem;border-radius:7px;cursor:pointer;color:#A09080;transition:all .18s}
+.tab.on{background:#C9A84C;color:#1C0F0A;font-weight:500}
+.menu-grid{display:flex;flex-direction:column;gap:.7rem;width:100%;max-width:520px}
+.mcard{background:#2A1810;border:.5px solid #C9A84C33;border-radius:12px;padding:1.1rem;transition:all .18s}
+.mcard:hover{border-color:#C9A84C66;background:#2F1A10}
+.mcard.sel{border-color:#C9A84C;background:#C9A84C0D}
+.mcard.dim{opacity:.4;border-style:dashed}
+.mcard-click{cursor:pointer}
+.ct{display:flex;justify-content:space-between;align-items:flex-start;gap:.4rem}
+.cn{font-family:'Cormorant Garant',serif;font-size:1.1rem;color:#F7F0E6;line-height:1.3}
+.cvintage{font-family:'Cormorant Garant',serif;font-size:.88rem;color:#C9A84C99;display:block;margin-top:.1rem}
+.cp{font-family:'Cormorant Garant',serif;font-size:.95rem;color:#C9A84C;white-space:nowrap;flex-shrink:0}
+.cd{font-size:.78rem;color:#A09080;margin-top:.35rem;line-height:1.5}
+.cb{display:flex;flex-wrap:wrap;gap:.28rem;margin-top:.55rem}
+.badge{font-size:.68rem;padding:.18rem .55rem;border-radius:20px}
+.btype{background:#C9A84C0D;color:#C9A84C88;border:.5px solid #C9A84C22}
+.bwarn{background:#D4896A1A;color:#D4896A;border:.5px solid #D4896A44}
+.bok{background:#7A9E7E1A;color:#7A9E7E;border:.5px solid #7A9E7E44}
+.bdia{background:#7A9E7E1A;color:#7A9E7E;border:.5px solid #7A9E7E55}
+.bsug{background:#C9A84C0D;color:#C9A84C;border:.5px solid #C9A84C44;cursor:pointer;font-size:.68rem;padding:.18rem .55rem;border-radius:20px;display:inline-block;margin-top:.4rem}
+.wine-pairing{background:#1C0F0A;border:.5px solid #C9A84C33;border-radius:10px;padding:.9rem;margin-top:.65rem;display:none}
+.wine-pairing.open{display:block}
+.wp-label{font-size:.7rem;letter-spacing:.12em;color:#C9A84C88;text-transform:uppercase;margin-bottom:.35rem}
+.wp-text{font-size:.82rem;color:#D4896A;line-height:1.65;font-family:'Cormorant Garant',serif;font-style:italic}
+.wp-dishes{margin-top:.55rem;display:flex;flex-direction:column;gap:.3rem}
+.wp-dish{font-size:.75rem;color:#C9A84C;padding:.22rem .55rem;background:#C9A84C0D;border:.5px solid #C9A84C22;border-radius:6px;display:inline-block;width:fit-content}
+.price-row{display:flex;gap:.4rem;margin-top:.5rem;flex-wrap:wrap}
+.price-pill{font-size:.71rem;padding:.2rem .55rem;border-radius:6px;background:#C9A84C0D;color:#C9A84C77;border:.5px solid #C9A84C1A}
+.summary-box{background:#2A1810;border:.5px solid #C9A84C44;border-radius:12px;padding:1.2rem;width:100%;max-width:520px;margin-top:.9rem}
+.srow{display:flex;justify-content:space-between;padding:.38rem 0;border-bottom:.5px solid #C9A84C1A;font-size:.83rem}
+.srow:last-child{border:none}
+.confirm-box{background:#7A9E7E0D;border:.5px solid #7A9E7E44;border-radius:12px;padding:1.4rem;text-align:center;width:100%;max-width:520px;margin-top:.9rem;display:none}
+.toggle-wrap{display:flex;align-items:center;gap:.8rem;padding:.65rem;background:#1C0F0A;border-radius:8px;cursor:pointer;margin-top:.75rem;border:.5px solid transparent}
+.toggle-wrap:hover{border-color:#C9A84C22}
+.track{width:34px;height:19px;background:#C9A84C33;border-radius:10px;position:relative;transition:background .18s;flex-shrink:0}
+.track.on{background:#C9A84C}
+.thumb{width:15px;height:15px;background:#F7F0E6;border-radius:50%;position:absolute;top:2px;left:2px;transition:left .18s}
+.track.on .thumb{left:17px}
+.top-bar{display:flex;justify-content:space-between;align-items:center;width:100%;max-width:520px;margin-bottom:.9rem}
+.top-name{font-family:'Cormorant Garant',serif;font-size:.95rem;color:#C9A84C;font-style:italic}
+.bar-right{display:flex;gap:.5rem;align-items:center}
+.back-btn{background:transparent;border:.5px solid #C9A84C33;color:#A09080;border-radius:6px;padding:.28rem .65rem;font-size:.73rem;cursor:pointer}
+.dot-a span{animation:blink 1.2s infinite;display:inline-block}
+.dot-a span:nth-child(2){animation-delay:.2s}
+.dot-a span:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,80%,100%{opacity:.2}40%{opacity:1}}
+.ai-box{background:#1C0F0A;border:.5px solid #C9A84C33;border-radius:10px;padding:1rem;margin-top:.75rem;max-width:520px;width:100%;display:none}
+.ai-box.show{display:block}
+.sugar-note{font-size:.71rem;color:#7A9E7E;margin-top:.3rem;line-height:1.4}
+.fm-banner{background:#2A1810;border:.5px solid #C9A84C55;border-radius:10px;padding:.85rem 1rem;width:100%;max-width:520px;margin-bottom:1.2rem;display:flex;align-items:center;gap:.8rem}
+.fm-code-display{font-family:'Cormorant Garant',serif;font-size:1.2rem;color:#C9A84C}
+.xref-note{font-size:.75rem;color:#A09080;line-height:1.5;margin-top:.3rem}
+.xref-chip{display:inline-block;background:#C9A84C11;border:.5px solid #C9A84C33;border-radius:6px;padding:.15rem .5rem;font-size:.7rem;color:#C9A84C;margin-top:.2rem}
+.reset-bar{display:flex;justify-content:flex-end;width:100%;max-width:440px;margin-bottom:.5rem}
+.tier-row{display:flex;gap:.4rem;margin-top:.65rem;flex-wrap:wrap}
+.tier-btn{flex:1;min-width:80px;background:#1C0F0A;border:.5px solid #C9A84C33;border-radius:8px;padding:.5rem .4rem;color:#C9A84C88;font-family:'Inter',sans-serif;font-size:.72rem;cursor:pointer;transition:all .18s;text-align:center;line-height:1.4}
+.tier-btn:hover{border-color:#C9A84C77;background:#C9A84C0D;color:#C9A84C}
+.tier-btn.tier-sel{border-color:#C9A84C;background:#C9A84C22;color:#C9A84C;font-weight:500}
+.tier-price{display:block;font-family:'Cormorant Garant',serif;font-size:.88rem;color:#C9A84C;margin-top:.15rem}
+.tier-btn.tier-sel .tier-price{color:#DDB95C}
+.sources{margin-top:.65rem;border-top:.5px solid #C9A84C1A;padding-top:.55rem;display:flex;flex-direction:column;gap:.3rem}
+.source-link{display:flex;align-items:flex-start;gap:.45rem;text-decoration:none;font-size:.72rem;color:#C9A84C88;line-height:1.45;transition:color .15s}
+.source-link:hover{color:#C9A84C}
+.source-dot{width:5px;height:5px;border-radius:50%;background:#C9A84C44;flex-shrink:0;margin-top:.35rem}
+.source-link:hover .source-dot{background:#C9A84C}
+.gelato-swap{margin-top:.6rem;background:#1C0F0A;border:.5px solid #C9A84C33;border-radius:8px;padding:.6rem .8rem}
+.gelato-label{font-size:.7rem;letter-spacing:.1em;color:#C9A84C88;text-transform:uppercase;margin-bottom:.35rem}
+.gelato-options{display:flex;gap:.5rem;flex-wrap:wrap}
+.gelato-btn{font-size:.75rem;padding:.28rem .75rem;border-radius:20px;border:.5px solid #C9A84C44;color:#C9A84C88;background:transparent;cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s}
+.gelato-btn.active{background:#C9A84C;color:#1C0F0A;border-color:#C9A84C}
+.gelato-btn:hover{border-color:#C9A84C;color:#C9A84C}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+<div id="s-lang" class="screen active" style="justify-content:center;padding-top:2.5rem">
+  <div class="reset-bar"><button class="btn-reset" onclick="startOver()">&#8635; Start over</button></div>
+  <div class="logo-title">The Epicurean House</div>
+  <div class="logo-sub">@ The Chocolate Studio</div>
+  <div class="divider"><span>&#10022; &#10022; &#10022;</span></div>
+  <div class="panel" style="max-width:440px;margin-bottom:1.1rem">
+    <div class="slabel">Food Master &#8212; enter your code &amp; assign table</div>
+    <input type="text" id="w-code-input" placeholder="Food Master code" maxlength="8" style="letter-spacing:.12em;font-size:1rem;margin-bottom:.6rem">
+    <div style="display:flex;gap:.5rem;align-items:center;margin-top:.5rem">
+      <select id="table-assign" style="background:#1C0F0A;border:.5px solid #C9A84C44;border-radius:8px;padding:.55rem .8rem;color:#F7F0E6;font-family:'Inter',sans-serif;font-size:.83rem;outline:none;flex:1">
+        <option value="">Assign table (1&#8211;50)&#8230;</option>
+      </select>
+    </div>
+    <button class="btn btn-gold" style="margin-top:.8rem" onclick="openTable()">Open table &#8594;</button>
+    <div id="wc-confirm" style="display:none;margin-top:.6rem;font-size:.78rem;color:#7A9E7E">&#10003; Food Master <span id="wc-num"></span> &#8212; Table <span id="wc-table"></span> is open</div>
+  </div>
+  <div style="font-size:.78rem;color:#7A6A5A;text-align:center;margin-bottom:.2rem">Guest &#8212; select your language</div>
+  <div class="lang-grid">
+    <button class="btn-lang" onclick="setLang('en',this)"><span class="ln">English</span><span class="ls">English</span></button>
+    <button class="btn-lang" onclick="setLang('es',this)"><span class="ln">Espa&#241;ol</span><span class="ls">Spanish</span></button>
+    <button class="btn-lang" onclick="setLang('fr',this)"><span class="ln">Fran&#231;ais</span><span class="ls">French</span></button>
+    <button class="btn-lang" onclick="setLang('ja',this)"><span class="ln">&#x65E5;&#x672C;&#x8A9E;</span><span class="ls">Japanese</span></button>
+  </div>
+  <button class="btn btn-outline" style="max-width:420px;margin-top:1rem" onclick="doVoice()">&#127908; <span id="vbtxt">Speak your language</span></button>
+</div>
+
+<div id="s-phone" class="screen">
+  <div class="reset-bar" style="max-width:440px"><button class="btn-reset" onclick="startOver()">&#8635; Start over</button></div>
+  <div class="logo-title" style="font-size:1.6rem">The Epicurean House</div>
+  <div class="logo-sub">@ The Chocolate Studio</div>
+  <div class="divider"><span>&#10022;</span></div>
+  <!-- Returning guest: shows name as heading -->
+  <div id="guest-name-heading" style="display:none;font-family:'Cormorant Garant',serif;font-size:1.6rem;font-weight:300;color:#C9A84C;text-align:center;margin-bottom:.2rem;letter-spacing:.04em"></div>
+  <div style="font-family:'Cormorant Garant',serif;font-size:1.3rem;color:#F7F0E6;text-align:center;margin-bottom:.3rem" id="ph-welcome">Welcome, dear guest</div>
+  <div style="font-size:.8rem;color:#A09080;text-align:center;margin-bottom:1.2rem;line-height:1.6;max-width:360px" id="ph-sub">Enter your phone number so we can personalize your experience.</div>
+  <!-- Phone entry panel -->
+  <div class="panel" id="panel-phone">
+    <div class="slabel" id="ph-label">Your phone number</div>
+    <input type="tel" id="ph-input" placeholder="Enter phone number (any country)" maxlength="25" oninput="livePhoneLookup(this.value)">
+    <div style="font-size:.73rem;color:#7A6A5A;margin-top:.35rem" id="ph-note">We never share your number. All country formats accepted.</div>
+    <div id="ret-msg" style="display:none;margin-top:.7rem;padding:.65rem;background:#7A9E7E0D;border-radius:8px;border:.5px solid #7A9E7E44;font-size:.85rem;color:#7A9E7E;font-family:'Cormorant Garant',serif"></div>
+    <button class="btn btn-gold" onclick="fromPhone()" id="ph-btn">Continue &#8594;</button>
+    <button class="btn btn-outline" onclick="go('s-diet')" id="ph-skip">Skip for now</button>
+  </div>
+  <!-- New guest registration panel (shown when number not found) -->
+  <div class="panel" id="panel-newguest" style="display:none;margin-top:.8rem">
+    <div class="slabel" id="lbl-newguest-title">New guest &#8212; complete your profile</div>
+    <div style="font-size:.78rem;color:#A09080;margin-bottom:.8rem;line-height:1.5" id="lbl-newguest-sub">We did not find your number. Please enter your details below, or scan the QR code to fill in from your phone.</div>
+    <!-- QR code area -->
+    <div style="display:flex;gap:1rem;align-items:flex-start;margin-bottom:1rem">
+      <div id="qr-area" style="flex-shrink:0;width:80px;height:80px;background:#1C0F0A;border:.5px solid #C9A84C33;border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden"></div>
+      <div style="flex:1;font-size:.75rem;color:#7A6A5A;line-height:1.6" id="lbl-qr-hint">Scan to fill your details from your phone</div>
+    </div>
+    <div class="slabel" id="lbl-or-enter">Or enter here</div>
+    <input type="text" id="ng-name" placeholder="Full name" style="margin-bottom:.5rem">
+    <input type="email" id="ng-email" placeholder="Email address" style="margin-bottom:.5rem">
+    <div style="font-size:.72rem;color:#7A6A5A;margin-bottom:.7rem" id="lbl-voice-hint">&#127908; You can also speak your name and email</div>
+    <button class="btn" style="background:transparent;border:.5px solid #C9A84C44;color:#C9A84C88;font-size:.78rem;margin-bottom:.5rem;width:auto;padding:.4rem .9rem" onclick="startVoiceInput()" id="btn-voice-fill">&#127908; Speak to fill</button>
+    <button class="btn btn-gold" onclick="saveNewGuest()" id="btn-save-guest">Save &amp; continue &#8594;</button>
+  </div>
+</div>
+
+<div id="s-diet" class="screen">
+  <div class="reset-bar" style="max-width:440px"><button class="btn-reset" onclick="startOver()">&#8635; Start over</button></div>
+  <div style="font-family:'Cormorant Garant',serif;font-size:1.3rem;color:#F7F0E6;margin-bottom:.25rem;text-align:center" id="dt-h">Any allergies or restrictions?</div>
+  <div style="font-size:.8rem;color:#A09080;margin-bottom:1rem;text-align:center;max-width:360px" id="dt-s">Select all that apply &#8212; your menu will adapt.</div>
+  <div class="panel">
+    <div class="slabel" id="lbl-allergy">Allergies</div>
+    <div class="tag-grid">
+      <span class="tag" onclick="tAllergy(this,'nuts')" data-key="nuts">Tree Nuts</span>
+      <span class="tag" onclick="tAllergy(this,'peanuts')" data-key="peanuts">Peanuts</span>
+      <span class="tag" onclick="tAllergy(this,'shellfish')" data-key="shellfish">Shellfish</span>
+      <span class="tag" onclick="tAllergy(this,'fish')" data-key="fish">Fish</span>
+      <span class="tag" onclick="tAllergy(this,'dairy')" data-key="dairy">Dairy</span>
+      <span class="tag" onclick="tAllergy(this,'eggs')" data-key="eggs">Eggs</span>
+      <span class="tag" onclick="tAllergy(this,'gluten')" data-key="gluten">Gluten</span>
+      <span class="tag" onclick="tAllergy(this,'soy')" data-key="soy">Soy</span>
+      <span class="tag" onclick="tAllergy(this,'sulfites')" data-key="sulfites">Sulfites</span>
+    </div>
+    <div class="slabel" style="margin-top:1rem" id="lbl-diet">Dietary preference</div>
+    <div class="tag-grid">
+      <span class="tag" onclick="tDiet(this,'vegetarian')" data-key="vegetarian">Vegetarian</span>
+      <span class="tag" onclick="tDiet(this,'vegan')" data-key="vegan">Vegan</span>
+      <span class="tag" onclick="tDiet(this,'keto')" data-key="keto">Keto</span>
+      <span class="tag" onclick="tDiet(this,'diabetic')" data-key="diabetic">Diabetic / Low Sugar</span>
+      <span class="tag" onclick="tDiet(this,'halal')" data-key="halal">Halal</span>
+      <span class="tag" onclick="tDiet(this,'kosher')" data-key="kosher">Kosher</span>
+    </div>
+    <div class="slabel" style="margin-top:1rem" id="lbl-other">Other notes</div>
+    <input type="text" id="other" placeholder="e.g. low sodium, no spicy food&#8230;">
+    <div class="toggle-wrap" onclick="tShowAll()">
+      <div class="track" id="sa-track"><div class="thumb"></div></div>
+      <div>
+        <div style="font-size:.83rem;color:#F7F0E6" id="lbl-showall">Show full menu anyway</div>
+        <div style="font-size:.72rem;color:#A09080" id="lbl-showall-sub">Restricted items marked but visible</div>
+      </div>
+    </div>
+    <button class="btn btn-gold" onclick="goMenu()" id="btn-seemenu">See my menu &#8594;</button>
+  </div>
+</div>
+
+<div id="s-menu" class="screen">
+  <div class="top-bar">
+    <div class="top-name" id="top-greet"></div>
+    <div class="bar-right">
+      <button class="btn-reset" onclick="startOver()" id="rs-menu">&#8635; Start over</button>
+      <button class="back-btn" onclick="go('s-diet')" id="btn-back">&#8592; Back</button>
+    </div>
+  </div>
+  <div class="fm-banner" id="fm-banner" style="display:none">
+    <div>
+      <div class="slabel" style="margin-bottom:.2rem">Food Master</div>
+      <div class="fm-code-display" id="fm-display"></div>
+    </div>
+    <div style="flex:1">
+      <div class="xref-note" id="xref-note">Guest selections cross-referenced with your ordering pad in real time.</div>
+      <span class="xref-chip" id="xref-chip">Tap any item to confirm guest choice &#10003;</span>
+    </div>
+  </div>
+  <div class="tabs">
+    <div class="tab on" onclick="switchTab('mains',this)" id="tab-mains">Mains &amp; Dessert</div>
+    <div class="tab" onclick="switchTab('cocktails',this)" id="tab-cocktails">Cocktails</div>
+    <div class="tab" onclick="switchTab('wines',this)" id="tab-wines">Wines</div>
+  </div>
+  <div id="menu-list" class="menu-grid"></div>
+  <div id="ai-box" class="ai-box">
+    <div class="slabel" id="ai-lbl">Your personalized suggestion</div>
+    <div id="ai-txt" style="font-size:.82rem;color:#D4896A;line-height:1.6;font-family:'Cormorant Garant',serif;font-style:italic"></div>
+  </div>
+  <div id="sum-box" class="summary-box" style="display:none">
+    <div class="slabel" id="lbl-selections">Your selections</div>
+    <div id="sum-items"></div>
+    <button class="btn btn-outline" style="margin-top:.7rem;border-color:#D4896A44;color:#D4896A88;font-size:.78rem" onclick="clearSelections()" id="btn-clear">&#10005; Clear all selections</button>
+    <div style="margin-top:1rem;padding-top:.9rem;border-top:.5px solid #C9A84C1A">
+      <div style="font-size:.72rem;letter-spacing:.1em;color:#C9A84C88;text-transform:uppercase;margin-bottom:.55rem" id="lbl-call-fm">Call your Food Master</div>
+      <div>
+        <button class="btn btn-gold" style="margin-top:.3rem" onclick="callFoodMaster()" id="btn-call">&#128276; Call Food Master</button>
+      </div>
+      <div id="call-sent" style="display:none;margin-top:.55rem;font-size:.78rem;color:#7A9E7E;font-style:italic"></div>
+    </div>
+    <div style="margin-top:.6rem;font-size:.72rem;color:#7A6A5A;line-height:1.5" id="lbl-fm-note">Your Food Master will come to your table to review and confirm your order.</div>
+  </div>
+  <div id="fm-order-box" style="display:none;width:100%;max-width:520px;margin-top:.9rem">
+    <div style="background:#2A1810;border:.5px solid #C9A84C44;border-radius:12px;padding:1.2rem">
+      <div class="slabel" id="lbl-fm-review">Your order summary</div>
+      <div id="fm-order-items"></div>
+      <div style="margin-top:.85rem;padding-top:.75rem;border-top:.5px solid #C9A84C1A;text-align:center">
+        <div style="font-size:.78rem;color:#7A9E7E;font-style:italic;font-family:'Cormorant Garant',serif" id="lbl-fm-waiting">&#10003; Your Food Master has been notified and will be right with you.</div>
+      </div>
+    </div>
+  </div>
+  <div id="conf-box" class="confirm-box">
+    <div style="font-size:1.4rem;color:#7A9E7E">&#10003;</div>
+    <div style="font-family:'Cormorant Garant',serif;font-size:1.15rem;color:#7A9E7E;margin-top:.35rem" id="conf-msg">Order confirmed!</div>
+    <div style="font-size:.8rem;color:#A09080;margin-top:.3rem" id="conf-sub">Your order is on its way. Enjoy your evening.</div>
+    <div id="conf-items" style="margin-top:.75rem;width:100%;max-width:340px;text-align:left"></div>
+    <button class="btn btn-outline" style="margin-top:1rem;max-width:240px" onclick="startOver()" id="btn-newguest">New guest &#8635;</button>
+  </div>
+</div>
+
+</div>
+<script>
+var gelatoChoice = 'pistachio';
+
+var SOURCES = {
+  en: {
+    m1: [{label:'Duck: White Oak Pastures, Bluffton GA \u2014 free-roaming, pasture-raised',url:'https://www.whiteoakpastures.com'}],
+    m2: [{label:'Carnaroli rice: Riso Acquerello, Piedmont Italy \u2014 Rondolino family estate',url:'https://www.acquerello.it'},{label:'White truffle: Alba, Piedmont Italy \u2014 seasonal harvest',url:'https://www.fieradeltartufo.org'}],
+    m3: [{label:'Chilean Sea Bass (Patagonian Toothfish): flown from Santiago, Chile \u2014 Global Seafood',url:'https://www.globalseafood.org'}],
+    m4: [{label:'Beef: Craincrest Farms, New York \u2014 100% grass-fed, free-roaming',url:'https://www.ams.usda.gov/local-food-directories/farmersmarkets'}],
+    d1: [{label:'Pistachios: Pistacchio Verde di Bronte, Sicily Italy \u2014 DOP protected origin',url:'https://www.consorziopistacchiodibronte.it'},{label:'Vanilla (swap): Vanilla odorata beans, Ecuadorian Amazon \u2014 single-origin',url:'https://www.rainforestalliance.org'}]
+  },
+  es: {
+    m1: [{label:'Pato: White Oak Pastures, Georgia EE.UU. \u2014 cr\u00eda libre en pasto',url:'https://www.whiteoakpastures.com'}],
+    m2: [{label:'Arroz Carnaroli: Riso Acquerello, Piamonte Italia \u2014 familia Rondolino',url:'https://www.acquerello.it'},{label:'Trufa blanca: Alba, Piamonte Italia \u2014 cosecha de temporada',url:'https://www.fieradeltartufo.org'}],
+    m3: [{label:'Lubina chilena (Merluza negra): directo de Santiago, Chile \u2014 Global Seafood',url:'https://www.globalseafood.org'}],
+    m4: [{label:'Res: Craincrest Farms, Nueva York \u2014 100% pasto natural, libre en prado',url:'https://www.ams.usda.gov/local-food-directories/farmersmarkets'}],
+    d1: [{label:'Pistachos: Pistacchio Verde di Bronte, Sicilia Italia \u2014 DOP origen protegido',url:'https://www.consorziopistacchiodibronte.it'},{label:'Vainilla (alternativa): Vanilla odorata, Amazon\u00eda ecuatoriana \u2014 origen \u00fanico',url:'https://www.rainforestalliance.org'}]
+  },
+  fr: {
+    m1: [{label:'Canard: White Oak Pastures, G\u00e9orgie \u00c9.-U. \u2014 \u00e9levage en plein air',url:'https://www.whiteoakpastures.com'}],
+    m2: [{label:'Riz carnaroli: Riso Acquerello, Pi\u00e9mont Italie \u2014 domaine familial Rondolino',url:'https://www.acquerello.it'},{label:'Truffe blanche: Alba, Pi\u00e9mont Italie \u2014 r\u00e9colte saisonni\u00e8re',url:'https://www.fieradeltartufo.org'}],
+    m3: [{label:'Bar chilien (Légine australe): transport\u00e9 depuis Santiago, Chili \u2014 Global Seafood',url:'https://www.globalseafood.org'}],
+    m4: [{label:'B\u0153uf: Craincrest Farms, New York \u2014 100% herbe, \u00e9levage libre',url:'https://www.ams.usda.gov/local-food-directories/farmersmarkets'}],
+    d1: [{label:'Pistaches: Pistacchio Verde di Bronte, Sicile Italie \u2014 AOP origine prot\u00e9g\u00e9e',url:'https://www.consorziopistacchiodibronte.it'},{label:'Vanille (variante): Vanilla odorata, Amazonie \u00e9quatorienne \u2014 origine unique',url:'https://www.rainforestalliance.org'}]
+  },
+  ja: {
+    m1: [{label:'\u9d28\u8089: White Oak Pastures\u3001\u30b8\u30e7\u30fc\u30b8\u30a2\u5dde\u7b46\u2014\u653e\u7267\u98fc\u80b2',url:'https://www.whiteoakpastures.com'}],
+    m2: [{label:'\u30ab\u30eb\u30ca\u30fc\u30ed\u30fc\u30ea\u7c73: Riso Acquerello\u3001\u30d4\u30a8\u30e2\u30f3\u30c6\u5dde\u30a4\u30bf\u30ea\u30a2\u2014\u30ed\u30f3\u30c9\u30ea\u30fc\u30ce\u5bb6',url:'https://www.acquerello.it'},{label:'\u767d\u30c8\u30ea\u30e5\u30d5: \u30a2\u30eb\u30d0\u3001\u30d4\u30a8\u30e2\u30f3\u30c6\u5dde\u30a4\u30bf\u30ea\u30a2\u2014\u5b63\u7bc0\u306e\u53ce\u7a6b',url:'https://www.fieradeltartufo.org'}],
+    m3: [{label:'\u30c1\u30ea\u30a2\u30f3\u30b7\u30fc\u30d0\u30b9: \u30b5\u30f3\u30c6\u30a3\u30a2\u30b4\u304b\u3089\u76f4\u9001\u3001\u30c1\u30ea\u2014Global Seafood',url:'https://www.globalseafood.org'}],
+    m4: [{label:'\u725b\u8089: Craincrest Farms\u3001\u30cb\u30e5\u30fc\u30e8\u30fc\u30af\u2014100%\u8349\u7280\u3044\u3001\u653e\u7267\u98fc\u80b2',url:'https://www.ams.usda.gov/local-food-directories/farmersmarkets'}],
+    d1: [{label:'\u30d4\u30b9\u30bf\u30c1\u30aa: \u30d4\u30b9\u30bf\u30c3\u30ad\u30aa\u30fb\u30f4\u30a7\u30eb\u30c7\u30fb\u30c7\u30a3\u30fb\u30d6\u30ed\u30f3\u30c6\u3001\u30b7\u30c1\u30ea\u30a2\u30a4\u30bf\u30ea\u30a2\u2014DOP\u6307\u5b9a',url:'https://www.consorziopistacchiodibronte.it'},{label:'\u30d0\u30cb\u30e9(\u4ee3\u66ff): Vanilla odorata\u3001\u30a8\u30af\u30a2\u30c9\u30eb\u30a2\u30de\u30be\u30f3\u2014\u30b7\u30f3\u30b0\u30eb\u30aa\u30ea\u30b8\u30f3',url:'https://www.rainforestalliance.org'}]
+  }
+};
+
+var GELATO_LABELS = {
+  en: {title:'Choose your gelato', pistachio:'Pistachio gelato', vanilla:'Vanilla gelato (nut-free)', vanillaSub:'Vanilla odorata \u2014 Ecuadorian Amazon', noteVanilla:'Served with vanilla gelato (nut-free)'},
+  es: {title:'Elija su gelato', pistachio:'Gelato de pistacho', vanilla:'Gelato de vainilla (sin frutos secos)', vanillaSub:'Vanilla odorata \u2014 Amazon\u00eda ecuatoriana', noteVanilla:'Servido con gelato de vainilla (sin frutos secos)'},
+  fr: {title:'Choisissez votre gelato', pistachio:'Gelato pistache', vanilla:'Gelato vanille (sans fruits \u00e0 coque)', vanillaSub:'Vanilla odorata \u2014 Amazonie \u00e9quatorienne', noteVanilla:'Servi avec gelato vanille (sans fruits \u00e0 coque)'},
+  ja: {title:'\u30b8\u30a7\u30e9\u30fc\u30c8\u3092\u9078\u3093\u3067\u304f\u3060\u3055\u3044', pistachio:'\u30d4\u30b9\u30bf\u30c1\u30aa\u30b8\u30a7\u30e9\u30fc\u30c8', vanilla:'\u30d0\u30cb\u30e9\u30b8\u30a7\u30e9\u30fc\u30c8\uff08\u30ca\u30c3\u30c4\u4e0d\u4f7f\u7528\uff09', vanillaSub:'Vanilla odorata \u2014 \u30a8\u30af\u30a2\u30c9\u30eb\u30a2\u30de\u30be\u30f3', noteVanilla:'\u30d0\u30cb\u30e9\u30b8\u30a7\u30e9\u30fc\u30c8\u6dfb\u3048\uff08\u30ca\u30c3\u30c4\u4e0d\u4f7f\u7528\uff09'}
+};
+
+var D = {
+en:{
+  welcome:"Welcome, dear guest",sub:"Enter your phone number so we can remember your preferences for future visits.",
+  ph:"Your phone number",note:"We never share your number.",cont:"Continue &rarr;",skip:"Skip for now",
+  dh:"Any allergies or restrictions?",ds:"Select all that apply &mdash; your menu will adapt.",
+  greet:"Good evening",confirmed:"Order confirmed!",confirmedSub:"Your Food Master has been notified. Enjoy your evening.",
+  aiLbl:"Your personalized suggestion",tabM:"Mains & Dessert",tabC:"Cocktails",tabW:"Wines",
+  lblAllergy:"Allergies",lblDiet:"Dietary preference",lblOther:"Other notes",
+  showAll:"Show full menu anyway",showAllSub:"Restricted items marked but visible",
+  seeMenu:"See my menu &rarr;",back:"&larr; Back",selections:"Your selections",
+  askFM:"When ready, ask your Food Master to confirm this order on their pad.",
+  sendOrder:"Send order to kitchen",newGuest:"New guest &#8635;",startOver:"&#8635; Start over",
+  safeFor:"&#10003; Safe for you",pairing:"Food pairing",hidePairing:"Hide pairing",suggestedPairing:"Suggested pairing",
+  viewSourcing:"View sourcing",hideSourcing:"Hide sourcing",
+  bottleLabel:"Bottle",glassLabel:"Full glass",halfLabel:"Half glass",
+  fmWaiting:"&#10003; Your Food Master has been notified and will be right with you.",orderSummaryLabel:"Your order summary",
+  newGuestTitle:"New guest — complete your profile",newGuestSub:"We did not find your number. Enter your details or scan the QR code from your phone.",qrHint:"Scan to complete your profile from your phone",orEnter:"Or enter here",voiceHint:"You can also speak your name and email",saveGuest:"Save & continue →",namePlaceholder:"Full name",emailPlaceholder:"Email address",
+  clearAll:"&#10005; Clear all",callFMLabel:"Call your Food Master",fmNoteLabel:"Your Food Master will come to your table to review and confirm.",selectTable:"Select table…",tableLabel:"Table",callSent:"Food Master called to table",fmReviewLabel:"Food Master — Review & Confirm",
+  xrefNote:"Guest selections cross-referenced with your ordering pad in real time.",
+  xrefChip:"Tap any item to confirm guest choice &#10003;",
+  noItems:"No items match your dietary profile here.",
+  diabeticFriendly:"&#10003; Diabetic-friendly",otherPlaceholder:"e.g. low sodium, no spicy food\u2026",
+  sourceLabel:"Sourced from",
+  aLabels:{nuts:"Tree Nuts",peanuts:"Peanuts",shellfish:"Shellfish",fish:"Fish",dairy:"Dairy",eggs:"Eggs",gluten:"Gluten",soy:"Soy",sulfites:"Sulfites"},
+  dLabels:{vegetarian:"Vegetarian",vegan:"Vegan",keto:"Keto",diabetic:"Diabetic / Low Sugar",halal:"Halal",kosher:"Kosher"},
+  mains:[
+    {name:"Seared Duck Breast",desc:"Cherry gastrique, roasted root vegetables, thyme jus"},
+    {name:"White Truffle Risotto",desc:"Carnaroli rice, shaved fresh white truffle, aged Parmigiano-Reggiano, chive oil"},
+    {name:"Miso-Glazed Sea Bass",desc:"Dashi broth, pickled ginger, forbidden rice, scallion oil"},
+    {name:"Chocolate Braised Short Rib",desc:"72% cacao mole, celery root pur\u00e9e, crispy shallots"},
+    {name:"Flourless Chocolate Cake",desc:"Sugarless 72% dark chocolate, baked flourless &mdash; served with gelato",sugarNote:"No sugar added &middot; Suitable for diabetics",hasGelato:true}
+  ],
+  cocktails:[
+    {name:"Cacao Old Fashioned",desc:"Bourbon, cacao nib bitters, demerara, smoked orange peel"},
+    {name:"Hibiscus Mezcal Spritz",desc:"Mezcal, real hibiscus juice (no syrup), monk fruit, lime, prosecco, salt rim &mdash; no sugar added",sugarNote:"No sugar added &middot; Monk fruit sweetened &middot; Diabetic-friendly"},
+    {name:"Chocolate Martini",desc:"100% pure cacao, double espresso, touch of aged rum, monk fruit &mdash; zero sugar, no dairy",sugarNote:"No sugar added &middot; Monk fruit sweetened &middot; Diabetic-friendly"},
+    {name:"Passion Fruit Mule",desc:"Vodka, fresh passion fruit pur\u00e9e, ginger beer, fresh mint"}
+  ],
+  wines:[
+    {name:"Joh. Jos. Pr\u00fcm Graacher Himmelreich Riesling Sp\u00e4tlese",desc:"Delicate off-dry white &mdash; stone fruit, slate minerality, vibrant acidity",pairingNote:"The Pr\u00fcm Riesling\u2019s vibrant acidity and off-dry stone fruit are a natural match for the Miso-Glazed Sea Bass, its mineral thread cutting through dashi richness and echoing the pickled ginger. A second glass alongside the Flourless Chocolate Cake creates a breathtaking contrast.",pairingDishes:["Miso-Glazed Sea Bass","Flourless Chocolate Cake"]},
+    {name:"Ch\u00e2teau d\u2019Yquem Premier Cru Sup\u00e9rieur",desc:"Legendary Sauternes &mdash; honeyed apricot, saffron, candied citrus, extraordinary concentration",pairingNote:"D\u2019Yquem\u2019s botrytised concentration finds its highest calling alongside the Flourless Chocolate Cake, where sweetness meets bitterness in transcendent balance. Its richness also elevates the White Truffle Risotto in baroque harmony.",pairingDishes:["Flourless Chocolate Cake","White Truffle Risotto"]},
+    {name:"Teso La Monja Almirez",desc:"Powerful Toro red &mdash; dense dark fruit, iron minerality, firm structured tannins",pairingNote:"Almirez is a wine of deep earth and power &mdash; its dark fruit mirrors the Chocolate Braised Short Rib, the 72% cacao mole drawing out the wine\u2019s brooding complexity. The Seared Duck Breast is a second match.",pairingDishes:["Chocolate Braised Short Rib","Seared Duck Breast"]},
+    {name:"Bollinger Brut Sp\u00e9cial Cuv\u00e9e",desc:"Classic Non-Vintage Champagne &mdash; toasted brioche, green apple, persistent fine mousse",pairingNote:"Bollinger\u2019s toasted brioche and fine mousse are the perfect foil for the White Truffle Risotto, the acidity cutting through aged Parmigiano and amplifying truffle earthiness. A flute alongside the Chocolate Martini transforms the pairing into pure celebration.",pairingDishes:["White Truffle Risotto","Chocolate Martini"]},
+    {name:"Produttori del Barbaresco DOCG",desc:"Elegant Nebbiolo &mdash; rose, tar, velvet tannins, electric acidity, earthy truffle undertones",pairingNote:"Barbaresco\u2019s soaring rose and tar aromatics were made for the Chocolate Braised Short Rib, the nebbiolo weaving through the cacao mole with extraordinary elegance. The wine\u2019s truffle undertones make it equally compelling with the White Truffle Risotto.",pairingDishes:["Chocolate Braised Short Rib","White Truffle Risotto"]}
+  ]
+},
+es:{
+  welcome:"Bienvenido, estimado hu\u00e9sped",sub:"Ingrese su n\u00famero para recordar sus preferencias en visitas futuras.",
+  ph:"Su n\u00famero de tel\u00e9fono",note:"Nunca compartimos su n\u00famero.",cont:"Continuar &rarr;",skip:"Omitir por ahora",
+  dh:"\u00bfTiene alergias o restricciones?",ds:"Seleccione todo lo que aplique &mdash; su men\u00fa se adaptar\u00e1.",
+  greet:"Buenas noches",confirmed:"\u00a1Pedido confirmado!",confirmedSub:"Su Food Master ha sido notificado. Disfrute su velada.",
+  aiLbl:"Su sugerencia personalizada",tabM:"Platos y Postre",tabC:"C\u00f3cteles",tabW:"Vinos",
+  lblAllergy:"Alergias",lblDiet:"Preferencia diet\u00e9tica",lblOther:"Otras notas",
+  showAll:"Mostrar men\u00fa completo",showAllSub:"Los art\u00edculos restringidos se marcar\u00e1n",
+  seeMenu:"Ver mi men\u00fa &rarr;",back:"&larr; Atr\u00e1s",selections:"Sus selecciones",
+  askFM:"Cuando est\u00e9 listo, pida a su Food Master que confirme el pedido.",
+  sendOrder:"Enviar pedido a cocina",newGuest:"Nuevo hu\u00e9sped &#8635;",startOver:"&#8635; Comenzar de nuevo",
+  safeFor:"&#10003; Apto para usted",pairing:"Maridaje",hidePairing:"Ocultar maridaje",suggestedPairing:"Maridaje sugerido",
+  viewSourcing:"Ver procedencia",hideSourcing:"Ocultar procedencia",
+  bottleLabel:"Botella",glassLabel:"Copa",halfLabel:"Media copa",
+  fmWaiting:"&#10003; Su Food Master ha sido notificado y estará con usted en breve.",orderSummaryLabel:"Resumen de su pedido",
+  newGuestTitle:"Nuevo huésped — complete su perfil",newGuestSub:"No encontramos su número. Ingrese sus datos o escanee el código QR desde su teléfono.",qrHint:"Escanee para completar su perfil desde su teléfono",orEnter:"O ingrese aquí",voiceHint:"También puede hablar su nombre y correo",saveGuest:"Guardar y continuar →",namePlaceholder:"Nombre completo",emailPlaceholder:"Correo electrónico",
+  clearAll:"&#10005; Borrar todo",callFMLabel:"Llamar a su Food Master",fmNoteLabel:"Su Food Master vendrá a su mesa para revisar y confirmar.",selectTable:"Seleccione mesa…",tableLabel:"Mesa",callSent:"Food Master llamado a mesa",fmReviewLabel:"Food Master — Revisar y Confirmar",
+  xrefNote:"Las selecciones se verifican con su pad en tiempo real.",
+  xrefChip:"Toque un plato para confirmar &#10003;",
+  noItems:"Ning\u00fan art\u00edculo corresponde a su perfil aqu\u00ed.",
+  diabeticFriendly:"&#10003; Apto para diab\u00e9ticos",otherPlaceholder:"p.ej. sin sal, sin picante\u2026",
+  sourceLabel:"Procedencia",
+  aLabels:{nuts:"Frutos secos",peanuts:"Cacahuetes",shellfish:"Mariscos",fish:"Pescado",dairy:"L\u00e1cteos",eggs:"Huevos",gluten:"Gluten",soy:"Soja",sulfites:"Sulfitos"},
+  dLabels:{vegetarian:"Vegetariano",vegan:"Vegano",keto:"Keto",diabetic:"Diab\u00e9tico / Bajo en az\u00facar",halal:"Halal",kosher:"Kosher"},
+  mains:[
+    {name:"Pechuga de Pato Sellada",desc:"Gastrique de cereza, verduras asadas, jugo de tomillo"},
+    {name:"Risotto de Trufa Blanca",desc:"Arroz carnaroli, trufa blanca fresca rallada, Parmigiano-Reggiano a\u00f1ejo, aceite de cebollino"},
+    {name:"Lubina Glaseada al Miso",desc:"Caldo dashi, jengibre encurtido, arroz negro, aceite de cebolleta"},
+    {name:"Costilla Braseada al Chocolate",desc:"Mole de cacao al 72%, pur\u00e9 de apio nabo, chalotes crujientes"},
+    {name:"Bizcocho de Chocolate sin Harina",desc:"Chocolate negro 72% sin az\u00facar, sin harina &mdash; servido con gelato",sugarNote:"Sin az\u00facar a\u00f1adido &middot; Apto para diab\u00e9ticos",hasGelato:true}
+  ],
+  cocktails:[
+    {name:"Cacao Old Fashioned",desc:"Bourbon, bitters de cacao, demerara, c\u00e1scara de naranja ahumada"},
+    {name:"Spritz de Hibisco y Mezcal",desc:"Mezcal, jugo real de hibisco, monk fruit, lima, prosecco, sal &mdash; sin az\u00facar",sugarNote:"Sin az\u00facar &middot; Endulzado con monk fruit &middot; Apto para diab\u00e9ticos"},
+    {name:"Martini de Chocolate",desc:"Cacao puro al 100%, doble espresso, toque de ron a\u00f1ejo, monk fruit &mdash; sin az\u00facar",sugarNote:"Sin az\u00facar &middot; Endulzado con monk fruit &middot; Apto para diab\u00e9ticos"},
+    {name:"Mule de Maracuy\u00e1",desc:"Vodka, pur\u00e9 de maracuy\u00e1 fresco, ginger beer, menta fresca"}
+  ],
+  wines:[
+    {name:"Joh. Jos. Pr\u00fcm Riesling Sp\u00e4tlese",desc:"Blanco semiseco &mdash; fruta de hueso, mineralidad de pizarra, acidez vibrante",pairingNote:"La acidez del Riesling Pr\u00fcm es compañera natural de la Lubina al Miso. Una segunda copa junto al Bizcocho de Chocolate crea un contraste deslumbrante.",pairingDishes:["Lubina Glaseada al Miso","Bizcocho de Chocolate sin Harina"]},
+    {name:"Ch\u00e2teau d\u2019Yquem Premier Cru Sup\u00e9rieur",desc:"Sauternes legendario &mdash; albaricoque miel, azafr\u00e1n, c\u00edtricos confitados",pairingNote:"La concentraci\u00f3n de d\u2019Yquem alcanza su mayor expresi\u00f3n con el Bizcocho de Chocolate. Su riqueza tambi\u00e9n eleva el Risotto de Trufa Blanca en armon\u00eda barroca.",pairingDishes:["Bizcocho de Chocolate sin Harina","Risotto de Trufa Blanca"]},
+    {name:"Teso La Monja Almirez",desc:"Toro tinto poderoso &mdash; fruta oscura densa, mineralidad ferrosa, taninos firmes",pairingNote:"El Almirez espeja la Costilla al Chocolate. La Pechuga de Pato es un segundo maridaje natural.",pairingDishes:["Costilla Braseada al Chocolate","Pechuga de Pato Sellada"]},
+    {name:"Bollinger Brut Sp\u00e9cial Cuv\u00e9e",desc:"Champagne Non-Vintage &mdash; brioche tostado, manzana verde, mousse fina",pairingNote:"El brioche del Bollinger es el contrapunto perfecto del Risotto de Trufa Blanca. Una copa con el Martini de Chocolate es pura celebraci\u00f3n.",pairingDishes:["Risotto de Trufa Blanca","Martini de Chocolate"]},
+    {name:"Produttori del Barbaresco DOCG",desc:"Nebbiolo elegante &mdash; rosa, alquitr\u00e1n, taninos de terciopelo",pairingNote:"El Barbaresco fue creado para la Costilla Braseada al Chocolate. Sus notas de trufa lo hacen igualmente convincente con el Risotto de Trufa Blanca.",pairingDishes:["Costilla Braseada al Chocolate","Risotto de Trufa Blanca"]}
+  ]
+},
+fr:{
+  welcome:"Bienvenue, cher convive",sub:"Veuillez entrer votre num\u00e9ro afin que nous puissions m\u00e9moriser vos pr\u00e9f\u00e9rences.",
+  ph:"Votre num\u00e9ro de t\u00e9l\u00e9phone",note:"Nous ne le partageons jamais.",cont:"Continuer &rarr;",skip:"Passer pour l\u2019instant",
+  dh:"Des allergies ou restrictions alimentaires?",ds:"S\u00e9lectionnez tout ce qui s\u2019applique &mdash; votre menu s\u2019adaptera.",
+  greet:"Bonsoir",confirmed:"Commande confirm\u00e9e!",confirmedSub:"Votre Food Master a \u00e9t\u00e9 inform\u00e9. Bonne soir\u00e9e.",
+  aiLbl:"Votre suggestion personnalis\u00e9e",tabM:"Plats & Dessert",tabC:"Cocktails",tabW:"Vins",
+  lblAllergy:"Allergies",lblDiet:"Pr\u00e9f\u00e9rence alimentaire",lblOther:"Autres notes",
+  showAll:"Afficher le menu complet",showAllSub:"Les articles restreints seront marqu\u00e9s",
+  seeMenu:"Voir mon menu &rarr;",back:"&larr; Retour",selections:"Vos s\u00e9lections",
+  askFM:"Lorsque vous \u00eates pr\u00eat, demandez \u00e0 votre Food Master de confirmer.",
+  sendOrder:"Envoyer la commande en cuisine",newGuest:"Nouvel invit\u00e9 &#8635;",startOver:"&#8635; Recommencer",
+  safeFor:"&#10003; Convient pour vous",pairing:"Accord mets-vin",hidePairing:"Masquer l\u2019accord",suggestedPairing:"Accord sugg\u00e9r\u00e9",
+  viewSourcing:"Voir la provenance",hideSourcing:"Masquer la provenance",
+  bottleLabel:"Bouteille",glassLabel:"Verre",halfLabel:"Demi-verre",
+  fmWaiting:"&#10003; Votre Food Master a été prévenu et sera avec vous dans un instant.",orderSummaryLabel:"Résumé de votre commande",
+  newGuestTitle:"Nouvel invité — complétez votre profil",newGuestSub:"Nous n’avons pas trouvé votre numéro. Entrez vos coordonnées ou scannez le QR code depuis votre téléphone.",qrHint:"Scannez pour compléter votre profil",orEnter:"Ou saisir ici",voiceHint:"Vous pouvez aussi dicter votre nom et email",saveGuest:"Enregistrer & continuer →",namePlaceholder:"Nom complet",emailPlaceholder:"Adresse e-mail",
+  clearAll:"&#10005; Tout effacer",callFMLabel:"Appeler votre Food Master",fmNoteLabel:"Votre Food Master viendra à votre table pour examiner et confirmer.",selectTable:"Sélectionnez table…",tableLabel:"Table",callSent:"Food Master appelé à table",fmReviewLabel:"Food Master — Examiner & Confirmer",
+  xrefNote:"Les s\u00e9lections sont recoup\u00e9es avec votre pad en temps r\u00e9el.",
+  xrefChip:"Appuyez pour confirmer le choix &#10003;",
+  noItems:"Aucun article ne correspond \u00e0 votre profil ici.",
+  diabeticFriendly:"&#10003; Convient aux diab\u00e9tiques",otherPlaceholder:"ex. peu sal\u00e9, sans \u00e9pices\u2026",
+  sourceLabel:"Provenance",
+  aLabels:{nuts:"Fruits \u00e0 coque",peanuts:"Arachides",shellfish:"Crustac\u00e9s",fish:"Poisson",dairy:"Produits laitiers",eggs:"\u0152ufs",gluten:"Gluten",soy:"Soja",sulfites:"Sulfites"},
+  dLabels:{vegetarian:"V\u00e9g\u00e9tarien",vegan:"V\u00e9g\u00e9talien",keto:"Keto",diabetic:"Diab\u00e9tique / Pauvre en sucre",halal:"Halal",kosher:"Casher"},
+  mains:[
+    {name:"Magret de Canard Po\u00eal\u00e9",desc:"Gastrique \u00e0 la cerise, l\u00e9gumes racines r\u00f4tis, jus de thym"},
+    {name:"Risotto \u00e0 la Truffe Blanche",desc:"Riz carnaroli, truffe blanche fra\u00eeche r\u00e2p\u00e9e, Parmigiano-Reggiano affin\u00e9, huile de ciboulette"},
+    {name:"Bar Miso Glac\u00e9",desc:"Bouillon dashi, gingembre marin\u00e9, riz interdit, huile de ciboule"},
+    {name:"C\u00f4te de B\u0153uf Brais\u00e9e au Chocolat",desc:"Mole cacao 72%, pur\u00e9e de c\u00e9leri-rave, \u00e9chalotes croustillantes"},
+    {name:"G\u00e2teau au Chocolat sans Farine",desc:"Chocolat noir 72% sans sucre, sans farine &mdash; servi avec gelato",sugarNote:"Sans sucre ajout\u00e9 &middot; Convient aux diab\u00e9tiques",hasGelato:true}
+  ],
+  cocktails:[
+    {name:"Cacao Old Fashioned",desc:"Bourbon, amers de cacao, demerara, zeste d\u2019orange fum\u00e9"},
+    {name:"Spritz Hibiscus Mezcal",desc:"Mezcal, jus d\u2019hibiscus frais, monk fruit, citron vert, prosecco, sel &mdash; sans sucre",sugarNote:"Sans sucre &middot; \u00c9dulcor\u00e9 au monk fruit &middot; Convient aux diab\u00e9tiques"},
+    {name:"Martini Chocolat",desc:"Cacao pur 100%, double espresso, touche de rhum vieux, monk fruit &mdash; sans sucre",sugarNote:"Sans sucre &middot; \u00c9dulcor\u00e9 au monk fruit &middot; Convient aux diab\u00e9tiques"},
+    {name:"Mule Fruit de la Passion",desc:"Vodka, pur\u00e9e fra\u00eeche de fruit de la passion, ginger beer, menthe fra\u00eeche"}
+  ],
+  wines:[
+    {name:"Joh. Jos. Pr\u00fcm Riesling Sp\u00e4tlese",desc:"Blanc demi-sec &mdash; fruits \u00e0 noyau, min\u00e9ralit\u00e9 ardois\u00e9e, acidit\u00e9 vive",pairingNote:"L\u2019acidit\u00e9 vive du Riesling est un compagnon naturel du Bar Miso. Un second verre avec le G\u00e2teau au Chocolat cr\u00e9e un contraste saisissant.",pairingDishes:["Bar Miso Glac\u00e9","G\u00e2teau au Chocolat sans Farine"]},
+    {name:"Ch\u00e2teau d\u2019Yquem Premier Cru Sup\u00e9rieur",desc:"Sauternes l\u00e9gendaire &mdash; abricot miel, safran, agrumes confits",pairingNote:"La concentration de d\u2019Yquem trouve sa plus haute expression avec le G\u00e2teau au Chocolat. Sa richesse \u00e9l\u00e8ve \u00e9galement le Risotto \u00e0 la Truffe Blanche.",pairingDishes:["G\u00e2teau au Chocolat sans Farine","Risotto \u00e0 la Truffe Blanche"]},
+    {name:"Teso La Monja Almirez",desc:"Toro rouge puissant &mdash; fruits noirs denses, min\u00e9ralit\u00e9 ferreuse, tanins structur\u00e9s",pairingNote:"L\u2019Almirez refl\u00e8te la C\u00f4te de B\u0153uf au Chocolat. Le Magret de Canard constitue un second accord naturel.",pairingDishes:["C\u00f4te de B\u0153uf Brais\u00e9e au Chocolat","Magret de Canard Po\u00eal\u00e9"]},
+    {name:"Bollinger Brut Sp\u00e9cial Cuv\u00e9e",desc:"Champagne Non-Vintage &mdash; brioche grill\u00e9e, pomme verte, mousse fine",pairingNote:"La brioche du Bollinger est le contrepoint parfait du Risotto \u00e0 la Truffe Blanche. Une fl\u00fbte avec le Martini Chocolat transforme l\u2019accord en f\u00eate.",pairingDishes:["Risotto \u00e0 la Truffe Blanche","Martini Chocolat"]},
+    {name:"Produttori del Barbaresco DOCG",desc:"Nebbiolo \u00e9l\u00e9gant &mdash; rose, goudron, tanins de velours, acidit\u00e9 \u00e9lectrique",pairingNote:"Les ar\u00f4mes du Barbaresco ont \u00e9t\u00e9 faits pour la C\u00f4te de B\u0153uf au Chocolat. Ses notes de truffe en font un compagnon convaincant pour le Risotto.",pairingDishes:["C\u00f4te de B\u0153uf Brais\u00e9e au Chocolat","Risotto \u00e0 la Truffe Blanche"]}
+  ]
+},
+ja:{
+  welcome:"\u3044\u3089\u3063\u3057\u3083\u3044\u307e\u305b",sub:"\u3054\u6765\u5e97\u3054\u3068\u306e\u304a\u597d\u307f\u3092\u8a18\u61b6\u3059\u308b\u305f\u3081\u3001\u96fb\u8a71\u756a\u53f7\u3092\u3054\u5165\u529b\u304f\u3060\u3055\u3044\u3002",
+  ph:"\u304a\u96fb\u8a71\u756a\u53f7",note:"\u756a\u53f7\u306f\u7b2c\u4e09\u8005\u3068\u5171\u6709\u3055\u308c\u307e\u305b\u3093\u3002",cont:"\u7d9a\u3051\u308b &rarr;",skip:"\u30b9\u30ad\u30c3\u30d7",
+  dh:"\u30a2\u30ec\u30eb\u30ae\u30fc\u3084\u98df\u4e8b\u5236\u9650\u306f\u3042\u308a\u307e\u3059\u304b\uff1f",ds:"\u8a72\u5f53\u3059\u308b\u3082\u306e\u3092\u3059\u3079\u3066\u9078\u629e\u3057\u3066\u304f\u3060\u3055\u3044\u3002\u30e1\u30cb\u30e5\u30fc\u304c\u6700\u9069\u5316\u3055\u308c\u307e\u3059\u3002",
+  greet:"\u3053\u3093\u3070\u3093\u306f",confirmed:"\u3054\u6ce8\u6587\u304c\u78ba\u5b9a\u3055\u308c\u307e\u3057\u305f\uff01",confirmedSub:"Food Master\u306b\u901a\u77e5\u3057\u307e\u3057\u305f\u3002\u3086\u3063\u304f\u308a\u304a\u697d\u3057\u307f\u304f\u3060\u3055\u3044\u3002",
+  aiLbl:"\u3042\u306a\u305f\u3078\u306e\u304a\u3059\u3059\u3081",tabM:"\u30e1\u30a4\u30f3\u30fb\u30c7\u30b6\u30fc\u30c8",tabC:"\u30ab\u30af\u30c6\u30eb",tabW:"\u30ef\u30a4\u30f3",
+  lblAllergy:"\u30a2\u30ec\u30eb\u30ae\u30fc",lblDiet:"\u98df\u4e8b\u306e\u597d\u307f",lblOther:"\u305d\u306e\u4ed6\u306e\u3054\u8981\u671b",
+  showAll:"\u3059\u3079\u3066\u306e\u30e1\u30cb\u30e5\u30fc\u3092\u8868\u793a",showAllSub:"\u5236\u9650\u30a2\u30a4\u30c6\u30e0\u306f\u30de\u30fc\u30af\u4ed8\u304d\u3067\u8868\u793a",
+  seeMenu:"\u30e1\u30cb\u30e5\u30fc\u3092\u898b\u308b &rarr;",back:"&larr; \u623b\u308b",selections:"\u3054\u6ce8\u6587\u5185\u5bb9",
+  askFM:"\u3054\u6e96\u5099\u304c\u3067\u304d\u307e\u3057\u305f\u3089\u3001Food Master\u306b\u78ba\u8a8d\u3059\u308b\u3088\u3046\u304a\u4f1a\u3044\u304f\u3060\u3055\u3044\u3002",
+  sendOrder:"\u53e8\u623f\u306b\u6ce8\u6587\u3092\u9001\u308b",newGuest:"\u6b21\u306e\u304a\u5ba2\u69d8 &#8635;",startOver:"&#8635; \u6700\u521d\u304b\u3089\u3084\u308a\u76f4\u3059",
+  safeFor:"&#10003; \u304a\u5ba2\u69d8\u306b\u5b89\u5168",pairing:"\u6599\u7406\u3068\u306e\u30da\u30a2\u30ea\u30f3\u30b0",hidePairing:"\u30da\u30a2\u30ea\u30f3\u30b0\u3092\u96a0\u3059",suggestedPairing:"\u304a\u3059\u3059\u3081\u30da\u30a2\u30ea\u30f3\u30b0",
+  viewSourcing:"\u98df\u6750\u306e\u7523\u5730\u3092\u898b\u308b",hideSourcing:"\u7523\u5730\u3092\u96a0\u3059",
+  bottleLabel:"\u30dc\u30c8\u30eb",glassLabel:"\u30b0\u30e9\u30b9",halfLabel:"\u30cf\u30fc\u30d5\u30b0\u30e9\u30b9",
+  fmWaiting:"&#10003; Food Masterに通知しました。すぐ参ります。",orderSummaryLabel:"ご注文内容",
+  newGuestTitle:"\u65b0\u898f\u30b2\u30b9\u30c8 \u2014 \u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u3092\u5165\u529b",newGuestSub:"\u756a\u53f7\u304c\u898b\u3064\u304b\u308a\u307e\u305b\u3093\u3002QR\u30b3\u30fc\u30c9\u3092\u30b9\u30ad\u30e3\u30f3\u3057\u3066\u304f\u3060\u3055\u3044\u3002",qrHint:"\u30b9\u30de\u30db\u3067QR\u30b3\u30fc\u30c9\u3092\u30b9\u30ad\u30e3\u30f3",orEnter:"\u307e\u305f\u306f\u3053\u3061\u3089\u306b\u5165\u529b",voiceHint:"\u304a\u540d\u524d\u3068\u30e1\u30fc\u30eb\u3092\u8a71\u305b\u307e\u3059",saveGuest:"\u4fdd\u5b58\u3057\u3066\u7d9a\u3051\u308b \u2192",namePlaceholder:"\u30d5\u30eb\u30cd\u30fc\u30e0",emailPlaceholder:"\u30e1\u30fc\u30eb\u30a2\u30c9\u30ec\u30b9",
+  clearAll:"&#10005; \u3059\u3079\u3066\u6d88\u3059",callFMLabel:"Food Master\u3092\u547c\u3076",fmNoteLabel:"Food Master\u304c\u30c6\u30fc\u30d6\u30eb\u306b\u53c2\u308a\u307e\u3059\u3002",selectTable:"\u30c6\u30fc\u30d6\u30eb\u3092\u9078\u3093\u3067\u304f\u3060\u3055\u3044\u2026",tableLabel:"\u30c6\u30fc\u30d6\u30eb",callSent:"Food Master\u3092\u547c\u3073\u51fa\u3057\u307e\u3057\u305f",fmReviewLabel:"Food Master \u2014 \u78ba\u8a8d & \u6ce8\u6587\u9001\u4fe1",
+  xrefNote:"\u30b2\u30b9\u30c8\u306e\u9078\u629e\u306f\u30ea\u30a2\u30eb\u30bf\u30a4\u30e0\u3067\u6ce8\u6587\u30d1\u30c3\u30c9\u3068\u7167\u5408\u3055\u308c\u3066\u3044\u307e\u3059\u3002",
+  xrefChip:"\u30bf\u30c3\u30d7\u3057\u3066\u9078\u629e\u3092\u78ba\u8a8d &#10003;",
+  noItems:"\u304a\u5ba2\u69d8\u306e\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u306b\u5408\u3046\u30a2\u30a4\u30c6\u30e0\u304c\u3042\u308a\u307e\u305b\u3093\u3002",
+  diabeticFriendly:"&#10003; \u7cd6\u5c3f\u75c5\u5bfe\u5fdc",otherPlaceholder:"\u4f8b\uff1a\u4f4e\u5869\u5206\u3001\u8f9b\u3044\u3082\u306e\u304c\u82e6\u624b\u2026",
+  sourceLabel:"\u98df\u6750\u306e\u7523\u5730",
+  aLabels:{nuts:"\u6728\u306e\u5b9f",peanuts:"\u30d4\u30fc\u30ca\u30c3\u30c4",shellfish:"\u8c9d\u985e",fish:"\u9b5a",dairy:"\u4e73\u88fd\u54c1",eggs:"\u5375",gluten:"\u30b0\u30eb\u30c6\u30f3",soy:"\u5927\u8c46",sulfites:"\u4e9c\u7862\u9178\u5869"},
+  dLabels:{vegetarian:"\u30d9\u30b8\u30bf\u30ea\u30a2\u30f3",vegan:"\u30f4\u30a3\u30fc\u30ac\u30f3",keto:"\u30b1\u30c8\u30b8\u30a7\u30cb\u30c3\u30af",diabetic:"\u7cd6\u5c3f\u75c5 / \u4f4e\u7cd6",halal:"\u30cf\u30e9\u30fc\u30eb",kosher:"\u30b3\u30fc\u30b7\u30e3\u30fc"},
+  mains:[
+    {name:"\u9d28\u80f8\u8089\u306e\u30bd\u30c6\u30fc",desc:"\u30c1\u30a7\u30ea\u30fc\u306e\u30ac\u30b9\u30c8\u30ea\u30c3\u30af\u3001\u6839\u83dc\u306e\u30ed\u30fc\u30b9\u30c8\u3001\u30bf\u30a4\u30e0\u30b8\u30e5"},
+    {name:"\u767d\u30c8\u30ea\u30e5\u30d5\u306e\u30ea\u30be\u30c3\u30c8",desc:"\u30ab\u30eb\u30ca\u30fc\u30ed\u30fc\u30ea\u7c73\u3001\u65b0\u9bae\u767d\u30c8\u30ea\u30e5\u30d5\u524a\u308a\u3001\u719f\u6210\u30d1\u30eb\u30df\u30b8\u30e3\u30fc\u30ce\u3001\u30c1\u30e3\u30a4\u30d6\u30aa\u30a4\u30eb"},
+    {name:"\u5473\u564c\u30b0\u30ec\u30fc\u30ba\u306e\u9c72",desc:"\u51fa\u6c41\u30d6\u30ed\u30b9\u3001\u9162\u6f2c\u3051\u751f\u59dc\u3001\u9ed2\u7c73\u3001\u4e07\u80fd\u306d\u304e\u30aa\u30a4\u30eb"},
+    {name:"\u30c1\u30e7\u30b3\u30ec\u30fc\u30c8\u30d6\u30ec\u30a4\u30ba\u30c9\u30b7\u30e7\u30fc\u30c8\u30ea\u30d6",desc:"72%\u30ab\u30ab\u30aa\u306e\u30e2\u30ec\u3001\u30bb\u30ed\u30ea\u30a2\u30c3\u30af\u30d4\u30e5\u30fc\u30ec\u3001\u30af\u30ea\u30b9\u30d4\u30fc\u30b7\u30e3\u30ed\u30c3\u30c8"},
+    {name:"\u30d5\u30e9\u30ef\u30fc\u30ec\u30b9\u30c1\u30e7\u30b3\u30ec\u30fc\u30c8\u30b1\u30fc\u30ad",desc:"\u7121\u7cd672%\u30c0\u30fc\u30af\u30c1\u30e7\u30b3\u30ec\u30fc\u30c8\u3001\u5c0f\u9ea6\u7c89\u4e0d\u4f7f\u7528 \u2014 \u30b8\u30a7\u30e9\u30fc\u30c8\u6dfb\u3048",sugarNote:"\u7802\u7cd6\u4e0d\u4f7f\u7528 &middot; \u7cd6\u5c3f\u75c5\u5bfe\u5fdc",hasGelato:true}
+  ],
+  cocktails:[
+    {name:"\u30ab\u30ab\u30aa\u30fb\u30aa\u30fc\u30eb\u30c9\u30d5\u30a1\u30c3\u30b7\u30e7\u30f3",desc:"\u30d0\u30fc\u30dc\u30f3\u3001\u30ab\u30ab\u30aa\u30cb\u30d6\u30d3\u30bf\u30fc\u30ba\u3001\u30c7\u30e1\u30e9\u30fc\u30e9\u3001\u30b9\u30e2\u30fc\u30af\u30aa\u30ec\u30f3\u30b8\u30d4\u30fc\u30eb"},
+    {name:"\u30cf\u30a4\u30d3\u30b9\u30ab\u30b9\u30e1\u30b9\u30ab\u30eb\u30b9\u30d7\u30ea\u30c3\u30c4",desc:"\u30e1\u30b9\u30ab\u30eb\u3001\u672c\u7269\u30cf\u30a4\u30d3\u30b9\u30ab\u30b9\u30b8\u30e5\u30fc\u30b9\u3001\u30e2\u30f3\u30af\u30d5\u30eb\u30fc\u30c4\u3001\u30e9\u30a4\u30e0\u3001\u30d7\u30ed\u30bb\u30c3\u30b3 \u2014 \u7802\u7cd6\u4e0d\u4f7f\u7528",sugarNote:"\u7802\u7cd6\u4e0d\u4f7f\u7528 &middot; \u30e2\u30f3\u30af\u30d5\u30eb\u30fc\u30c4\u7504\u5473 &middot; \u7cd6\u5c3f\u75c5\u5bfe\u5fdc"},
+    {name:"\u30c1\u30e7\u30b3\u30ec\u30fc\u30c8\u30de\u30c6\u30a3\u30fc\u30cb",desc:"100%\u7d14\u30ab\u30ab\u30aa\u3001\u30c0\u30d6\u30eb\u30a8\u30b9\u30d7\u30ec\u30c3\u30bd\u3001\u719f\u6210\u30e9\u30e0\u5c11\u91cf\u3001\u30e2\u30f3\u30af\u30d5\u30eb\u30fc\u30c4 \u2014 \u7cd6\u5206\u30bc\u30ed",sugarNote:"\u7802\u7cd6\u4e0d\u4f7f\u7528 &middot; \u30e2\u30f3\u30af\u30d5\u30eb\u30fc\u30c4\u7504\u5473 &middot; \u7cd6\u5c3f\u75c5\u5bfe\u5fdc"},
+    {name:"\u30d1\u30c3\u30b7\u30e7\u30f3\u30d5\u30eb\u30fc\u30c4\u30df\u30e5\u30fc\u30eb",desc:"\u30a6\u30a9\u30c3\u30ab\u3001\u65b0\u9bae\u30d1\u30c3\u30b7\u30e7\u30f3\u30d5\u30eb\u30fc\u30c4\u30d4\u30e5\u30fc\u30ec\u3001\u30b8\u30f3\u30b8\u30e3\u30fc\u30d3\u30fc\u30eb\u3001\u30d5\u30ec\u30c3\u30b7\u30e5\u30df\u30f3\u30c8"}
+  ],
+  wines:[
+    {name:"\u30d7\u30ea\u30e5\u30e0 \u30ea\u30fc\u30b9\u30ea\u30f3\u30b0 \u30b7\u30e5\u30da\u30fc\u30c8\u30ec\u30fc\u30bc",desc:"\u7e4a\u7d30\u306a\u534a\u8f9b\u53e3\u767d\u30ef\u30a4\u30f3 \u2014 \u6838\u679c\u3001\u30b9\u30ec\u30fc\u30c8\u306e\u30df\u30cd\u30e9\u30eb\u611f\u3001\u9178\u5473",pairingNote:"\u30d7\u30ea\u30e5\u30e0\u306e\u9178\u5473\u3068\u534a\u8f9b\u53e3\u306e\u6838\u679c\u306f\u3001\u5473\u564c\u30b0\u30ec\u30fc\u30ba\u306e\u9c72\u3068\u5929\u6027\u306e\u76f8\u6027\u3092\u6301\u3061\u307e\u3059\u3002\u30d5\u30e9\u30ef\u30fc\u30ec\u30b9\u30c1\u30e7\u30b3\u30ec\u30fc\u30c8\u30b1\u30fc\u30ad\u3068\u306e\u30da\u30a2\u30ea\u30f3\u30b0\u3082\u606f\u3092\u306e\u3080\u5bfe\u6bd4\u3092\u751f\u307f\u51fa\u3057\u307e\u3059\u3002",pairingDishes:["\u5473\u564c\u30b0\u30ec\u30fc\u30ba\u306e\u9c72","\u30d5\u30e9\u30ef\u30fc\u30ec\u30b9\u30c1\u30e7\u30b3\u30ec\u30fc\u30c8\u30b1\u30fc\u30ad"]},
+    {name:"\u30b7\u30e3\u30c8\u30fc\u30fb\u30c7\u30a3\u30b1\u30e0",desc:"\u4f1d\u8aac\u306e\u30bd\u30fc\u30c6\u30eb\u30cc \u2014 \u871c\u6f2c\u3051\u6756\u6912\u8089\u3001\u30b5\u30d5\u30e9\u30f3\u3001\u6fc3\u7e2e\u611f",pairingNote:"\u30c7\u30a3\u30b1\u30e0\u306e\u6fc3\u7e2e\u611f\u306f\u30d5\u30e9\u30ef\u30fc\u30ec\u30b9\u30c1\u30e7\u30b3\u30ec\u30fc\u30c8\u30b1\u30fc\u30ad\u3068\u306e\u7d44\u307f\u5408\u308f\u305b\u3067\u6700\u9ad8\u6f6e\u3002\u767d\u30c8\u30ea\u30e5\u30d5\u306e\u30ea\u30be\u30c3\u30c8\u3068\u3082\u5b8c\u74a7\u306a\u30da\u30a2\u30ea\u30f3\u30b0\u3002",pairingDishes:["\u30d5\u30e9\u30ef\u30fc\u30ec\u30b9\u30c1\u30e7\u30b3\u30ec\u30fc\u30c8\u30b1\u30fc\u30ad","\u767d\u30c8\u30ea\u30e5\u30d5\u306e\u30ea\u30be\u30c3\u30c8"]},
+    {name:"\u30a2\u30eb\u30df\u30ec\u30b9",desc:"\u529b\u5f37\u3044\u30c8\u30ed\u306e\u8d64\u30ef\u30a4\u30f3 \u2014 \u9ed2\u679c\u5b9f\u3001\u9244\u306e\u30df\u30cd\u30e9\u30eb\u611f\u3001\u5805\u56fa\u306a\u30bf\u30f3\u30cb\u30f3",pairingNote:"\u30a2\u30eb\u30df\u30ec\u30b9\u306f\u30c1\u30e7\u30b3\u30ec\u30fc\u30c8\u30d6\u30ec\u30a4\u30ba\u30c9\u30b7\u30e7\u30fc\u30c8\u30ea\u30d6\u3068\u5b8c\u74a7\u306a\u76f8\u6027\u3002\u9d28\u80f8\u8089\u306e\u30bd\u30c6\u30fc\u3068\u306e\u30da\u30a2\u30ea\u30f3\u30b0\u3067\u306f\u30c1\u30a7\u30ea\u30fc\u304c\u5171\u9cf4\u3002",pairingDishes:["\u30c1\u30e7\u30b3\u30ec\u30fc\u30c8\u30d6\u30ec\u30a4\u30ba\u30c9\u30b7\u30e7\u30fc\u30c8\u30ea\u30d6","\u9d28\u80f8\u8089\u306e\u30bd\u30c6\u30fc"]},
+    {name:"\u30dc\u30e9\u30f3\u30b8\u30a7 \u30d6\u30ea\u30e5\u30c3\u30c8",desc:"\u30ce\u30f3\u30f4\u30a3\u30f3\u30c6\u30fc\u30b8\u30b7\u30e3\u30f3\u30d1\u30fc\u30cb\u30e5 \u2014 \u30c8\u30fc\u30b9\u30c8\u30d6\u30ea\u30aa\u30c3\u30b7\u30e5\u3001\u9752\u30ea\u30f3\u30b4\u3001\u7d30\u304b\u3044\u6ce1",pairingNote:"\u30dc\u30e9\u30f3\u30b8\u30a7\u306e\u30c8\u30fc\u30b9\u30c8\u30d6\u30ea\u30aa\u30c3\u30b7\u30e5\u3068\u767d\u30c8\u30ea\u30e5\u30d5\u306e\u30ea\u30be\u30c3\u30c8\u306f\u5b8c\u74a7\u306a\u5bfe\u6bd4\u3002\u30c1\u30e7\u30b3\u30ec\u30fc\u30c8\u30de\u30c6\u30a3\u30fc\u30cb\u3068\u306e\u30da\u30a2\u30ea\u30f3\u30b0\u306f\u81f3\u798f\u306e\u3072\u3068\u3068\u304d\u3002",pairingDishes:["\u767d\u30c8\u30ea\u30e5\u30d5\u306e\u30ea\u30be\u30c3\u30c8","\u30c1\u30e7\u30b3\u30ec\u30fc\u30c8\u30de\u30c6\u30a3\u30fc\u30cb"]},
+    {name:"\u30d0\u30eb\u30d0\u30ec\u30b9\u30b3 DOCG",desc:"\u30a8\u30ec\u30ac\u30f3\u30c8\u306a\u30cd\u30c3\u30d3\u30aa\u30fc\u30ed \u2014 \u30d0\u30e9\u3001\u30bf\u30fc\u30eb\u3001\u30d3\u30ed\u30fc\u30c9\u306e\u30bf\u30f3\u30cb\u30f3",pairingNote:"\u30d0\u30eb\u30d0\u30ec\u30b9\u30b3\u306e\u9999\u308a\u3068\u30bf\u30f3\u30cb\u30f3\u306f\u30c1\u30e7\u30b3\u30ec\u30fc\u30c8\u30d6\u30ec\u30a4\u30ba\u30c9\u30b7\u30e7\u30fc\u30c8\u30ea\u30d6\u306e\u305f\u3081\u306b\u751f\u307e\u308c\u305f\u304b\u306e\u3088\u3046\u3002\u767d\u30c8\u30ea\u30e5\u30d5\u306e\u30ea\u30be\u30c3\u30c8\u3068\u3082\u8aac\u5f97\u529b\u3042\u308b\u30da\u30a2\u30ea\u30f3\u30b0\u3002",pairingDishes:["\u30c1\u30e7\u30b3\u30ec\u30fc\u30c8\u30d6\u30ec\u30a4\u30ba\u30c9\u30b7\u30e7\u30fc\u30c8\u30ea\u30d6","\u767d\u30c8\u30ea\u30e5\u30d5\u306e\u30ea\u30be\u30c3\u30c8"]}
+  ]
+}
+};
+
+var MB={
+  mains:[
+    {id:'m1',price:'$42',contains:[],badges:['Gluten-free','Dairy-free'],diabetic:true,type:'main'},
+    {id:'m2',price:'$80',contains:['dairy','eggs'],badges:['Vegetarian'],diabetic:false,type:'main'},
+    {id:'m3',price:'$46',contains:['fish','soy','gluten'],badges:['Pescatarian'],diabetic:false,type:'main'},
+    {id:'m4',price:'$54',contains:[],badges:['Gluten-free','Dairy-free'],diabetic:true,type:'main'},
+    {id:'d1',price:'$22',contains:['eggs','dairy','nuts'],badges:['Gluten-free','No sugar added'],diabetic:true,type:'dessert',hasGelato:true}
+  ],
+  cocktails:[
+    {id:'c1',price:'$28',contains:[],badges:['Signature'],diabetic:false,type:'cocktail'},
+    {id:'c2',price:'$25',contains:['sulfites'],badges:['No sugar added','Vegan'],diabetic:true,type:'cocktail'},
+    {id:'c3',price:'$28',contains:[],badges:['No sugar added','Diabetic-friendly'],diabetic:true,type:'cocktail'},
+    {id:'c4',price:'$25',contains:[],badges:['Vegan'],diabetic:false,type:'cocktail'}
+  ],
+  wines:[
+    {id:'w1',vintage:'2023',region:'Mosel, Germany',price:'$180 btl',priceGlass:'$45 glass',price2oz:'$15 &middot; 2 oz',contains:['sulfites'],badges:['White','Off-dry'],diabetic:false,type:'wine'},
+    {id:'w2',vintage:'2009',region:'Sauternes, France',price:'$1,200 &middot; 375 ml',priceGlass:'$225 glass',price2oz:'$115 &middot; &frac12; glass',contains:['sulfites'],badges:['Dessert wine','Legendary'],diabetic:false,type:'wine'},
+    {id:'w3',vintage:'2021',region:'Toro, Spain',price:'$110 btl',priceGlass:'$28 glass',price2oz:'$7 &middot; 2 oz',contains:['sulfites'],badges:['Red','Full-bodied'],diabetic:false,type:'wine'},
+    {id:'w4',vintage:'NV',region:'Champagne, France',price:'$152 btl',priceGlass:'$38 glass',price2oz:'$10 &middot; 2 oz',contains:['sulfites'],badges:['Champagne','Non-vintage'],diabetic:false,type:'wine'},
+    {id:'w5',vintage:'2020',region:'Barbaresco, Piedmont',price:'$180 btl',priceGlass:'$45 glass',price2oz:'$13 &middot; 2 oz',contains:['sulfites'],badges:['Red','Nebbiolo'],diabetic:false,type:'wine'}
+  ]
+};
+
+var lang='en',allergies=[],diets=[],showAll=false,selected={},phone='',fmCode='',tableNum='',openPairings={},openSources={},curTab='mains',orderLocked=false;
+var guestName='', guestEmail='';
+
+// ── Guest database (phone normalised to digits only) ──
+var GUESTS = {
+  '5514862688':  {name:'Andre Mendoza',  email:''},
+  '346896670359':{name:'Paco Arias',     email:''},
+  '7189168239':  {name:'Max Rodriguez',  email:''},
+  '7184404363':  {name:'Alfonso Galindo',email:''},
+  '9175314900':  {name:'Edwin Perez',    email:''}
+};
+
+function normalizePhone(raw){
+  // Strip everything except digits — works for any country format
+  return raw.replace(/[^0-9]/g,'');
+}
+function lookupGuest(raw){
+  var n=normalizePhone(raw);
+  if(!n) return null;
+  // 1. Exact match
+  if(GUESTS[n]) return GUESTS[n];
+  // 2. Try stripping leading country codes (1, 34, 44, 52, 81, etc.)
+  //    Match last 9 digits then last 10 digits progressively
+  for(var len=10; len>=7; len--){
+    var tail=n.slice(-len);
+    for(var k in GUESTS){
+      if(GUESTS[k] && normalizePhone(k).slice(-len)===tail) return GUESTS[k];
+    }
+  }
+  return null;
+}
+function dd(){return D[lang]||D.en;}
+function go(id){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});document.getElementById(id).classList.add('active');}
+function si(id){return document.getElementById(id);}
+function ih(id,v){si(id).innerHTML=v;}
+
+function startOver(){
+  allergies=[];diets=[];showAll=false;selected={};phone='';openPairings={};openSources={};curTab='mains';fmCode='';gelatoChoice='pistachio';orderLocked=false;guestName='';guestEmail='';tableNum='';
+  si('w-code-input').value='';if(si('table-assign'))si('table-assign').value='';
+  si('wc-confirm').style.display='none';
+  if(si('guest-name-heading')){si('guest-name-heading').style.display='none';si('guest-name-heading').textContent='';}
+  if(si('panel-newguest'))si('panel-newguest').style.display='none';
+  if(si('panel-phone'))si('panel-phone').style.display='block';
+  if(si('ret-msg')){si('ret-msg').style.display='none';si('ret-msg').innerHTML='';}
+  if(si('ph-input'))si('ph-input').value='';
+  if(si('ng-name'))si('ng-name').value='';
+  if(si('ng-email'))si('ng-email').value='';si('wc-confirm').style.display='none';
+  si('ph-input').value='';si('ret-msg').style.display='none';
+  si('other').value='';si('sa-track').classList.remove('on');
+  document.querySelectorAll('.tag').forEach(function(t){t.classList.remove('on');});
+  document.querySelectorAll('.btn-lang').forEach(function(b){b.classList.remove('sel');});
+  si('conf-box').style.display='none';si('sum-box').style.display='none';
+  si('ai-box').classList.remove('show');si('fm-banner').style.display='none';si('fm-order-box').style.display='none';
+  var ts=si('table-select');if(ts){ts.innerHTML='';}
+  go('s-lang');
+}
+
+function populateLangTableSelect(){
+  var sel=si('table-assign');
+  if(sel.options.length>1) return;
+  for(var n=1;n<=50;n++){
+    var o=document.createElement('option');
+    o.value=n;o.textContent='Table '+n;
+    sel.appendChild(o);
+  }
+}
+
+function openTable(){
+  populateLangTableSelect();
+  var wc=si('w-code-input').value.trim();
+  var tbl=si('table-assign').value;
+  if(!wc){si('w-code-input').style.borderColor='#D4896A';si('w-code-input').focus();return;}
+  if(!tbl){si('table-assign').style.borderColor='#D4896A';si('table-assign').focus();return;}
+  fmCode=wc; tableNum=tbl;
+  si('wc-num').textContent='#'+wc;
+  si('wc-table').textContent=tbl;
+  si('wc-confirm').style.display='block';
+  si('w-code-input').style.borderColor='#C9A84C44';
+  si('table-assign').style.borderColor='#C9A84C44';
+}
+
+function setLang(l,el){
+  var wc=si('w-code-input').value.trim();
+  var tbl=si('table-assign')?si('table-assign').value:'';
+  if(!wc){si('w-code-input').style.borderColor='#D4896A';si('w-code-input').focus();return;}
+  if(!tbl){
+    if(si('table-assign')){si('table-assign').style.borderColor='#D4896A';si('table-assign').focus();}
+    return;
+  }
+  fmCode=wc; tableNum=tbl;
+  si('wc-num').textContent='#'+wc;
+  if(si('wc-table'))si('wc-table').textContent=tbl;
+  si('wc-confirm').style.display='block';
+  lang=l;
+  document.querySelectorAll('.btn-lang').forEach(function(b){b.classList.remove('sel');});
+  el.classList.add('sel');
+  applyTxt();
+  populateLangTableSelect();
+  setTimeout(function(){go('s-phone');},280);
+}
+
+function applyTxt(){
+  var t=dd();
+  ih('ph-welcome',t.welcome);ih('ph-sub',t.sub);ih('ph-label',t.ph);ih('ph-note',t.note);
+  ih('ph-btn',t.cont);ih('ph-skip',t.skip);ih('dt-h',t.dh);ih('dt-s',t.ds);
+  ih('lbl-allergy',t.lblAllergy);ih('lbl-diet',t.lblDiet);ih('lbl-other',t.lblOther);
+  ih('lbl-showall',t.showAll);ih('lbl-showall-sub',t.showAllSub);ih('btn-seemenu',t.seeMenu);
+  ih('tab-mains',t.tabM);ih('tab-cocktails',t.tabC);ih('tab-wines',t.tabW);
+  si('other').placeholder=t.otherPlaceholder;
+  document.querySelectorAll('[data-key]').forEach(function(el){
+    var k=el.dataset.key;el.innerHTML=t.aLabels[k]||t.dLabels[k]||k;
+  });
+  document.querySelectorAll('.btn-reset').forEach(function(b){b.innerHTML=t.startOver;});
+  ih('btn-back',t.back);ih('lbl-selections',t.selections);
+  ih('btn-newguest',t.newGuest);
+  if(si('lbl-newguest-title'))ih('lbl-newguest-title',t.newGuestTitle||'New guest — complete your profile');
+  if(si('lbl-newguest-sub'))ih('lbl-newguest-sub',t.newGuestSub||'We did not find your number. Please enter your details or scan the QR code from your phone.');
+  if(si('lbl-qr-hint'))ih('lbl-qr-hint',t.qrHint||'Scan to fill your details from your phone');
+  if(si('lbl-or-enter'))ih('lbl-or-enter',t.orEnter||'Or enter here');
+  if(si('lbl-voice-hint'))ih('lbl-voice-hint','&#127908; '+( t.voiceHint||'You can also speak your name and email'));
+  if(si('btn-save-guest'))ih('btn-save-guest',t.saveGuest||'Save &amp; continue &rarr;');
+  if(si('ng-name'))si('ng-name').placeholder=t.namePlaceholder||'Full name';
+  if(si('ng-email'))si('ng-email').placeholder=t.emailPlaceholder||'Email address';
+  ih('xref-note',t.xrefNote);ih('xref-chip',t.xrefChip);ih('ai-lbl',t.aiLbl);
+  if(si('lbl-fm-waiting'))ih('lbl-fm-waiting', t.fmWaiting||'&#10003; Your Food Master has been notified and will be right with you.');
+  if(si('lbl-fm-review'))ih('lbl-fm-review', t.orderSummaryLabel||'Your order summary');
+  if(si('btn-clear'))ih('btn-clear',t.clearAll||'&#10005; Clear all selections');
+  if(si('lbl-call-fm'))ih('lbl-call-fm',t.callFMLabel||'Call your Food Master');
+  if(si('lbl-fm-note'))ih('lbl-fm-note',t.fmNoteLabel||'Your Food Master will come to review and confirm.');
+  if(si('btn-call'))si('btn-call').innerHTML='&#128276; '+(t.callFMLabel||'Call').split(' ')[0];
+}
+
+function livePhoneLookup(raw){
+  var guest=lookupGuest(raw);
+  if(guest && raw.replace(/[^0-9]/g,'').length >= 7){
+    var heading=si('guest-name-heading');
+    heading.textContent=guest.name;
+    heading.style.display='block';
+    var r=si('ret-msg');
+    r.style.display='block';
+    r.innerHTML='&#10003; Welcome back, '+guest.name+'!';
+    si('panel-newguest').style.display='none';
+  } else {
+    si('guest-name-heading').style.display='none';
+    si('ret-msg').style.display='none';
+    si('panel-newguest').style.display='none';
+  }
+}
+
+function fromPhone(){
+  var v=si('ph-input').value.trim();
+  if(!v){go('s-diet');return;}
+  phone=v;
+  var guest=lookupGuest(v);
+  if(guest){
+    guestName=guest.name; guestEmail=guest.email||'';
+    si('guest-name-heading').textContent=guestName;
+    si('guest-name-heading').style.display='block';
+    var r=si('ret-msg');r.style.display='block';
+    r.innerHTML='&#10003; Welcome back, <strong>'+guestName+'</strong>!';
+    setTimeout(function(){go('s-diet');},800);
+  } else {
+    // Number not found — show registration panel
+    si('panel-newguest').style.display='block';
+    generateQR(v);
+    si('panel-newguest').scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+}
+
+function generateQR(phoneVal){
+  var qrArea=si('qr-area');
+  if(!qrArea) return;
+  // Build a mailto-style data URL encoded registration link
+  var regUrl='https://epicureanhouse.com/register?phone='+encodeURIComponent(phoneVal)+'&table='+encodeURIComponent(tableNum);
+  var size=80;
+  // Use Google Charts QR API (no auth needed, free)
+  var img=document.createElement('img');
+  img.src='https://chart.googleapis.com/chart?cht=qr&chs='+size+'x'+size+'&chl='+encodeURIComponent(regUrl)+'&choe=UTF-8';
+  img.alt='QR'; img.width=size; img.height=size;
+  img.style.borderRadius='6px';
+  qrArea.innerHTML=''; qrArea.appendChild(img);
+}
+
+function saveNewGuest(){
+  var name=si('ng-name').value.trim();
+  var email=si('ng-email').value.trim();
+  if(!name){si('ng-name').focus();si('ng-name').style.borderColor='#D4896A';return;}
+  guestName=name; guestEmail=email;
+  // Save to runtime guest DB
+  var n=normalizePhone(si('ph-input').value.trim());
+  if(n) GUESTS[n]={name:guestName,email:guestEmail};
+  si('guest-name-heading').textContent=guestName;
+  si('guest-name-heading').style.display='block';
+  si('panel-newguest').style.display='none';
+  var r=si('ret-msg');r.style.display='block';
+  r.innerHTML='&#10003; Welcome, <strong>'+guestName+'</strong>! Profile saved.';
+  setTimeout(function(){go('s-diet');},900);
+}
+
+function startVoiceInput(){
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){alert('Voice input not supported on this device.');return;}
+  var r=new SR();r.lang=lang==='es'?'es-ES':lang==='fr'?'fr-FR':lang==='ja'?'ja-JP':'en-US';
+  r.maxAlternatives=1;r.start();
+  si('btn-voice-fill').innerHTML='&#127908; Listening&#8230;';
+  r.onresult=function(e){
+    var t=e.results[0][0].transcript;
+    if(!si('ng-name').value) si('ng-name').value=t;
+    else si('ng-email').value=t;
+    si('btn-voice-fill').innerHTML='&#127908; Speak to fill';
+  };
+  r.onerror=function(){si('btn-voice-fill').innerHTML='&#127908; Speak to fill';};
+}
+
+function tAllergy(el,v){el.classList.toggle('on');var i=allergies.indexOf(v);if(i>-1)allergies.splice(i,1);else allergies.push(v);}
+function tDiet(el,v){el.classList.toggle('on');var i=diets.indexOf(v);if(i>-1)diets.splice(i,1);else diets.push(v);}
+function tShowAll(){showAll=!showAll;showAll?si('sa-track').classList.add('on'):si('sa-track').classList.remove('on');}
+function isR(item){return item.contains.some(function(c){return allergies.indexOf(c)>-1;});}
+
+function setGelato(choice){
+  gelatoChoice=choice;
+  if(curTab==='mains') renderMenu('mains');
+}
+
+function goMenu(){
+  var t=dd();
+  var nameDisplay=guestName?('<span style="font-family:Cormorant Garant,serif;color:#F7F0E6;font-weight:300"> &mdash; '+guestName+'</span>'):'';
+  var tableDisplay=tableNum?(' &middot; Table '+tableNum):'';
+  si('top-greet').innerHTML=t.greet+tableDisplay+nameDisplay;
+  if(fmCode){si('fm-banner').style.display='flex';si('fm-display').textContent='Food Master #'+fmCode+' &middot; Table '+tableNum;}
+  curTab='mains';
+  document.querySelectorAll('.tab').forEach(function(tab){tab.classList.remove('on');});
+  si('tab-mains').classList.add('on');
+  renderMenu('mains');go('s-menu');loadAI();
+}
+
+function switchTab(cat,el){
+  curTab=cat;
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on');});
+  el.classList.add('on');openPairings={};openSources={};renderMenu(cat);
+}
+
+function renderMenu(cat){
+  var list=si('menu-list');list.innerHTML='';
+  var t=dd();var txItems=t[cat];
+  var srcLang=SOURCES[lang]||SOURCES.en;
+  var glLang=GELATO_LABELS[lang]||GELATO_LABELS.en;
+  MB[cat].forEach(function(item,i){
+    var tx=txItems[i]||{};var restr=isR(item);var isDb=diets.indexOf('diabetic')>-1;
+    var hasNutAllergy=allergies.indexOf('nuts')>-1;
+    if(!showAll&&restr){
+      if(item.hasGelato&&hasNutAllergy&&gelatoChoice==='vanilla'){
+        var modContains=item.contains.filter(function(c){return c!=='nuts';});
+        if(!modContains.some(function(c){return allergies.indexOf(c)>-1;})){
+          restr=false;
+        }
+      }
+    }
+    if(!showAll&&restr) return;
+    var div=document.createElement('div');
+    div.className='mcard'+(restr?' dim':'')+(selected[item.id]?' sel':'');
+    div.dataset.itemid=item.id;
+    var bh=item.badges.map(function(b){return '<span class="badge btype">'+b+'</span>';}).join('');
+    if(isDb&&item.diabetic) bh+='<span class="badge bdia">'+t.diabeticFriendly+'</span>';
+    if(restr) bh+='<span class="badge bwarn">&#9888; '+item.contains.filter(function(c){return allergies.indexOf(c)>-1;}).map(function(c){return t.aLabels[c]||c;}).join(', ')+'</span>';
+    else if(allergies.length) bh+='<span class="badge bok">'+t.safeFor+'</span>';
+    var nb='<div><span class="cn">'+(tx.name||item.id)+'</span>';
+    if(item.vintage) nb+='<span class="cvintage">'+item.vintage+' &middot; '+item.region+'</span>';
+    nb+='</div>';
+    var ex='';
+    if(item.type==='wine'){
+      var tBottleSel=selected[item.id+'__bottle']?'tier-sel':'';
+      var tGlassSel=selected[item.id+'__glass']?'tier-sel':'';
+      var tHalfSel=selected[item.id+'__half']?'tier-sel':'';
+      var wLabel=(tx.name||item.id);
+      var bLabel=(dd().bottleLabel||'Bottle');
+      var gLabel=(dd().glassLabel||'Glass');
+      var hLabel=(dd().halfLabel||'Half glass');
+      ex+='<div class="tier-row">';
+      ex+='<button class="tier-btn '+tBottleSel+'" data-winekey="'+item.id+'__bottle" onclick="toggleWineTier(event,\''+item.id+'\',\'bottle\',\''+item.price+'\',\''+wLabel+' &mdash; '+bLabel+'\')">'+bLabel+'<br><span class="tier-price">'+item.price+'</span></button>';
+      ex+='<button class="tier-btn '+tGlassSel+'" data-winekey="'+item.id+'__glass" onclick="toggleWineTier(event,\''+item.id+'\',\'glass\',\''+item.priceGlass+'\',\''+wLabel+' &mdash; '+gLabel+'\')">'+gLabel+'<br><span class="tier-price">'+item.priceGlass+'</span></button>';
+      ex+='<button class="tier-btn '+tHalfSel+'" data-winekey="'+item.id+'__half" onclick="toggleWineTier(event,\''+item.id+'\',\'half\',\''+item.price2oz+'\',\''+wLabel+' &mdash; '+hLabel+'\')">'+hLabel+'<br><span class="tier-price">'+item.price2oz+'</span></button>';
+      ex+='</div>';
+      if(tx.pairingNote){
+        var op=openPairings[item.id];
+        ex+='<span class="bsug" onclick="toggleP(event,\''+item.id+'\')">&#127860; '+(op?t.hidePairing:t.pairing)+'</span>';
+        if(op){
+          var chips=(tx.pairingDishes||[]).map(function(dname){return '<span class="wp-dish">+ '+dname+'</span>';}).join('');
+          ex+='<div class="wine-pairing open"><div class="wp-label">'+t.suggestedPairing+'</div><div class="wp-text">'+tx.pairingNote+'</div><div class="wp-dishes">'+chips+'</div></div>';
+        }
+      }
+    }
+    if(tx.sugarNote) ex+='<div class="sugar-note">'+tx.sugarNote+'</div>';
+    if(item.hasGelato){
+      var piActive=gelatoChoice==='pistachio';
+      ex+='<div class="gelato-swap"><div class="gelato-label">'+glLang.title+'</div>';
+      ex+='<div class="gelato-options">';
+      ex+='<button class="gelato-btn'+(piActive?' active':'')+'" onclick="event.stopPropagation();setGelato(\'pistachio\')">'+glLang.pistachio+'</button>';
+      ex+='<button class="gelato-btn'+(!piActive?' active':'')+'" onclick="event.stopPropagation();setGelato(\'vanilla\')">'+glLang.vanilla+'<br><span style="font-size:.65rem;opacity:.75">'+glLang.vanillaSub+'</span></button>';
+      ex+='</div></div>';
+      if(!piActive) ex+='<div class="sugar-note" style="color:#C9A84C88;font-style:italic">'+glLang.noteVanilla+'</div>';
+    }
+    var srcs=srcLang[item.id];
+    if(srcs&&srcs.length){
+      var srcOpen=openSources[item.id];
+      ex+='<span class="bsug" style="margin-top:.5rem" onclick="toggleSrc(event,\''+item.id+'\')">&#127807; '+(srcOpen?t.hideSourcing:t.viewSourcing)+'</span>';
+      if(srcOpen){
+        ex+='<div class="sources">';
+        srcs.forEach(function(s){
+          ex+='<a class="source-link" href="'+s.url+'" target="_blank" rel="noopener"><span class="source-dot"></span><span>'+s.label+' &#8599;</span></a>';
+        });
+        ex+='</div>';
+      }
+    }
+    div.innerHTML='<div class="ct">'+nb+'<span class="cp">'+item.price+'</span></div><div class="cd">'+(tx.desc||'')+'</div><div class="cb">'+bh+'</div>'+ex;
+    if(item.type!=='wine'){
+      (function(it,tx2,dv,r){dv.onclick=function(e){if(!e.target.classList.contains('gelato-btn')&&!e.target.closest('.gelato-btn')&&!e.target.classList.contains('source-link')&&!e.target.closest('.source-link')&&!e.target.classList.contains('bsug')&&!e.target.closest('.bsug'))toggleItem(it,tx2,dv,r);};})(item,tx,div,restr);
+    } else {
+      div.style.cursor='default';
+      // wine card body click does nothing; selection via tier buttons
+    }
+    list.appendChild(div);
+  });
+  if(!list.innerHTML) list.innerHTML='<div style="text-align:center;padding:2rem;color:#7A6A5A;font-style:italic">'+dd().noItems+'</div>';
+}
+
+function toggleP(e,id){e.stopPropagation();openPairings[id]=!openPairings[id];renderMenu(curTab);}
+function toggleSrc(e,id){e.stopPropagation();openSources[id]=!openSources[id];renderMenu(curTab);}
+
+function toggleWineTier(e, itemId, tier, price, label){
+  e.stopPropagation();
+  if(orderLocked) return;
+  var key = itemId+'__'+tier;
+  // toggle: if same key selected, deselect; otherwise select this tier
+  if(selected[key]){
+    delete selected[key];
+    e.currentTarget.classList.remove('tier-sel');
+  } else {
+    // deselect other tiers for same wine
+    ['bottle','glass','half'].forEach(function(t2){
+      var k2=itemId+'__'+t2;
+      if(selected[k2]){
+        delete selected[k2];
+        var btns=document.querySelectorAll('[data-winekey="'+k2+'"]');
+        btns.forEach(function(b){b.classList.remove('tier-sel');});
+      }
+    });
+    var card=document.querySelector('[data-itemid="'+itemId+'"]');
+    var wineItem=null;
+    if(card) wineItem=JSON.parse(card.dataset.itemjson||'null');
+    var o={id:key,wineId:itemId,name:label,price:price,type:'wine'};
+    selected[key]=o;
+    e.currentTarget.classList.add('tier-sel');
+  }
+  updateSum();
+}
+
+function toggleItem(item,tx,el,restr){
+  if(orderLocked) return;
+  if(restr&&!showAll) return;
+  if(item.type==='wine') return; // wines use toggleWineTier instead
+  if(selected[item.id]) delete selected[item.id];
+  else{var o={};for(var k in item)o[k]=item[k];o.name=tx.name||item.id;if(item.hasGelato)o.gelatoChoice=gelatoChoice;selected[item.id]=o;}
+  el.classList.toggle('sel');updateSum();
+}
+
+function appendItemRow(container, i, withRemove){
+  var glLang=GELATO_LABELS[lang]||GELATO_LABELS.en;
+  var row=document.createElement('div');
+  row.className='srow';
+  row.style.cssText='align-items:center;display:flex;justify-content:space-between;padding:.38rem 0;border-bottom:.5px solid #C9A84C1A';
+  var left=document.createElement('span');
+  left.style.display='flex';
+  left.style.alignItems='center';
+  left.style.gap='4px';
+  left.style.flex='1';
+  // name
+  var nameSpan=document.createElement('span');
+  nameSpan.innerHTML=i.name;
+  left.appendChild(nameSpan);
+  // gelato note
+  if(i.hasGelato){
+    var note=document.createElement('span');
+    note.style.cssText='font-size:.7rem;color:#C9A84C88;margin-left:4px';
+    note.innerHTML='&mdash; '+(i.gelatoChoice==='vanilla'?glLang.vanilla:glLang.pistachio);
+    left.appendChild(note);
+  }
+  // remove button
+  if(withRemove){
+    var btn=document.createElement('button');
+    btn.innerHTML='&#10005;';
+    btn.title='Remove';
+    btn.style.cssText='background:transparent;border:.5px solid #D4896A44;color:#D4896A88;cursor:pointer;font-size:.78rem;padding:.1rem .4rem;margin-left:.5rem;border-radius:4px;flex-shrink:0;transition:all .15s';
+    btn.onmouseover=function(){this.style.color='#D4896A';this.style.borderColor='#D4896A';};
+    btn.onmouseout=function(){this.style.color='#D4896A88';this.style.borderColor='#D4896A44';};
+    (function(id){btn.onclick=function(e){e.stopPropagation();removeItem(id);};})(i.id);
+    left.appendChild(btn);
+  }
+  // price
+  var right=document.createElement('span');
+  right.style.cssText='color:#C9A84C;white-space:nowrap;margin-left:.5rem;flex-shrink:0;font-family:Cormorant Garant,serif';
+  right.textContent=i.price;
+  row.appendChild(left);
+  row.appendChild(right);
+  container.appendChild(row);
+}
+
+function updateSum(){
+  var box=si('sum-box');
+  var items=Object.keys(selected).map(function(k){return selected[k];});
+  if(!items.length){
+    box.style.display='none';
+    si('fm-order-box').style.display='none';
+    si('call-sent').style.display='none';
+    return;
+  }
+  box.style.display='block';
+  var c=si('sum-items');
+  c.innerHTML='';
+  items.forEach(function(i){appendItemRow(c,i,true);});
+}
+
+// Legacy wrapper used by FM review panel
+function buildItemRow(i, withRemove){
+  var tmp=document.createElement('div');
+  appendItemRow(tmp,i,withRemove);
+  return tmp.innerHTML;
+}
+
+function removeItem(id){
+  if(orderLocked) return;
+  delete selected[id];
+  // For wine tier keys like 'w1__bottle', clear the tier button
+  var tierBtn=document.querySelector('[data-winekey="'+id+'"]');
+  if(tierBtn) tierBtn.classList.remove('tier-sel');
+  // For non-wine items, un-highlight the card
+  var baseId=id.split('__')[0];
+  document.querySelectorAll('.mcard.sel').forEach(function(card){
+    if(card.dataset&&card.dataset.itemid===baseId) card.classList.remove('sel');
+  });
+  updateSum();
+  si('fm-order-box').style.display='none';
+  si('call-sent').style.display='none';
+}
+
+function clearSelections(){
+  if(orderLocked) return;
+  selected={};
+  renderMenu(curTab);
+  updateSum();
+  si('fm-order-box').style.display='none';
+  si('call-sent').style.display='none';
+}
+
+function populateTableSelect(){
+  var sel=si('table-select');
+  if(sel.options.length>0) return;
+  var t=dd();
+  var opt=document.createElement('option');
+  opt.value='';opt.textContent=t.selectTable||'Select table…';
+  sel.appendChild(opt);
+  for(var n=1;n<=50;n++){
+    var o=document.createElement('option');
+    o.value=n;o.textContent=(t.tableLabel||'Table')+' '+n;
+    sel.appendChild(o);
+  }
+}
+
+function callFoodMaster(){
+  var items=Object.keys(selected).map(function(k){return selected[k];});
+  if(!items.length) return;
+  var t=dd();
+  var sentEl=si('call-sent');
+  sentEl.style.display='block';
+  var tblMsg=tableNum?((' — '+(t.tableLabel||'Table')+' '+tableNum)):'';
+  sentEl.innerHTML='&#128276; '+(t.callSent||'Food Master has been notified')+tblMsg;
+  var fmBox=si('fm-order-box');
+  fmBox.style.display='block';
+  var c=si('fm-order-items');c.innerHTML='';
+  items.forEach(function(i){c.innerHTML+=buildItemRow(i,false);});
+  var reviewHdr=(t.fmReviewLabel||'Food Master — Review & Confirm');
+  if(tableNum) reviewHdr+=' — '+(t.tableLabel||'Table')+' '+tableNum;
+  ih('lbl-fm-review', reviewHdr);
+  fmBox.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function fmConfirmOrder(){
+  orderLocked=true;
+  var t=dd();
+  si('sum-box').style.display='none';
+  si('fm-order-box').style.display='none';
+  si('conf-box').style.display='block';
+  ih('conf-msg',t.confirmed);
+  si('conf-sub').innerHTML=t.confirmedSub+(tableNum?' &middot; '+(t.tableLabel||'Table')+' '+tableNum:'')+(fmCode?' &middot; Food Master #'+fmCode:'');
+  var items=Object.keys(selected).map(function(k){return selected[k];});
+  var ci=si('conf-items');ci.innerHTML='';
+  items.forEach(function(i){ci.innerHTML+=buildItemRow(i,false);});
+  document.querySelectorAll('.mcard').forEach(function(c){c.style.pointerEvents='none';c.style.opacity=c.classList.contains('sel')?'1':'.3';});
+}
+
+function fmRejectOrder(){
+  si('fm-order-box').style.display='none';
+  si('call-sent').style.display='none';
+  si('table-select').value='';
+}
+
+function loadAI(){
+  var box=si('ai-box');var txt=si('ai-txt');var t=dd();
+  ih('ai-lbl',t.aiLbl);
+  if(!allergies.length&&!diets.length){box.classList.remove('show');return;}
+  box.classList.add('show');
+  txt.innerHTML='<span class="dot-a">...<span>.</span><span>.</span><span>.</span></span>';
+  var profile='Allergies: '+(allergies.join(', ')||'none')+'. Dietary: '+(diets.join(', ')||'none')+'.';
+  fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:180,messages:[{role:'user',content:'You are the sommelier and head chef at The Epicurean House @ The Chocolate Studio. Guest: '+profile+' Menu: Seared Duck Breast $42, White Truffle Risotto $80, Miso-Glazed Sea Bass $46, Chocolate Braised Short Rib $54, Flourless Chocolate Cake (no sugar) $22. Cocktails: Cacao Old Fashioned $28, Hibiscus Mezcal Spritz (no sugar) $25, Chocolate Martini (no sugar) $28, Passion Fruit Mule $25. Respond in '+lang+' with a warm 2-sentence personalized recommendation. Name specific dishes. Be poetic and concise.'}]})}).then(function(r){return r.json();}).then(function(data){txt.textContent=(data.content&&data.content[0]&&data.content[0].text)||'We invite you to begin with the Chocolate Braised Short Rib.';}).catch(function(){txt.textContent='We invite you to begin with our Chocolate Braised Short Rib \u2014 a true signature of The Chocolate Studio.';});
+}
+
+function doVoice(){
+  var b=si('vbtxt');var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){b.textContent='Voice not supported \u2014 please tap above';return;}
+  b.textContent='Listening\u2026';
+  var r=new SR();r.lang='';r.maxAlternatives=1;r.start();
+  r.onresult=function(e){
+    var s=e.results[0][0].transcript.toLowerCase();
+    var btns=document.querySelectorAll('.btn-lang');
+    if(/espa|hola|buenas/.test(s)) setLang('es',btns[1]);
+    else if(/fran|bonjour/.test(s)) setLang('fr',btns[2]);
+    else if(/nihon|japan/.test(s)) setLang('ja',btns[3]);
+    else setLang('en',btns[0]);
+  };
+  r.onerror=function(){b.textContent='Could not detect \u2014 please tap a language';};
+}
+
+si('w-code-input').addEventListener('input',function(){this.style.borderColor='#C9A84C44';});
+</script>
+</body>
+</html>
