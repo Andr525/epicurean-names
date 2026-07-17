@@ -7,188 +7,384 @@
 <meta name="mobile-web-app-capable" content="yes">
 <title>The Epicurean House — Menu</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
 <style>
 :root {
-  --cream: #FDF8F0;
-  --ivory: #FAF5EB;
-  --warm-white: #FFFDF9;
-  --chocolate: #3B2314;
-  --chocolate-light: #5C3A24;
-  --copper: #B87333;
-  --copper-light: #D4956A;
-  --copper-glow: #E8A96840;
-  --gold: #C9A96E;
-  --gold-light: #E0C992;
-  --sage: #7A9E7E;
-  --sage-light: #A8C5AB;
-  --wine-red: #8B2252;
-  --charcoal: #2C2C2C;
-  --text-primary: #2C1810;
-  --text-secondary: #6B5B50;
-  --text-muted: #9B8B80;
-  --border: #E8DFD4;
-  --shadow-sm: 0 1px 3px rgba(59,35,20,0.08);
-  --shadow-md: 0 4px 12px rgba(59,35,20,0.12);
-  --shadow-lg: 0 8px 32px rgba(59,35,20,0.16);
-  --radius: 12px;
-  --radius-lg: 20px;
-  --font-display: 'Playfair Display', Georgia, serif;
+  --bg: #0A0A0A;
+  --bg-elevated: #141414;
+  --bg-card: #1A1A1A;
+  --bg-card-hover: #222222;
+  --gold: #C8A961;
+  --gold-dim: #A08840;
+  --gold-glow: rgba(200,169,97,0.12);
+  --text-primary: #F5F2ED;
+  --text-secondary: #A8A29E;
+  --text-muted: #6B6560;
+  --border: rgba(255,255,255,0.06);
+  --border-gold: rgba(200,169,97,0.25);
+  --wine: #8B3A4A;
+  --sage: #6B8F6B;
+  --shadow: 0 8px 32px rgba(0,0,0,0.4);
+  --radius: 8px;
+  --radius-lg: 16px;
+  --font-display: 'Cormorant Garamond', Georgia, serif;
   --font-body: 'Inter', -apple-system, sans-serif;
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 * { margin:0; padding:0; box-sizing:border-box; }
 html,body { height:100%; overflow:hidden; }
-body { font-family:var(--font-body); color:var(--text-primary); background:var(--cream); -webkit-font-smoothing:antialiased; }
+body { font-family:var(--font-body); color:var(--text-primary); background:var(--bg); -webkit-font-smoothing:antialiased; }
 
 .screen { display:none; height:100vh; overflow:hidden; }
 .screen.active { display:flex; flex-direction:column; }
 
-/* SETUP SCREEN */
+/* ─── SETUP SCREEN ─── */
 #setup {
-  background: linear-gradient(135deg, var(--chocolate) 0%, var(--chocolate-light) 100%);
-  align-items:center; justify-content:center; text-align:center; color:var(--cream); padding:2rem;
+  background:var(--bg);
+  align-items:center; justify-content:center; text-align:center;
+  padding:2rem; position:relative;
 }
-#setup h1 { font-family:var(--font-display); font-size:2.4rem; font-weight:600; letter-spacing:0.02em; margin-bottom:0.3rem; }
-#setup .subtitle { font-size:1rem; color:var(--copper-light); font-weight:300; letter-spacing:0.15em; text-transform:uppercase; margin-bottom:1.5rem; }
-#setup .divider { width:80px; height:1px; background:var(--copper); margin:1.5rem auto; opacity:0.6; }
-.lang-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:1rem; max-width:320px; width:100%; margin-bottom:2rem; }
+#setup::before {
+  content:''; position:absolute; inset:0;
+  background:radial-gradient(ellipse at 50% 30%, rgba(200,169,97,0.04) 0%, transparent 70%);
+}
+#setup h1 {
+  font-family:var(--font-display); font-size:3rem; font-weight:300;
+  letter-spacing:0.08em; color:var(--text-primary); position:relative;
+}
+#setup .subtitle {
+  font-family:var(--font-body); font-size:0.7rem; color:var(--text-muted);
+  font-weight:400; letter-spacing:0.3em; text-transform:uppercase;
+  margin-top:0.5rem; margin-bottom:2.5rem; position:relative;
+}
+.divider {
+  width:40px; height:1px; background:var(--gold); margin:0 auto 2.5rem;
+  opacity:0.5; position:relative;
+}
+.lang-grid {
+  display:grid; grid-template-columns:repeat(2,1fr); gap:0.8rem;
+  max-width:280px; width:100%; margin-bottom:2.5rem; position:relative;
+}
 .lang-card {
-  background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12);
-  border-radius:var(--radius-lg); padding:1.2rem; cursor:pointer;
+  background:transparent; border:1px solid var(--border);
+  border-radius:var(--radius); padding:1rem; cursor:pointer;
   transition:all 0.2s var(--ease-out); text-align:center;
 }
-.lang-card:hover { background:rgba(255,255,255,0.1); transform:translateY(-2px); }
-.lang-card.selected { border-color:var(--copper); background:rgba(184,115,51,0.15); }
-.lang-card h3 { font-family:var(--font-display); font-size:1.1rem; margin-bottom:0.2rem; }
-.lang-card p { font-size:0.75rem; color:var(--copper-light); }
+.lang-card:hover { border-color:rgba(255,255,255,0.15); }
+.lang-card.selected { border-color:var(--gold); background:var(--gold-glow); }
+.lang-card h3 { font-family:var(--font-display); font-size:1.2rem; font-weight:400; color:var(--text-primary); }
+.lang-card p { font-size:0.65rem; color:var(--text-muted); margin-top:0.2rem; letter-spacing:0.05em; }
 
-.setup-form { max-width:320px; width:100%; }
+.setup-form { max-width:280px; width:100%; position:relative; }
 .setup-form select {
-  width:100%; padding:0.8rem; border-radius:var(--radius);
-  border:1px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.08);
-  color:var(--cream); font-size:0.9rem; margin-bottom:1rem;
+  width:100%; padding:0.9rem 1rem; border-radius:var(--radius);
+  border:1px solid var(--border); background:var(--bg-elevated);
+  color:var(--text-primary); font-size:0.85rem; margin-bottom:1rem;
+  appearance:none; font-family:var(--font-body);
 }
-.setup-form select option { color:#333; }
+.setup-form select option { background:#1a1a1a; color:#fff; }
 .btn-open {
   width:100%; padding:1rem; border:none; border-radius:var(--radius);
-  background:var(--copper); color:#fff; font-size:1rem; font-weight:600;
+  background:var(--gold); color:var(--bg); font-size:0.8rem; font-weight:500;
   cursor:pointer; transition:all 0.16s var(--ease-out);
+  letter-spacing:0.1em; text-transform:uppercase;
 }
-.btn-open:active { transform:scale(0.97); }
+.btn-open:active { transform:scale(0.97); opacity:0.9; }
 
-/* MENU SCREEN */
-#menu { background:var(--cream); }
+/* ─── MENU SCREEN ─── */
+#menu { background:var(--bg); }
 .menu-header {
   display:flex; align-items:center; justify-content:space-between;
-  padding:1rem 1.5rem; background:var(--warm-white);
-  border-bottom:1px solid var(--border); flex-shrink:0;
+  padding:1rem 1.5rem; background:var(--bg); border-bottom:1px solid var(--border);
+  flex-shrink:0;
 }
-.menu-header .brand { font-family:var(--font-display); font-size:1.1rem; color:var(--chocolate); font-weight:600; }
+.menu-header .brand {
+  font-family:var(--font-display); font-size:1.2rem; color:var(--text-primary);
+  font-weight:300; letter-spacing:0.04em;
+}
 .menu-header .table-badge {
-  background:var(--copper); color:#fff; font-size:0.75rem; font-weight:600;
-  padding:0.3rem 0.8rem; border-radius:20px;
+  font-size:0.65rem; font-weight:500; color:var(--gold);
+  letter-spacing:0.15em; text-transform:uppercase;
 }
 .call-server-btn {
-  background:var(--wine-red); color:#fff; border:none; border-radius:30px;
-  padding:0.6rem 1.2rem; font-size:0.85rem; font-weight:500; cursor:pointer;
-  display:flex; align-items:center; gap:0.4rem;
-  transition:all 0.16s var(--ease-out); animation:pulse-ring 2s infinite;
-}
-.call-server-btn:active { transform:scale(0.95); }
-@keyframes pulse-ring { 0%,100%{box-shadow:0 0 0 0 rgba(139,34,82,0.4)} 50%{box-shadow:0 0 0 8px rgba(139,34,82,0)} }
-
-.menu-tabs {
-  display:flex; gap:0; overflow-x:auto; padding:0 1rem;
-  background:var(--warm-white); border-bottom:1px solid var(--border); flex-shrink:0;
-  scrollbar-width:none;
-}
-.menu-tabs::-webkit-scrollbar { display:none; }
-.menu-tab {
-  padding:0.8rem 1.2rem; font-size:0.8rem; font-weight:500; white-space:nowrap;
-  color:var(--text-muted); border-bottom:2px solid transparent; cursor:pointer;
-  transition:all 0.2s var(--ease-out);
-}
-.menu-tab.active { color:var(--copper); border-bottom-color:var(--copper); }
-
-.menu-content { flex:1; overflow-y:auto; padding:1.5rem; }
-.menu-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1.2rem; }
-
-.dish-card {
-  background:var(--warm-white); border:1px solid var(--border); border-radius:var(--radius);
-  padding:1.2rem; transition:all 0.2s var(--ease-out); cursor:pointer;
-}
-.dish-card:hover { box-shadow:var(--shadow-md); transform:translateY(-2px); }
-.dish-card .dish-name { font-family:var(--font-display); font-size:1.05rem; font-weight:600; margin-bottom:0.3rem; }
-.dish-card .dish-desc { font-size:0.82rem; color:var(--text-secondary); line-height:1.5; margin-bottom:0.6rem; }
-.dish-card .dish-meta { display:flex; align-items:center; justify-content:space-between; }
-.dish-card .dish-price { font-weight:600; color:var(--copper); font-size:1rem; }
-.dish-card .dish-tags { display:flex; gap:0.3rem; flex-wrap:wrap; }
-.dish-tag {
-  font-size:0.65rem; padding:0.15rem 0.5rem; border-radius:10px;
-  background:var(--sage-light); color:#fff; font-weight:500;
-}
-.dish-tag.allergen { background:#f87171; }
-
-.menu-footer {
-  display:flex; align-items:center; justify-content:space-between;
-  padding:0.8rem 1.5rem; background:var(--warm-white); border-top:1px solid var(--border); flex-shrink:0;
-}
-.lang-selector { display:flex; gap:0.5rem; }
-.lang-btn {
-  width:32px; height:32px; border-radius:50%; border:1px solid var(--border);
-  background:var(--warm-white); font-size:0.7rem; cursor:pointer;
-  display:flex; align-items:center; justify-content:center;
+  background:transparent; color:var(--text-secondary); border:1px solid var(--border);
+  border-radius:var(--radius); padding:0.5rem 1rem; font-size:0.75rem;
+  font-weight:400; cursor:pointer; letter-spacing:0.05em;
   transition:all 0.16s var(--ease-out);
 }
-.lang-btn.active { border-color:var(--copper); background:var(--copper-glow); }
+.call-server-btn:hover { border-color:var(--gold); color:var(--gold); }
+.call-server-btn:active { transform:scale(0.95); }
 
-/* Dish detail modal */
+/* ─── NAV TABS ─── */
+.menu-nav {
+  display:flex; gap:0; overflow-x:auto; padding:0;
+  background:var(--bg); border-bottom:1px solid var(--border); flex-shrink:0;
+  scrollbar-width:none;
+}
+.menu-nav::-webkit-scrollbar { display:none; }
+.menu-nav-item {
+  padding:0.9rem 1.4rem; font-size:0.65rem; font-weight:400; white-space:nowrap;
+  color:var(--text-muted); letter-spacing:0.15em; text-transform:uppercase;
+  cursor:pointer; transition:all 0.2s var(--ease-out);
+  border-bottom:1px solid transparent; position:relative;
+}
+.menu-nav-item:hover { color:var(--text-secondary); }
+.menu-nav-item.active { color:var(--gold); border-bottom-color:var(--gold); }
+
+/* ─── MENU CONTENT ─── */
+.menu-content { flex:1; overflow-y:auto; padding:2rem 1.5rem; scroll-behavior:smooth; }
+.menu-content::-webkit-scrollbar { width:3px; }
+.menu-content::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+
+/* Section headers */
+.section-header {
+  margin-bottom:1.5rem; padding-bottom:1rem; border-bottom:1px solid var(--border);
+}
+.section-label {
+  font-size:0.6rem; letter-spacing:0.25em; text-transform:uppercase;
+  color:var(--gold-dim); margin-bottom:0.4rem; font-weight:400;
+}
+.section-title {
+  font-family:var(--font-display); font-size:2rem; font-weight:300;
+  color:var(--text-primary); letter-spacing:0.02em;
+}
+
+/* ─── REGULAR MENU GRID ─── */
+.menu-grid { display:grid; grid-template-columns:1fr; gap:0; margin-bottom:3rem; }
+
+.dish-row {
+  display:flex; align-items:flex-start; justify-content:space-between;
+  padding:1.2rem 0; border-bottom:1px solid var(--border);
+  cursor:pointer; transition:all 0.2s var(--ease-out); gap:1rem;
+}
+.dish-row:first-child { padding-top:0; }
+.dish-row:hover { background:var(--bg-elevated); margin:0 -1rem; padding-left:1rem; padding-right:1rem; border-radius:var(--radius); }
+.dish-info { flex:1; }
+.dish-name {
+  font-family:var(--font-display); font-size:1.15rem; font-weight:400;
+  color:var(--text-primary); margin-bottom:0.3rem; letter-spacing:0.01em;
+}
+.dish-desc {
+  font-size:0.78rem; color:var(--text-secondary); line-height:1.6;
+  font-weight:300; max-width:500px;
+}
+.dish-tags-row { display:flex; gap:0.4rem; margin-top:0.5rem; flex-wrap:wrap; }
+.dish-tag {
+  font-size:0.6rem; padding:0.2rem 0.5rem; border-radius:3px;
+  border:1px solid rgba(107,143,107,0.3); color:var(--sage); font-weight:400;
+  letter-spacing:0.03em;
+}
+.dish-tag.allergen { border-color:rgba(139,58,74,0.3); color:var(--wine); }
+.dish-price {
+  font-size:0.9rem; color:var(--gold); font-weight:400;
+  white-space:nowrap; padding-top:0.2rem;
+}
+
+/* ─── PHOTO CARDS (for featured items) ─── */
+.featured-grid {
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));
+  gap:1.2rem; margin-bottom:3rem;
+}
+.photo-card {
+  position:relative; border-radius:var(--radius-lg); overflow:hidden;
+  aspect-ratio:4/3; cursor:pointer; transition:all 0.3s var(--ease-out);
+}
+.photo-card:hover { transform:translateY(-3px); box-shadow:var(--shadow); }
+.photo-card img {
+  width:100%; height:100%; object-fit:cover;
+  transition:transform 0.4s var(--ease-out);
+}
+.photo-card:hover img { transform:scale(1.03); }
+.photo-card-overlay {
+  position:absolute; inset:0;
+  background:linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.1) 60%, transparent 100%);
+}
+.photo-card-info {
+  position:absolute; bottom:0; left:0; right:0; padding:1.2rem;
+}
+.photo-card-name {
+  font-family:var(--font-display); font-size:1.2rem; font-weight:400;
+  color:#fff; margin-bottom:0.2rem;
+}
+.photo-card-desc { font-size:0.7rem; color:rgba(255,255,255,0.6); font-weight:300; }
+.photo-card-price {
+  position:absolute; top:1rem; right:1rem;
+  background:rgba(0,0,0,0.6); backdrop-filter:blur(8px);
+  padding:0.3rem 0.7rem; border-radius:4px;
+  font-size:0.75rem; color:var(--gold); font-weight:400;
+}
+
+/* ─── TASTING MENU SECTION ─── */
+.tasting-section { margin-bottom:3rem; }
+.tasting-card {
+  background:var(--bg-elevated); border:1px solid var(--border-gold);
+  border-radius:var(--radius-lg); padding:2rem; margin-bottom:1.2rem;
+  position:relative; overflow:hidden;
+  transition:all 0.2s var(--ease-out); cursor:pointer;
+}
+.tasting-card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg, transparent, var(--gold), transparent);
+  opacity:0.4;
+}
+.tasting-card:hover { border-color:var(--gold); background:var(--bg-card-hover); }
+.tasting-card-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem; }
+.tasting-card-title {
+  font-family:var(--font-display); font-size:1.5rem; font-weight:400;
+  color:var(--text-primary);
+}
+.tasting-card-subtitle {
+  font-size:0.7rem; color:var(--text-muted); letter-spacing:0.1em;
+  text-transform:uppercase; margin-top:0.3rem;
+}
+.tasting-card-price {
+  font-family:var(--font-display); font-size:1.4rem; color:var(--gold); font-weight:400;
+}
+.tasting-card-price small {
+  font-size:0.65rem; color:var(--text-muted); display:block;
+  font-family:var(--font-body); letter-spacing:0.05em;
+}
+.tasting-courses-list { list-style:none; }
+.tasting-courses-list li {
+  padding:0.5rem 0; font-size:0.8rem; color:var(--text-secondary);
+  border-bottom:1px solid var(--border); font-weight:300;
+  display:flex; align-items:center; gap:0.6rem;
+}
+.tasting-courses-list li:last-child { border-bottom:none; }
+.tasting-courses-list .course-num {
+  font-size:0.6rem; color:var(--gold-dim); letter-spacing:0.1em;
+  min-width:1.5rem;
+}
+.tasting-pairing {
+  display:inline-flex; align-items:center; gap:0.5rem;
+  margin-top:1rem; padding:0.6rem 1rem; border-radius:var(--radius);
+  background:rgba(139,58,74,0.1); border:1px solid rgba(139,58,74,0.2);
+  font-size:0.72rem; color:var(--text-secondary);
+}
+.tasting-pairing .pairing-price { color:var(--gold); margin-left:0.5rem; }
+
+/* ─── PRIX FIXE SECTION ─── */
+.prix-fixe-card {
+  background:var(--bg-elevated); border:1px solid var(--border);
+  border-radius:var(--radius-lg); padding:2rem; margin-bottom:1.2rem;
+  transition:all 0.2s var(--ease-out); cursor:pointer;
+}
+.prix-fixe-card:hover { border-color:var(--border-gold); }
+.prix-fixe-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.2rem; }
+.prix-fixe-title {
+  font-family:var(--font-display); font-size:1.4rem; font-weight:400;
+  color:var(--text-primary);
+}
+.prix-fixe-desc {
+  font-size:0.75rem; color:var(--text-muted); margin-top:0.3rem; font-weight:300;
+}
+.prix-fixe-price {
+  font-family:var(--font-display); font-size:1.3rem; color:var(--gold);
+}
+.prix-fixe-price small {
+  font-size:0.6rem; color:var(--text-muted); display:block;
+  font-family:var(--font-body);
+}
+.prix-fixe-courses { margin-top:1rem; }
+.prix-fixe-course-group { margin-bottom:1rem; }
+.prix-fixe-course-label {
+  font-size:0.6rem; letter-spacing:0.2em; text-transform:uppercase;
+  color:var(--gold-dim); margin-bottom:0.4rem;
+}
+.prix-fixe-option {
+  padding:0.4rem 0; font-size:0.8rem; color:var(--text-secondary);
+  font-weight:300; display:flex; justify-content:space-between;
+}
+.prix-fixe-option .upcharge { color:var(--gold); font-size:0.7rem; }
+
+/* ─── FOOTER ─── */
+.menu-footer {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0.8rem 1.5rem; background:var(--bg); border-top:1px solid var(--border); flex-shrink:0;
+}
+.lang-selector { display:flex; gap:0.4rem; }
+.lang-btn {
+  width:28px; height:28px; border-radius:50%; border:1px solid var(--border);
+  background:transparent; font-size:0.6rem; cursor:pointer; color:var(--text-muted);
+  display:flex; align-items:center; justify-content:center;
+  transition:all 0.16s var(--ease-out); letter-spacing:0.02em;
+}
+.lang-btn:hover { border-color:var(--text-secondary); color:var(--text-secondary); }
+.lang-btn.active { border-color:var(--gold); color:var(--gold); background:var(--gold-glow); }
+
+/* ─── DISH DETAIL MODAL ─── */
 .modal-overlay {
-  position:fixed; inset:0; background:rgba(44,24,16,0.5); backdrop-filter:blur(4px);
+  position:fixed; inset:0; background:rgba(0,0,0,0.8); backdrop-filter:blur(8px);
   display:none; align-items:center; justify-content:center; z-index:1000; padding:1.5rem;
 }
 .modal-overlay.open { display:flex; }
 .modal-card {
-  background:var(--warm-white); border-radius:var(--radius-lg); padding:2rem;
-  max-width:500px; width:100%; max-height:80vh; overflow-y:auto;
-  box-shadow:var(--shadow-lg); position:relative;
+  background:var(--bg-elevated); border:1px solid var(--border);
+  border-radius:var(--radius-lg); padding:2rem;
+  max-width:480px; width:100%; max-height:80vh; overflow-y:auto;
+  box-shadow:var(--shadow); position:relative;
 }
-.modal-card h2 { font-family:var(--font-display); font-size:1.4rem; margin-bottom:0.5rem; }
-.modifier-group { margin-top:1rem; }
-.modifier-group h4 { font-size:0.8rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-muted); margin-bottom:0.5rem; }
+.modal-card h2 { font-family:var(--font-display); font-size:1.6rem; font-weight:400; margin-bottom:0.5rem; }
+.modifier-group { margin-top:1.2rem; }
+.modifier-group h4 {
+  font-size:0.65rem; text-transform:uppercase; letter-spacing:0.15em;
+  color:var(--text-muted); margin-bottom:0.5rem;
+}
 .modifier-option {
-  display:flex; align-items:center; gap:0.6rem; padding:0.5rem 0;
-  border-bottom:1px solid var(--border); cursor:pointer;
+  display:flex; align-items:center; gap:0.6rem; padding:0.6rem 0;
+  border-bottom:1px solid var(--border); cursor:pointer; font-size:0.85rem;
+  color:var(--text-secondary);
 }
-.modifier-option input { accent-color:var(--copper); }
+.modifier-option input { accent-color:var(--gold); }
 
-/* Toast */
+/* ─── TASTING DETAIL MODAL ─── */
+.tasting-modal-courses { margin-top:1.5rem; }
+.tasting-modal-course {
+  padding:1rem 0; border-bottom:1px solid var(--border);
+}
+.tasting-modal-course:last-child { border-bottom:none; }
+.tasting-modal-course-num {
+  font-size:0.6rem; letter-spacing:0.2em; text-transform:uppercase;
+  color:var(--gold-dim); margin-bottom:0.3rem;
+}
+.tasting-modal-course-name {
+  font-family:var(--font-display); font-size:1.1rem; font-weight:400;
+  color:var(--text-primary); margin-bottom:0.2rem;
+}
+.tasting-modal-course-desc {
+  font-size:0.75rem; color:var(--text-secondary); font-weight:300;
+}
+
+/* ─── TOAST & NOTIFICATION ─── */
 .toast {
-  position:fixed; top:1rem; left:50%; transform:translateX(-50%) translateY(-100%);
-  background:var(--chocolate); color:var(--cream); padding:0.8rem 1.5rem;
-  border-radius:var(--radius); font-size:0.85rem; font-weight:500;
-  box-shadow:var(--shadow-lg); z-index:9999; opacity:0;
+  position:fixed; top:1.5rem; left:50%; transform:translateX(-50%) translateY(-100%);
+  background:var(--bg-elevated); color:var(--text-primary); padding:0.8rem 1.5rem;
+  border-radius:var(--radius); font-size:0.8rem; font-weight:400;
+  border:1px solid var(--border); box-shadow:var(--shadow); z-index:9999; opacity:0;
   transition:all 0.3s var(--ease-out);
 }
 .toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
 
-/* Message notification */
 .msg-notification {
   position:fixed; bottom:5rem; left:50%; transform:translateX(-50%);
-  background:var(--chocolate); color:var(--cream); padding:0.8rem 1.5rem;
-  border-radius:var(--radius); font-size:0.85rem; box-shadow:var(--shadow-lg);
-  z-index:999; display:none; max-width:80%;
+  background:var(--bg-elevated); color:var(--text-primary); padding:0.8rem 1.5rem;
+  border-radius:var(--radius); font-size:0.8rem; border:1px solid var(--border-gold);
+  box-shadow:var(--shadow); z-index:999; display:none; max-width:80%;
 }
 .msg-notification.show { display:block; animation:slideUp 0.3s var(--ease-out); }
 @keyframes slideUp { from{opacity:0;transform:translateX(-50%) translateY(20px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
 
 /* Responsive */
-@media (max-width:768px) { .menu-grid { grid-template-columns:1fr; } }
-@media (min-width:1024px) { .menu-grid { grid-template-columns:repeat(3,1fr); } }
+@media (min-width:768px) {
+  .featured-grid { grid-template-columns:repeat(2,1fr); }
+}
+@media (min-width:1024px) {
+  .featured-grid { grid-template-columns:repeat(3,1fr); }
+  .menu-content { padding:2.5rem 3rem; }
+}
 </style>
 </head>
 <body>
@@ -198,10 +394,9 @@ body { font-family:var(--font-body); color:var(--text-primary); background:var(-
 
 <!-- SETUP SCREEN -->
 <div id="setup" class="screen active">
-  <h1 style="font-family:var(--font-display);">The Epicurean House</h1>
-  <p class="subtitle">@ The Chocolate Studio</p>
+  <h1>The Epicurean House</h1>
+  <p class="subtitle">at The Chocolate Studio</p>
   <div class="divider"></div>
-  <p style="color:var(--copper-light);margin-bottom:2rem;font-size:0.9rem;">Select your language</p>
   <div class="lang-grid">
     <div class="lang-card selected" onclick="setLang('en',this)"><h3>English</h3><p>English</p></div>
     <div class="lang-card" onclick="setLang('es',this)"><h3>Español</h3><p>Spanish</p></div>
@@ -209,8 +404,8 @@ body { font-family:var(--font-body); color:var(--text-primary); background:var(-
     <div class="lang-card" onclick="setLang('ja',this)"><h3>日本語</h3><p>Japanese</p></div>
   </div>
   <div class="setup-form">
-    <select id="setup-table"><option value="">Select table…</option></select>
-    <button class="btn-open" onclick="openMenu()">Open Menu →</button>
+    <select id="setup-table"><option value="">Select table</option></select>
+    <button class="btn-open" onclick="openMenu()">View Menu</button>
   </div>
 </div>
 
@@ -219,9 +414,9 @@ body { font-family:var(--font-body); color:var(--text-primary); background:var(-
   <div class="menu-header">
     <span class="brand">The Epicurean House</span>
     <span class="table-badge" id="menu-table-badge">Table 1</span>
-    <button class="call-server-btn" onclick="callServer()">🔔 Call Server</button>
+    <button class="call-server-btn" onclick="callServer()">Call Server</button>
   </div>
-  <div class="menu-tabs" id="menu-tabs"></div>
+  <div class="menu-nav" id="menu-nav"></div>
   <div class="menu-content" id="menu-content"></div>
   <div class="menu-footer">
     <div class="lang-selector">
@@ -230,13 +425,18 @@ body { font-family:var(--font-body); color:var(--text-primary); background:var(-
       <button class="lang-btn" data-lang="fr" onclick="switchLang('fr')">FR</button>
       <button class="lang-btn" data-lang="ja" onclick="switchLang('ja')">JA</button>
     </div>
-    <div id="menu-msg-area" style="font-size:0.8rem;color:var(--text-muted);max-width:60%;text-align:right;"></div>
+    <div id="menu-msg-area" style="font-size:0.7rem;color:var(--text-muted);max-width:60%;text-align:right;"></div>
   </div>
 </div>
 
 <!-- DISH DETAIL MODAL -->
-<div class="modal-overlay" id="dish-modal">
+<div class="modal-overlay" id="dish-modal" onclick="if(event.target===this)closeDishModal()">
   <div class="modal-card" id="dish-modal-content"></div>
+</div>
+
+<!-- TASTING DETAIL MODAL -->
+<div class="modal-overlay" id="tasting-modal" onclick="if(event.target===this)closeTastingModal()">
+  <div class="modal-card" id="tasting-modal-content"></div>
 </div>
 
 <script>
@@ -253,38 +453,134 @@ var fbApp=null, fbDb=null, fbReady=false;
 try { fbApp=firebase.initializeApp(firebaseConfig); fbDb=firebase.firestore(); fbReady=true; } catch(e){ console.warn('Firebase init:',e); }
 
 // ─── State ──────────────────────────────────────────────────────
-var STATE = { lang:'en', tableNum:1, menuItems:[], menuCategories:[], messages:[] };
+var STATE = { lang:'en', tableNum:1, menuItems:[], menuCategories:[], messages:[], tastingMenus:[], prixFixeMenus:[] };
 
 var SEED_CATEGORIES = [
+  {id:'tasting',name:'Tasting Menus',visible:true,type:'special'},
+  {id:'prix-fixe',name:'Prix Fixe',visible:true,type:'special'},
   {id:'small-plates',name:'Small Plates',visible:true},
   {id:'ceviche',name:'Ceviche',visible:true},
   {id:'soups-salads',name:'Soups & Salads',visible:true},
   {id:'entrees',name:'Entrées',visible:true},
   {id:'sides',name:'Sides',visible:true},
   {id:'desserts',name:'Desserts',visible:true},
-  {id:'kids',name:'Kids',visible:true},
-  {id:'brunch',name:'Brunch',visible:true},
   {id:'cocktails',name:'Cocktails',visible:true},
-  {id:'beer',name:'Beer',visible:true},
-  {id:'spirits',name:'Spirits',visible:true},
-  {id:'wine',name:'Wine',visible:true}
+  {id:'wine',name:'Wine',visible:true},
+  {id:'beer',name:'Beer & Spirits',visible:true}
 ];
 
 var SEED_ITEMS = [
-  {id:'i1',code:'SP01',name:'Tuna Tartare',desc:'Ahi tuna, avocado mousse, sesame crisp, ponzu',price:16,cost:5.5,category:'small-plates',station:'Cold/Garde Manger',cookTime:8,allergens:['Fish','Soy','Sesame'],dietary:['GF','DF','Nut-Free'],modifiers:[]},
-  {id:'i2',code:'CE01',name:'Peruvian Ceviche',desc:'Fresh corvina, leche de tigre, red onion, sweet potato, cancha',price:18,cost:6.5,category:'ceviche',station:'Cold/Garde Manger',cookTime:5,allergens:['Fish'],dietary:['GF','DF','Nut-Free','Shellfish-Free'],modifiers:[]},
-  {id:'i3',code:'CE02',name:'Shrimp Ceviche',desc:'Gulf shrimp, mango, habanero, coconut milk',price:19,cost:7,category:'ceviche',station:'Cold/Garde Manger',cookTime:5,allergens:['Shellfish'],dietary:['GF','DF','Nut-Free'],modifiers:[]},
-  {id:'i4',code:'EN01',name:'Wagyu Ribeye',desc:'12oz prime wagyu, chimichurri, roasted garlic, seasonal vegetables',price:58,cost:22,category:'entrees',station:'Grill',cookTime:18,allergens:[],dietary:['GF','DF','Nut-Free','Shellfish-Free'],modifiers:[{group:'Temperature',options:['R','MR','M']}]},
-  {id:'i5',code:'EN02',name:'Pan-Seared Salmon',desc:'Atlantic salmon, lemon beurre blanc, asparagus, fingerling potatoes',price:34,cost:12,category:'entrees',station:'Sauté',cookTime:14,allergens:['Fish','Dairy'],dietary:['GF','Nut-Free','Shellfish-Free'],modifiers:[{group:'Temperature',options:['MR','M']}]},
-  {id:'i6',code:'DE01',name:'Chocolate Studio Torte',desc:'Dark chocolate ganache, raspberry coulis, gold leaf, house ice cream',price:14,cost:3.5,category:'desserts',station:'Pastry',cookTime:3,allergens:['Dairy','Egg','Soy'],dietary:['Vegetarian','Nut-Free','Shellfish-Free'],modifiers:[]},
-  {id:'i7',code:'DE02',name:'Crème Brûlée',desc:'Madagascar vanilla bean, caramelized sugar, seasonal berries',price:12,cost:2.8,category:'desserts',station:'Pastry',cookTime:2,allergens:['Dairy','Egg'],dietary:['GF','Vegetarian','Nut-Free','Shellfish-Free'],modifiers:[]},
-  {id:'i8',code:'CK01',name:'Pisco Sour',desc:'Pisco, lime, egg white, Angostura bitters',price:14,cost:4,category:'cocktails',station:'Bar',cookTime:3,allergens:['Egg'],dietary:['GF','DF','Nut-Free'],modifiers:[]},
-  {id:'i9',code:'CK02',name:'Chocolate Old Fashioned',desc:'Bourbon, cacao nib syrup, orange, Angostura',price:16,cost:5,category:'cocktails',station:'Bar',cookTime:3,allergens:[],dietary:['GF','DF','Nut-Free','Vegan'],modifiers:[]},
-  {id:'i10',code:'BE01',name:'Local Lager',desc:'Crisp craft lager, 16oz draft',price:8,cost:2.5,category:'beer',station:'Bar',cookTime:1,allergens:['Gluten'],dietary:['DF','Nut-Free','Vegetarian'],modifiers:[]},
-  {id:'i11',code:'WN01',name:'Malbec Reserva',desc:'Bodega Andes, 2021, Mendoza — rich dark fruit, velvety tannins',price:52,cost:18,category:'wine',station:'Bar',cookTime:1,allergens:['Sulfites'],dietary:['GF','DF','Nut-Free','Vegan'],modifiers:[{group:'Pour',options:['Glass $14','Bottle $52']}]},
-  {id:'i12',code:'WN02',name:'Chardonnay',desc:'Casa Blanca, 2022, Casablanca — tropical fruit, balanced oak',price:44,cost:15,category:'wine',station:'Bar',cookTime:1,allergens:['Sulfites'],dietary:['GF','DF','Nut-Free','Vegan'],modifiers:[{group:'Pour',options:['Glass $12','Bottle $44']}]},
+  {id:'i1',code:'SP01',name:'Tuna Tartare',desc:'Ahi tuna, avocado mousse, sesame crisp, ponzu',price:16,cost:5.5,category:'small-plates',station:'Cold/Garde Manger',cookTime:8,allergens:['Fish','Soy','Sesame'],dietary:['GF','DF'],modifiers:[],photo:'https://files.manuscdn.com/user_upload_by_module/session_file/310519663748878699/hOvRJUxUpqahEgLs.jpg'},
+  {id:'i2',code:'CE01',name:'Peruvian Ceviche',desc:'Fresh corvina, leche de tigre, red onion, sweet potato, cancha',price:18,cost:6.5,category:'ceviche',station:'Cold/Garde Manger',cookTime:5,allergens:['Fish'],dietary:['GF','DF'],modifiers:[],photo:'https://files.manuscdn.com/user_upload_by_module/session_file/310519663748878699/JcroiJSPDIxHPrNU.jpeg'},
+  {id:'i3',code:'CE02',name:'Shrimp Ceviche',desc:'Gulf shrimp, mango, habanero, coconut milk',price:19,cost:7,category:'ceviche',station:'Cold/Garde Manger',cookTime:5,allergens:['Shellfish'],dietary:['GF','DF'],modifiers:[],photo:'https://files.manuscdn.com/user_upload_by_module/session_file/310519663748878699/eTQUOSZOFZkcLQWz.jpg'},
+  {id:'i4',code:'EN01',name:'Wagyu Ribeye',desc:'12oz prime wagyu, chimichurri, roasted garlic, seasonal vegetables',price:58,cost:22,category:'entrees',station:'Grill',cookTime:18,allergens:[],dietary:['GF','DF'],modifiers:[{group:'Temperature',options:['Rare','Medium Rare','Medium']}],photo:'https://files.manuscdn.com/user_upload_by_module/session_file/310519663748878699/TkvXjsDNeDgRwgXw.jpg'},
+  {id:'i5',code:'EN02',name:'Pan-Seared Salmon',desc:'Atlantic salmon, lemon beurre blanc, asparagus, fingerling potatoes',price:34,cost:12,category:'entrees',station:'Sauté',cookTime:14,allergens:['Fish','Dairy'],dietary:['GF'],modifiers:[{group:'Temperature',options:['Medium Rare','Medium']}],photo:'https://files.manuscdn.com/user_upload_by_module/session_file/310519663748878699/FNJIFIUgfmvpWcMl.jpg'},
+  {id:'i6',code:'DE01',name:'Chocolate Studio Torte',desc:'Dark chocolate ganache, raspberry coulis, gold leaf, house ice cream',price:14,cost:3.5,category:'desserts',station:'Pastry',cookTime:3,allergens:['Dairy','Egg','Soy'],dietary:['Vegetarian'],modifiers:[],photo:'https://files.manuscdn.com/user_upload_by_module/session_file/310519663748878699/YcDsguujiKXtfUwE.jpg'},
+  {id:'i7',code:'DE02',name:'Crème Brûlée',desc:'Madagascar vanilla bean, caramelized sugar, seasonal berries',price:12,cost:2.8,category:'desserts',station:'Pastry',cookTime:2,allergens:['Dairy','Egg'],dietary:['GF','Vegetarian'],modifiers:[]},
+  {id:'i8',code:'CK01',name:'Pisco Sour',desc:'Pisco, lime, egg white, Angostura bitters',price:14,cost:4,category:'cocktails',station:'Bar',cookTime:3,allergens:['Egg'],dietary:['GF','DF'],modifiers:[],photo:'https://files.manuscdn.com/user_upload_by_module/session_file/310519663748878699/oOZJyknyvyCSDozl.jpg'},
+  {id:'i9',code:'CK02',name:'Chocolate Old Fashioned',desc:'Bourbon, cacao nib syrup, orange, Angostura',price:16,cost:5,category:'cocktails',station:'Bar',cookTime:3,allergens:[],dietary:['GF','DF','Vegan'],modifiers:[]},
+  {id:'i10',code:'BE01',name:'Local Lager',desc:'Crisp craft lager, 16oz draft',price:8,cost:2.5,category:'beer',station:'Bar',cookTime:1,allergens:['Gluten'],dietary:['DF'],modifiers:[]},
+  {id:'i11',code:'WN01',name:'Malbec Reserva',desc:'Bodega Andes, 2021, Mendoza — rich dark fruit, velvety tannins',price:52,cost:18,category:'wine',station:'Bar',cookTime:1,allergens:['Sulfites'],dietary:['GF','DF','Vegan'],modifiers:[{group:'Pour',options:['Glass $14','Bottle $52']}]},
+  {id:'i12',code:'WN02',name:'Chardonnay',desc:'Casa Blanca, 2022, Casablanca — tropical fruit, balanced oak',price:44,cost:15,category:'wine',station:'Bar',cookTime:1,allergens:['Sulfites'],dietary:['GF','DF','Vegan'],modifiers:[{group:'Pour',options:['Glass $12','Bottle $44']}]},
   {id:'i13',code:'SS01',name:'Soup of the Day',desc:"Chef's seasonal creation — ask your server",price:10,cost:2.5,category:'soups-salads',station:'Sauté',cookTime:5,allergens:[],dietary:[],modifiers:[]},
-  {id:'i14',code:'SD01',name:'Truffle Fries',desc:'Hand-cut fries, truffle oil, parmesan, herbs',price:12,cost:3,category:'sides',station:'Fry',cookTime:6,allergens:['Dairy'],dietary:['Vegetarian','GF','Nut-Free','Shellfish-Free'],modifiers:[]}
+  {id:'i14',code:'SD01',name:'Truffle Fries',desc:'Hand-cut fries, truffle oil, parmesan, herbs',price:12,cost:3,category:'sides',station:'Fry',cookTime:6,allergens:['Dairy'],dietary:['Vegetarian','GF'],modifiers:[]}
+];
+
+var SEED_TASTING_MENUS = [
+  {
+    id:'tm1', name:"Chef's Tasting", subtitle:'7-Course Seasonal Journey',
+    price:145, duration:'~3 hours',
+    courses:[
+      {num:1, name:'Amuse-Bouche', desc:'Seasonal micro-bite from the chef'},
+      {num:2, name:'Ceviche Course', desc:'Corvina, leche de tigre, sweet potato crisp'},
+      {num:3, name:'Cold Plate', desc:'Tuna tartare, avocado mousse, sesame'},
+      {num:4, name:'Soup', desc:'Seasonal bisque, herb oil, crouton'},
+      {num:5, name:'Fish', desc:'Pan-seared salmon, beurre blanc, asparagus'},
+      {num:6, name:'Meat', desc:'Wagyu ribeye, chimichurri, roasted garlic'},
+      {num:7, name:'Dessert', desc:'Chocolate torte, raspberry, gold leaf'}
+    ],
+    pairings:[
+      {name:'Wine Pairing', desc:'Sommelier-selected wines per course', price:85},
+      {name:'Premium Pairing', desc:'Reserve & rare selections', price:145}
+    ],
+    active:true, mealPeriod:'dinner'
+  },
+  {
+    id:'tm2', name:'Chocolate Experience', subtitle:'5-Course Cacao Journey',
+    price:95, duration:'~2 hours',
+    courses:[
+      {num:1, name:'Cacao Amuse', desc:'White chocolate sphere, passion fruit'},
+      {num:2, name:'Savory Cacao', desc:'Mole-rubbed quail, cacao nib salad'},
+      {num:3, name:'Intermezzo', desc:'Dark chocolate sorbet, sea salt'},
+      {num:4, name:'Main', desc:'Cocoa-crusted lamb, cherry reduction'},
+      {num:5, name:'Grand Finale', desc:'Chocolate Studio signature torte'}
+    ],
+    pairings:[
+      {name:'Dessert Wine Pairing', desc:'Sweet wines & ports', price:65}
+    ],
+    active:true, mealPeriod:'dinner'
+  }
+];
+
+var SEED_PRIX_FIXE = [
+  {
+    id:'pf1', name:'Lunch Prix Fixe', desc:'Choose one from each course',
+    price:42, mealPeriod:'lunch', active:true,
+    courseGroups:[
+      {
+        label:'Appetizer', choose:1,
+        options:[
+          {name:'Soup of the Day', desc:'Seasonal creation', upcharge:0},
+          {name:'Tuna Tartare', desc:'Ahi tuna, avocado, ponzu', upcharge:0},
+          {name:'Peruvian Ceviche', desc:'Corvina, leche de tigre', upcharge:4}
+        ]
+      },
+      {
+        label:'Main Course', choose:1,
+        options:[
+          {name:'Pan-Seared Salmon', desc:'Beurre blanc, asparagus', upcharge:0},
+          {name:'Grilled Chicken', desc:'Herb-roasted, seasonal vegetables', upcharge:0},
+          {name:'Wagyu Ribeye', desc:'Chimichurri, roasted garlic', upcharge:18}
+        ]
+      },
+      {
+        label:'Dessert', choose:1,
+        options:[
+          {name:'Crème Brûlée', desc:'Madagascar vanilla', upcharge:0},
+          {name:'Chocolate Torte', desc:'Ganache, raspberry coulis', upcharge:0},
+          {name:'Cheese Plate', desc:'Artisanal selection', upcharge:6}
+        ]
+      }
+    ]
+  },
+  {
+    id:'pf2', name:'Sunday Brunch Prix Fixe', desc:'Three courses with a welcome cocktail',
+    price:55, mealPeriod:'brunch', active:true,
+    courseGroups:[
+      {
+        label:'Starter', choose:1,
+        options:[
+          {name:'Shrimp Ceviche', desc:'Mango, habanero, coconut', upcharge:0},
+          {name:'Avocado Toast', desc:'Poached egg, microgreens', upcharge:0}
+        ]
+      },
+      {
+        label:'Main', choose:1,
+        options:[
+          {name:'Eggs Benedict', desc:'Hollandaise, Canadian bacon', upcharge:0},
+          {name:'Steak & Eggs', desc:'Wagyu flat iron, sunny side', upcharge:12},
+          {name:'Lobster Omelette', desc:'Gruyère, chives, crème fraîche', upcharge:15}
+        ]
+      },
+      {
+        label:'Dessert', choose:1,
+        options:[
+          {name:'French Toast', desc:'Brioche, berries, maple', upcharge:0},
+          {name:'Chocolate Soufflé', desc:'Warm, with vanilla ice cream', upcharge:5}
+        ]
+      }
+    ]
+  }
 ];
 
 // ─── Helpers ────────────────────────────────────────────────────
@@ -297,7 +593,6 @@ function toast(msg, duration) {
   t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), duration||3000);
 }
-function genId() { return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
 
 // ─── Firebase load ──────────────────────────────────────────────
 function loadFromFirebase() {
@@ -312,14 +607,31 @@ function loadFromFirebase() {
     else STATE.menuItems = SEED_ITEMS;
   }).catch(()=>{ STATE.menuItems = SEED_ITEMS; });
 
-  // Listen for messages from server to this table
+  // Load tasting menus
+  fbDb.collection('config').doc('tasting_menus').get().then(doc => {
+    if (doc.exists && doc.data().items) STATE.tastingMenus = doc.data().items.filter(t=>t.active);
+    else STATE.tastingMenus = SEED_TASTING_MENUS;
+  }).catch(()=>{ STATE.tastingMenus = SEED_TASTING_MENUS; });
+
+  // Load prix fixe menus
+  fbDb.collection('config').doc('prix_fixe_menus').get().then(doc => {
+    if (doc.exists && doc.data().items) STATE.prixFixeMenus = doc.data().items.filter(p=>p.active);
+    else STATE.prixFixeMenus = SEED_PRIX_FIXE;
+  }).catch(()=>{ STATE.prixFixeMenus = SEED_PRIX_FIXE; });
+
+  // Listen for messages
   fbDb.collection('messages').onSnapshot(snap => {
     STATE.messages = [];
     snap.forEach(d => STATE.messages.push({id:d.id,...d.data()}));
     showLatestMessage();
   });
 }
-function useSeedData() { STATE.menuCategories = SEED_CATEGORIES; STATE.menuItems = SEED_ITEMS; }
+function useSeedData() {
+  STATE.menuCategories = SEED_CATEGORIES;
+  STATE.menuItems = SEED_ITEMS;
+  STATE.tastingMenus = SEED_TASTING_MENUS;
+  STATE.prixFixeMenus = SEED_PRIX_FIXE;
+}
 
 // ─── Setup ──────────────────────────────────────────────────────
 function setLang(lang, el) {
@@ -333,53 +645,143 @@ function openMenu() {
   if (sel.value) STATE.tableNum = parseInt(sel.value);
   document.getElementById('menu-table-badge').textContent = 'Table '+STATE.tableNum;
   showScreen('menu');
-  renderMenuTabs();
+  renderNav();
 }
 
-// ─── Menu rendering ─────────────────────────────────────────────
-var currentMenuCat = null;
+// ─── Navigation ─────────────────────────────────────────────────
+var currentNav = null;
 
-function renderMenuTabs() {
-  var tabs = document.getElementById('menu-tabs');
+function renderNav() {
+  var nav = document.getElementById('menu-nav');
   var cats = STATE.menuCategories.length ? STATE.menuCategories : SEED_CATEGORIES;
-  tabs.innerHTML = cats.map((c,i) =>
-    '<div class="menu-tab'+(i===0?' active':'')+'" data-cat="'+c.id+'" onclick="selectMenuCat(\''+c.id+'\')">'+c.name+'</div>'
+  nav.innerHTML = cats.map((c,i) =>
+    '<div class="menu-nav-item'+(i===0?' active':'')+'" data-cat="'+c.id+'" onclick="selectNav(\''+c.id+'\')">'+c.name+'</div>'
   ).join('');
-  currentMenuCat = cats[0].id;
-  renderMenuContent();
+  currentNav = cats[0].id;
+  renderContent();
 }
 
-function selectMenuCat(catId) {
-  currentMenuCat = catId;
-  document.querySelectorAll('.menu-tab').forEach(t => t.classList.toggle('active', t.dataset.cat===catId));
-  renderMenuContent();
+function selectNav(catId) {
+  currentNav = catId;
+  document.querySelectorAll('.menu-nav-item').forEach(t => t.classList.toggle('active', t.dataset.cat===catId));
+  renderContent();
 }
 
-function renderMenuContent() {
-  var items = (STATE.menuItems.length ? STATE.menuItems : SEED_ITEMS).filter(i => i.category===currentMenuCat);
+// ─── Content Rendering ──────────────────────────────────────────
+function renderContent() {
   var c = document.getElementById('menu-content');
-  if (!items.length) { c.innerHTML='<p style="text-align:center;color:var(--text-muted);padding:3rem;">No items in this category yet.</p>'; return; }
-  c.innerHTML = '<div class="menu-grid">'+items.map(item => {
-    var tags = (item.dietary||[]).slice(0,3).map(d=>'<span class="dish-tag">'+d+'</span>').join('');
-    var allergenTags = (item.allergens||[]).map(a=>'<span class="dish-tag allergen">'+a+'</span>').join('');
-    return '<div class="dish-card" onclick="openDish(\''+item.id+'\')">'+
-      '<div class="dish-name">'+item.name+'</div>'+
-      '<div class="dish-desc">'+item.desc+'</div>'+
-      '<div class="dish-meta">'+
-        '<span class="dish-price">$'+item.price.toFixed(2)+'</span>'+
-        '<div class="dish-tags">'+tags+allergenTags+'</div>'+
+  if (currentNav === 'tasting') { renderTastingMenus(c); return; }
+  if (currentNav === 'prix-fixe') { renderPrixFixe(c); return; }
+  renderRegularMenu(c);
+}
+
+function renderRegularMenu(container) {
+  var items = (STATE.menuItems.length ? STATE.menuItems : SEED_ITEMS).filter(i => i.category===currentNav);
+  if (!items.length) {
+    container.innerHTML='<div style="text-align:center;padding:4rem 2rem;"><p style="color:var(--text-muted);font-size:0.85rem;">No items available</p></div>';
+    return;
+  }
+
+  // Check if any items have photos for featured display
+  var featured = items.filter(i => i.photo);
+  var regular = items.filter(i => !i.photo);
+
+  var cats = STATE.menuCategories.length ? STATE.menuCategories : SEED_CATEGORIES;
+  var catObj = cats.find(c=>c.id===currentNav);
+  var catName = catObj ? catObj.name : currentNav;
+
+  var html = '<div class="section-header"><div class="section-label">Menu</div><div class="section-title">'+catName+'</div></div>';
+
+  // Featured items with photos
+  if (featured.length) {
+    html += '<div class="featured-grid">';
+    html += featured.map(item =>
+      '<div class="photo-card" onclick="openDish(\''+item.id+'\')">'+
+        '<img src="'+item.photo+'" alt="'+item.name+'" loading="lazy">'+
+        '<div class="photo-card-overlay"></div>'+
+        '<div class="photo-card-price">$'+item.price+'</div>'+
+        '<div class="photo-card-info">'+
+          '<div class="photo-card-name">'+item.name+'</div>'+
+          '<div class="photo-card-desc">'+item.desc+'</div>'+
+        '</div>'+
+      '</div>'
+    ).join('');
+    html += '</div>';
+  }
+
+  // Regular items in elegant list
+  if (regular.length) {
+    html += '<div class="menu-grid">';
+    html += regular.map(item => {
+      var tags = (item.dietary||[]).slice(0,3).map(d=>'<span class="dish-tag">'+d+'</span>').join('');
+      var allergenTags = (item.allergens||[]).slice(0,2).map(a=>'<span class="dish-tag allergen">'+a+'</span>').join('');
+      return '<div class="dish-row" onclick="openDish(\''+item.id+'\')">'+
+        '<div class="dish-info">'+
+          '<div class="dish-name">'+item.name+'</div>'+
+          '<div class="dish-desc">'+item.desc+'</div>'+
+          (tags||allergenTags ? '<div class="dish-tags-row">'+tags+allergenTags+'</div>' : '')+
+        '</div>'+
+        '<div class="dish-price">$'+item.price+'</div>'+
+      '</div>';
+    }).join('');
+    html += '</div>';
+  }
+
+  container.innerHTML = html;
+}
+
+function renderTastingMenus(container) {
+  var menus = STATE.tastingMenus.length ? STATE.tastingMenus : SEED_TASTING_MENUS;
+  var html = '<div class="section-header"><div class="section-label">Experience</div><div class="section-title">Tasting Menus</div></div>';
+  html += '<div class="tasting-section">';
+  html += menus.map(tm =>
+    '<div class="tasting-card" onclick="openTasting(\''+tm.id+'\')">'+
+      '<div class="tasting-card-header">'+
+        '<div><div class="tasting-card-title">'+tm.name+'</div>'+
+        '<div class="tasting-card-subtitle">'+tm.subtitle+'</div></div>'+
+        '<div class="tasting-card-price">$'+tm.price+'<small>per person</small></div>'+
       '</div>'+
-    '</div>';
-  }).join('')+'</div>';
+      '<ul class="tasting-courses-list">'+
+        tm.courses.slice(0,4).map(c =>
+          '<li><span class="course-num">'+c.num+'</span>'+c.name+'</li>'
+        ).join('')+
+        (tm.courses.length>4 ? '<li style="color:var(--text-muted);font-style:italic;">+ '+(tm.courses.length-4)+' more courses</li>' : '')+
+      '</ul>'+
+      (tm.pairings.length ? tm.pairings.map(p =>
+        '<div class="tasting-pairing">🍷 '+p.name+' <span class="pairing-price">+$'+p.price+'</span></div>'
+      ).join('') : '')+
+    '</div>'
+  ).join('');
+  html += '</div>';
+  container.innerHTML = html;
 }
 
-function switchLang(lang) {
-  STATE.lang = lang;
-  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang===lang));
-  renderMenuContent();
+function renderPrixFixe(container) {
+  var menus = STATE.prixFixeMenus.length ? STATE.prixFixeMenus : SEED_PRIX_FIXE;
+  var html = '<div class="section-header"><div class="section-label">Prix Fixe</div><div class="section-title">Set Menus</div></div>';
+  html += menus.map(pf =>
+    '<div class="prix-fixe-card" onclick="openPrixFixe(\''+pf.id+'\')">'+
+      '<div class="prix-fixe-header">'+
+        '<div><div class="prix-fixe-title">'+pf.name+'</div>'+
+        '<div class="prix-fixe-desc">'+pf.desc+'</div></div>'+
+        '<div class="prix-fixe-price">$'+pf.price+'<small>per person</small></div>'+
+      '</div>'+
+      '<div class="prix-fixe-courses">'+
+        pf.courseGroups.map(cg =>
+          '<div class="prix-fixe-course-group">'+
+            '<div class="prix-fixe-course-label">'+cg.label+' — choose '+cg.choose+'</div>'+
+            cg.options.map(o =>
+              '<div class="prix-fixe-option"><span>'+o.name+'</span>'+(o.upcharge?'<span class="upcharge">+$'+o.upcharge+'</span>':'')+'</div>'
+            ).join('')+
+          '</div>'
+        ).join('')+
+      '</div>'+
+    '</div>'
+  ).join('');
+  container.innerHTML = html;
 }
 
-// ─── Dish detail ────────────────────────────────────────────────
+// ─── Modals ─────────────────────────────────────────────────────
 function openDish(itemId) {
   var item = (STATE.menuItems.length?STATE.menuItems:SEED_ITEMS).find(i=>i.id===itemId);
   if (!item) return;
@@ -390,35 +792,104 @@ function openDish(itemId) {
     m.options.map(o=>'<label class="modifier-option"><input type="radio" name="mod-'+m.group+'" value="'+o+'"> '+o+'</label>').join('')+
     '</div>'
   ).join('');
-  var allergens = (item.allergens||[]).length ? '<p style="margin-top:0.8rem;"><strong style="color:var(--wine-red);">⚠ Allergens:</strong> '+(item.allergens||[]).join(', ')+'</p>' : '';
-  var dietary = (item.dietary||[]).length ? '<p style="margin-top:0.4rem;color:var(--sage);font-size:0.85rem;">'+item.dietary.join(' · ')+'</p>' : '';
-  content.innerHTML = '<button style="position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--text-muted);" onclick="closeDishModal()">×</button>'+
+  var allergens = (item.allergens||[]).length ? '<p style="margin-top:1rem;font-size:0.75rem;"><span style="color:var(--wine);">Allergens:</span> <span style="color:var(--text-secondary);">'+(item.allergens||[]).join(', ')+'</span></p>' : '';
+  var dietary = (item.dietary||[]).length ? '<p style="margin-top:0.3rem;color:var(--sage);font-size:0.72rem;">'+item.dietary.join(' · ')+'</p>' : '';
+  var photoHtml = item.photo ? '<img src="'+item.photo+'" style="width:100%;height:200px;object-fit:cover;border-radius:var(--radius);margin-bottom:1.2rem;">' : '';
+  content.innerHTML = '<button style="position:absolute;top:1rem;right:1.2rem;background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--text-muted);" onclick="closeDishModal()">×</button>'+
+    photoHtml+
     '<h2>'+item.name+'</h2>'+
-    '<p style="color:var(--text-secondary);margin-bottom:0.5rem;">'+item.desc+'</p>'+
-    '<p style="font-size:1.2rem;font-weight:600;color:var(--copper);">$'+item.price.toFixed(2)+'</p>'+
+    '<p style="color:var(--text-secondary);margin-bottom:0.5rem;font-size:0.85rem;font-weight:300;line-height:1.6;">'+item.desc+'</p>'+
+    '<p style="font-family:var(--font-display);font-size:1.3rem;color:var(--gold);margin-top:0.8rem;">$'+item.price.toFixed(2)+'</p>'+
     allergens+dietary+
-    '<p style="margin-top:0.8rem;font-size:0.8rem;color:var(--text-muted);">⏱ '+item.cookTime+' min · Station: '+item.station+'</p>'+
+    '<p style="margin-top:0.8rem;font-size:0.7rem;color:var(--text-muted);">Preparation: '+item.cookTime+' min · Station: '+item.station+'</p>'+
     mods;
   modal.classList.add('open');
 }
 function closeDishModal() { document.getElementById('dish-modal').classList.remove('open'); }
 
+function openTasting(tmId) {
+  var tm = (STATE.tastingMenus.length?STATE.tastingMenus:SEED_TASTING_MENUS).find(t=>t.id===tmId);
+  if (!tm) return;
+  var modal = document.getElementById('tasting-modal');
+  var content = document.getElementById('tasting-modal-content');
+  content.innerHTML = '<button style="position:absolute;top:1rem;right:1.2rem;background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--text-muted);" onclick="closeTastingModal()">×</button>'+
+    '<div class="section-label" style="margin-bottom:0.3rem;">Tasting Experience</div>'+
+    '<h2 style="font-family:var(--font-display);font-size:1.8rem;font-weight:300;">'+tm.name+'</h2>'+
+    '<p style="color:var(--text-secondary);font-size:0.8rem;margin-top:0.3rem;">'+tm.subtitle+' · '+tm.duration+'</p>'+
+    '<p style="font-family:var(--font-display);font-size:1.4rem;color:var(--gold);margin-top:1rem;">$'+tm.price+' <span style="font-size:0.7rem;color:var(--text-muted);font-family:var(--font-body);">per person</span></p>'+
+    '<div class="tasting-modal-courses">'+
+      tm.courses.map(c =>
+        '<div class="tasting-modal-course">'+
+          '<div class="tasting-modal-course-num">Course '+c.num+'</div>'+
+          '<div class="tasting-modal-course-name">'+c.name+'</div>'+
+          '<div class="tasting-modal-course-desc">'+c.desc+'</div>'+
+        '</div>'
+      ).join('')+
+    '</div>'+
+    (tm.pairings.length ? '<div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border);">'+
+      '<div class="section-label" style="margin-bottom:0.8rem;">Wine Pairings</div>'+
+      tm.pairings.map(p =>
+        '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0;">'+
+          '<div><div style="font-size:0.85rem;color:var(--text-primary);">'+p.name+'</div>'+
+          '<div style="font-size:0.7rem;color:var(--text-muted);">'+p.desc+'</div></div>'+
+          '<div style="color:var(--gold);font-size:0.9rem;">+$'+p.price+'</div>'+
+        '</div>'
+      ).join('')+
+    '</div>' : '');
+  modal.classList.add('open');
+}
+function closeTastingModal() { document.getElementById('tasting-modal').classList.remove('open'); }
+
+function openPrixFixe(pfId) {
+  var pf = (STATE.prixFixeMenus.length?STATE.prixFixeMenus:SEED_PRIX_FIXE).find(p=>p.id===pfId);
+  if (!pf) return;
+  var modal = document.getElementById('tasting-modal');
+  var content = document.getElementById('tasting-modal-content');
+  content.innerHTML = '<button style="position:absolute;top:1rem;right:1.2rem;background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--text-muted);" onclick="closeTastingModal()">×</button>'+
+    '<div class="section-label" style="margin-bottom:0.3rem;">Prix Fixe</div>'+
+    '<h2 style="font-family:var(--font-display);font-size:1.8rem;font-weight:300;">'+pf.name+'</h2>'+
+    '<p style="color:var(--text-secondary);font-size:0.8rem;margin-top:0.3rem;">'+pf.desc+'</p>'+
+    '<p style="font-family:var(--font-display);font-size:1.4rem;color:var(--gold);margin-top:1rem;">$'+pf.price+' <span style="font-size:0.7rem;color:var(--text-muted);font-family:var(--font-body);">per person</span></p>'+
+    '<div style="margin-top:1.5rem;">'+
+      pf.courseGroups.map(cg =>
+        '<div style="margin-bottom:1.5rem;">'+
+          '<div class="prix-fixe-course-label">'+cg.label+' — choose '+cg.choose+'</div>'+
+          cg.options.map(o =>
+            '<div style="padding:0.6rem 0;border-bottom:1px solid var(--border);">'+
+              '<div style="display:flex;justify-content:space-between;align-items:center;">'+
+                '<span style="font-size:0.85rem;color:var(--text-primary);">'+o.name+'</span>'+
+                (o.upcharge?'<span style="color:var(--gold);font-size:0.75rem;">+$'+o.upcharge+'</span>':'')+
+              '</div>'+
+              '<div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.2rem;">'+o.desc+'</div>'+
+            '</div>'
+          ).join('')+
+        '</div>'
+      ).join('')+
+    '</div>';
+  modal.classList.add('open');
+}
+
+function switchLang(lang) {
+  STATE.lang = lang;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang===lang));
+  renderContent();
+}
+
 // ─── Call Server ────────────────────────────────────────────────
 function callServer() {
   var call = { table:STATE.tableNum, time:Date.now(), status:'active' };
   if (fbReady) fbDb.collection('calls').add(call);
-  toast('🔔 Server has been called!');
+  toast('Server has been notified');
 }
 
 // ─── Messages from server ───────────────────────────────────────
 function showLatestMessage() {
   var msgs = STATE.messages.filter(m=>m.table===STATE.tableNum&&m.from==='server').sort((a,b)=>b.time-a.time);
   var area = document.getElementById('menu-msg-area');
-  if (area && msgs.length) area.innerHTML='💬 '+msgs[0].text;
-  // Show notification popup for recent messages (within 10s)
+  if (area && msgs.length) area.innerHTML=msgs[0].text;
   if (msgs.length && Date.now()-msgs[0].time < 10000) {
     var notif = document.getElementById('msg-notification');
-    notif.textContent = '💬 '+msgs[0].text;
+    notif.textContent = msgs[0].text;
     notif.classList.add('show');
     setTimeout(()=>notif.classList.remove('show'), 5000);
   }
