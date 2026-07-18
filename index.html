@@ -377,6 +377,37 @@ body { font-family:var(--font-body); color:var(--text-primary); background:var(-
 .msg-notification.show { display:block; animation:slideUp 0.3s var(--ease-out); }
 @keyframes slideUp { from{opacity:0;transform:translateX(-50%) translateY(20px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
 
+/* ─── ALLERGY FILTER ─── */
+.allergy-filter-btn {
+  background:none; border:1px solid var(--border); color:var(--text-secondary);
+  padding:0.4rem 0.8rem; border-radius:4px; font-size:0.65rem; cursor:pointer;
+  letter-spacing:0.05em; transition:all 0.2s var(--ease-out);
+}
+.allergy-filter-btn:hover { border-color:var(--gold-dim); color:var(--gold); }
+.allergy-filter-btn.active { border-color:var(--wine); color:var(--wine); background:rgba(139,58,74,0.08); }
+.allergy-grid {
+  display:grid; grid-template-columns:repeat(2,1fr); gap:0.6rem;
+}
+.allergy-check {
+  display:flex; align-items:center; gap:0.5rem; padding:0.6rem 0.8rem;
+  border:1px solid var(--border); border-radius:var(--radius); cursor:pointer;
+  transition:all 0.2s var(--ease-out); font-size:0.75rem; color:var(--text-secondary);
+}
+.allergy-check:hover { border-color:var(--wine); }
+.allergy-check.selected { border-color:var(--wine); background:rgba(139,58,74,0.08); color:var(--wine); }
+.allergy-check input { accent-color:var(--wine); }
+
+/* Allergen warning on items */
+.dish-row.has-allergen { border-left:3px solid var(--wine); padding-left:0.8rem; }
+.dish-row.has-allergen .dish-name::after {
+  content:'\26A0'; margin-left:0.4rem; color:var(--wine); font-size:0.7rem;
+}
+.photo-card.has-allergen::after {
+  content:'\26A0 Contains allergen'; position:absolute; top:0.6rem; left:0.6rem;
+  background:rgba(139,58,74,0.9); color:#fff; font-size:0.6rem; padding:0.2rem 0.5rem;
+  border-radius:3px; z-index:2;
+}
+
 /* Responsive */
 @media (min-width:768px) {
   .featured-grid { grid-template-columns:repeat(2,1fr); }
@@ -414,6 +445,7 @@ body { font-family:var(--font-body); color:var(--text-primary); background:var(-
   <div class="menu-header">
     <span class="brand">The Epicurean House</span>
     <span class="table-badge" id="menu-table-badge">Table 1</span>
+    <button class="allergy-filter-btn" id="allergy-btn" onclick="openAllergyFilter()">Allergies</button>
     <button class="call-server-btn" onclick="callServer()">Call Server</button>
   </div>
   <div class="menu-nav" id="menu-nav"></div>
@@ -426,6 +458,18 @@ body { font-family:var(--font-body); color:var(--text-primary); background:var(-
       <button class="lang-btn" data-lang="ja" onclick="switchLang('ja')">JA</button>
     </div>
     <div id="menu-msg-area" style="font-size:0.7rem;color:var(--text-muted);max-width:60%;text-align:right;"></div>
+  </div>
+</div>
+
+<!-- ALLERGY FILTER MODAL -->
+<div class="modal-overlay" id="allergy-modal" onclick="if(event.target===this)closeAllergyModal()">
+  <div class="modal-card" id="allergy-modal-content">
+    <button style="position:absolute;top:1rem;right:1.2rem;background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--text-muted);" onclick="closeAllergyModal()">&times;</button>
+    <h2 style="font-family:var(--font-display);font-size:1.3rem;margin-bottom:0.5rem;">Your Allergies</h2>
+    <p style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:1.5rem;">Select any allergens that apply to you. Items containing these will be flagged on the menu.</p>
+    <div id="allergy-checkboxes" class="allergy-grid"></div>
+    <button class="btn-open" style="margin-top:1.5rem;width:100%;" onclick="applyAllergyFilter()">Apply Filter</button>
+    <button style="margin-top:0.8rem;width:100%;background:none;border:1px solid var(--border);color:var(--text-secondary);padding:0.7rem;border-radius:var(--radius);cursor:pointer;font-size:0.8rem;" onclick="clearAllergyFilter()">Clear All</button>
   </div>
 </div>
 
@@ -453,7 +497,7 @@ var fbApp=null, fbDb=null, fbReady=false;
 try { fbApp=firebase.initializeApp(firebaseConfig); fbDb=firebase.firestore(); fbReady=true; } catch(e){ console.warn('Firebase init:',e); }
 
 // ─── State ──────────────────────────────────────────────────────
-var STATE = { lang:'en', tableNum:1, menuItems:[], menuCategories:[], messages:[], tastingMenus:[], prixFixeMenus:[] };
+var STATE = { lang:'en', tableNum:1, menuItems:[], menuCategories:[], messages:[], tastingMenus:[], prixFixeMenus:[], customerAllergies:[] };
 
 var SEED_CATEGORIES = [
   {id:'tasting',name:'Tasting Menus',visible:true,type:'special'},
@@ -597,25 +641,31 @@ function toast(msg, duration) {
 // ─── Firebase load ──────────────────────────────────────────────
 function loadFromFirebase() {
   if (!fbReady) { useSeedData(); return; }
-  fbDb.collection('config').doc('menu_categories').get().then(doc => {
-    if (doc.exists && doc.data().items) STATE.menuCategories = doc.data().items.filter(c=>c.visible!==false);
-    else STATE.menuCategories = SEED_CATEGORIES;
-  }).catch(()=>{ STATE.menuCategories = SEED_CATEGORIES; });
+  // Load menu from boh_shared (where BOH saves it)
+  fbDb.collection('boh_shared').doc('menu').get().then(doc => {
+    if (doc.exists && doc.data().cats) {
+      STATE.menuCategories = doc.data().cats.filter(c=>c.visible!==false);
+      // Map BOH field names to iPad menu field names
+      STATE.menuItems = (doc.data().items||[]).map(function(it){
+        return Object.assign({}, it, {
+          category: (it.catIds||[])[0] || '',
+          photo: it.photoUrl || it.photo || '',
+          dietary: it.diet || it.dietary || [],
+          allergens: it.allergens || []
+        });
+      });
+    } else { STATE.menuCategories = SEED_CATEGORIES; STATE.menuItems = SEED_ITEMS; }
+  }).catch(()=>{ STATE.menuCategories = SEED_CATEGORIES; STATE.menuItems = SEED_ITEMS; });
 
-  fbDb.collection('config').doc('menu_items').get().then(doc => {
-    if (doc.exists && doc.data().items) STATE.menuItems = doc.data().items;
-    else STATE.menuItems = SEED_ITEMS;
-  }).catch(()=>{ STATE.menuItems = SEED_ITEMS; });
-
-  // Load tasting menus
-  fbDb.collection('config').doc('tasting_menus').get().then(doc => {
-    if (doc.exists && doc.data().items) STATE.tastingMenus = doc.data().items.filter(t=>t.active);
+  // Load tasting menus from boh_shared
+  fbDb.collection('boh_shared').doc('tasting_menus').get().then(doc => {
+    if (doc.exists && doc.data().list) STATE.tastingMenus = doc.data().list.filter(t=>t.active);
     else STATE.tastingMenus = SEED_TASTING_MENUS;
   }).catch(()=>{ STATE.tastingMenus = SEED_TASTING_MENUS; });
 
-  // Load prix fixe menus
-  fbDb.collection('config').doc('prix_fixe_menus').get().then(doc => {
-    if (doc.exists && doc.data().items) STATE.prixFixeMenus = doc.data().items.filter(p=>p.active);
+  // Load prix fixe menus from boh_shared
+  fbDb.collection('boh_shared').doc('prix_fixe_menus').get().then(doc => {
+    if (doc.exists && doc.data().list) STATE.prixFixeMenus = doc.data().list.filter(p=>p.active);
     else STATE.prixFixeMenus = SEED_PRIX_FIXE;
   }).catch(()=>{ STATE.prixFixeMenus = SEED_PRIX_FIXE; });
 
@@ -696,7 +746,7 @@ function renderRegularMenu(container) {
   if (featured.length) {
     html += '<div class="featured-grid">';
     html += featured.map(item =>
-      '<div class="photo-card" onclick="openDish(\''+item.id+'\')">'+
+      '<div class="photo-card'+(itemHasAllergen(item)?' has-allergen':'')+'" onclick="openDish(\''+item.id+'\')">'+
         '<img src="'+item.photo+'" alt="'+item.name+'" loading="lazy">'+
         '<div class="photo-card-overlay"></div>'+
         '<div class="photo-card-price">$'+item.price+'</div>'+
@@ -715,7 +765,8 @@ function renderRegularMenu(container) {
     html += regular.map(item => {
       var tags = (item.dietary||[]).slice(0,3).map(d=>'<span class="dish-tag">'+d+'</span>').join('');
       var allergenTags = (item.allergens||[]).slice(0,2).map(a=>'<span class="dish-tag allergen">'+a+'</span>').join('');
-      return '<div class="dish-row" onclick="openDish(\''+item.id+'\')">'+
+      var hasAllergen = itemHasAllergen(item);
+      return '<div class="dish-row'+(hasAllergen?' has-allergen':'')+'" onclick="openDish(\''+item.id+'\')">'+
         '<div class="dish-info">'+
           '<div class="dish-name">'+item.name+'</div>'+
           '<div class="dish-desc">'+item.desc+'</div>'+
@@ -792,6 +843,7 @@ function openDish(itemId) {
     m.options.map(o=>'<label class="modifier-option"><input type="radio" name="mod-'+m.group+'" value="'+o+'"> '+o+'</label>').join('')+
     '</div>'
   ).join('');
+  var allergenWarning = itemHasAllergen(item) ? '<div style="margin-top:1rem;padding:0.7rem 1rem;background:rgba(139,58,74,0.12);border:1px solid rgba(139,58,74,0.3);border-radius:6px;"><span style="color:var(--wine);font-size:0.75rem;font-weight:500;">\u26A0 Contains your allergen: '+(item.allergens||[]).filter(a=>STATE.customerAllergies.indexOf(a)>-1).join(', ')+'</span></div>' : '';
   var allergens = (item.allergens||[]).length ? '<p style="margin-top:1rem;font-size:0.75rem;"><span style="color:var(--wine);">Allergens:</span> <span style="color:var(--text-secondary);">'+(item.allergens||[]).join(', ')+'</span></p>' : '';
   var dietary = (item.dietary||[]).length ? '<p style="margin-top:0.3rem;color:var(--sage);font-size:0.72rem;">'+item.dietary.join(' · ')+'</p>' : '';
   var photoHtml = item.photo ? '<img src="'+item.photo+'" style="width:100%;height:200px;object-fit:cover;border-radius:var(--radius);margin-bottom:1.2rem;">' : '';
@@ -800,7 +852,7 @@ function openDish(itemId) {
     '<h2>'+item.name+'</h2>'+
     '<p style="color:var(--text-secondary);margin-bottom:0.5rem;font-size:0.85rem;font-weight:300;line-height:1.6;">'+item.desc+'</p>'+
     '<p style="font-family:var(--font-display);font-size:1.3rem;color:var(--gold);margin-top:0.8rem;">$'+item.price.toFixed(2)+'</p>'+
-    allergens+dietary+
+    allergenWarning+allergens+dietary+
     '<p style="margin-top:0.8rem;font-size:0.7rem;color:var(--text-muted);">Preparation: '+item.cookTime+' min · Station: '+item.station+'</p>'+
     mods;
   modal.classList.add('open');
@@ -902,6 +954,48 @@ function init() {
   loadFromFirebase();
 }
 document.addEventListener('DOMContentLoaded', init);
+
+// ─── Allergy Filter ─────────────────────────────────────────────
+var ALL_ALLERGENS = ['Gluten','Dairy','Egg','Peanut','Tree Nut','Shellfish','Fish','Soy','Sesame','Sulfites'];
+
+function openAllergyFilter() {
+  var modal = document.getElementById('allergy-modal');
+  var container = document.getElementById('allergy-checkboxes');
+  container.innerHTML = ALL_ALLERGENS.map(a =>
+    '<label class="allergy-check'+(STATE.customerAllergies.indexOf(a)>-1?' selected':'')+'">'+
+      '<input type="checkbox" value="'+a+'"'+(STATE.customerAllergies.indexOf(a)>-1?' checked':'')+' onchange="toggleAllergyCheck(this)"> '+a+
+    '</label>'
+  ).join('');
+  modal.classList.add('open');
+}
+function closeAllergyModal() { document.getElementById('allergy-modal').classList.remove('open'); }
+function toggleAllergyCheck(cb) {
+  cb.closest('.allergy-check').classList.toggle('selected', cb.checked);
+}
+function applyAllergyFilter() {
+  STATE.customerAllergies = Array.from(document.querySelectorAll('#allergy-checkboxes input:checked')).map(cb=>cb.value);
+  var btn = document.getElementById('allergy-btn');
+  btn.classList.toggle('active', STATE.customerAllergies.length > 0);
+  btn.textContent = STATE.customerAllergies.length ? 'Allergies ('+STATE.customerAllergies.length+')' : 'Allergies';
+  closeAllergyModal();
+  renderContent();
+  if (STATE.customerAllergies.length) toast('Menu updated — flagged items contain your allergens');
+}
+function clearAllergyFilter() {
+  STATE.customerAllergies = [];
+  document.querySelectorAll('#allergy-checkboxes input').forEach(cb=>{cb.checked=false;cb.closest('.allergy-check').classList.remove('selected');});
+  var btn = document.getElementById('allergy-btn');
+  btn.classList.remove('active');
+  btn.textContent = 'Allergies';
+  closeAllergyModal();
+  renderContent();
+  toast('Allergy filter cleared');
+}
+function itemHasAllergen(item) {
+  if (!STATE.customerAllergies.length) return false;
+  return (item.allergens||[]).some(a => STATE.customerAllergies.indexOf(a) > -1);
+}
+
 </script>
 </body>
 </html>
