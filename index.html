@@ -807,28 +807,37 @@ function renderTastingMenus(container) {
   container.innerHTML = html;
 }
 
+function getPfCourses(pf) {
+  // Handle both BOH format (courses) and seed format (courseGroups)
+  if (pf.courseGroups) return pf.courseGroups;
+  if (pf.courses) return pf.courses.map(c => ({label:c.label, choose:1, options:c.options}));
+  return [];
+}
+function getPfDesc(pf) { return pf.desc || pf.subtitle || ''; }
+
 function renderPrixFixe(container) {
   var menus = STATE.prixFixeMenus.length ? STATE.prixFixeMenus : SEED_PRIX_FIXE;
   var html = '<div class="section-header"><div class="section-label">Prix Fixe</div><div class="section-title">Set Menus</div></div>';
-  html += menus.map(pf =>
-    '<div class="prix-fixe-card" onclick="openPrixFixe(\''+pf.id+'\')">'+
+  html += menus.map(pf => {
+    var courses = getPfCourses(pf);
+    return '<div class="prix-fixe-card" onclick="openPrixFixe(\''+pf.id+'\')">'+ 
       '<div class="prix-fixe-header">'+
         '<div><div class="prix-fixe-title">'+pf.name+'</div>'+
-        '<div class="prix-fixe-desc">'+pf.desc+'</div></div>'+
+        '<div class="prix-fixe-desc">'+getPfDesc(pf)+'</div></div>'+
         '<div class="prix-fixe-price">$'+pf.price+'<small>per person</small></div>'+
       '</div>'+
       '<div class="prix-fixe-courses">'+
-        pf.courseGroups.map(cg =>
+        courses.map(cg =>
           '<div class="prix-fixe-course-group">'+
-            '<div class="prix-fixe-course-label">'+cg.label+' — choose '+cg.choose+'</div>'+
+            '<div class="prix-fixe-course-label">'+cg.label+' \u2014 choose '+(cg.choose||1)+'</div>'+
             cg.options.map(o =>
               '<div class="prix-fixe-option"><span>'+o.name+'</span>'+(o.upcharge?'<span class="upcharge">+$'+o.upcharge+'</span>':'')+'</div>'
             ).join('')+
           '</div>'
         ).join('')+
       '</div>'+
-    '</div>'
-  ).join('');
+    '</div>';
+  }).join('');
   container.innerHTML = html;
 }
 
@@ -897,22 +906,24 @@ function openPrixFixe(pfId) {
   if (!pf) return;
   var modal = document.getElementById('tasting-modal');
   var content = document.getElementById('tasting-modal-content');
+  var courses = getPfCourses(pf);
   content.innerHTML = '<button style="position:absolute;top:1rem;right:1.2rem;background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--text-muted);" onclick="closeTastingModal()">×</button>'+
     '<div class="section-label" style="margin-bottom:0.3rem;">Prix Fixe</div>'+
     '<h2 style="font-family:var(--font-display);font-size:1.8rem;font-weight:300;">'+pf.name+'</h2>'+
-    '<p style="color:var(--text-secondary);font-size:0.8rem;margin-top:0.3rem;">'+pf.desc+'</p>'+
+    '<p style="color:var(--text-secondary);font-size:0.8rem;margin-top:0.3rem;">'+getPfDesc(pf)+'</p>'+
     '<p style="font-family:var(--font-display);font-size:1.4rem;color:var(--gold);margin-top:1rem;">$'+pf.price+' <span style="font-size:0.7rem;color:var(--text-muted);font-family:var(--font-body);">per person</span></p>'+
     '<div style="margin-top:1.5rem;">'+
-      pf.courseGroups.map(cg =>
+      courses.map(cg =>
         '<div style="margin-bottom:1.5rem;">'+
-          '<div class="prix-fixe-course-label">'+cg.label+' — choose '+cg.choose+'</div>'+
+          '<div class="prix-fixe-course-label">'+cg.label+' \u2014 choose '+(cg.choose||1)+'</div>'+
           cg.options.map(o =>
             '<div style="padding:0.6rem 0;border-bottom:1px solid var(--border);">'+
+              (o.photoUrl?'<img src="'+o.photoUrl+'" style="width:100%;height:120px;object-fit:cover;border-radius:6px;margin-bottom:0.4rem;">':'')+
               '<div style="display:flex;justify-content:space-between;align-items:center;">'+
                 '<span style="font-size:0.85rem;color:var(--text-primary);">'+o.name+'</span>'+
                 (o.upcharge?'<span style="color:var(--gold);font-size:0.75rem;">+$'+o.upcharge+'</span>':'')+
               '</div>'+
-              '<div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.2rem;">'+o.desc+'</div>'+
+              '<div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.2rem;">'+(o.desc||'')+'</div>'+
             '</div>'
           ).join('')+
         '</div>'
