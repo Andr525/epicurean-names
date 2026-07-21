@@ -639,13 +639,14 @@ function toast(msg, duration) {
 }
 
 // ─── Firebase load ──────────────────────────────────────────────
+var _menuReady = false;
 function loadFromFirebase() {
   if (!fbReady) { useSeedData(); return; }
-  // Load menu from boh_shared (where BOH saves it)
-  fbDb.collection('boh_shared').doc('menu').get().then(doc => {
+
+  // Real-time listener for regular menu items
+  fbDb.collection('boh_shared').doc('menu').onSnapshot(function(doc){
     if (doc.exists && doc.data().cats) {
       STATE.menuCategories = doc.data().cats.filter(c=>c.visible!==false);
-      // Map BOH field names to iPad menu field names
       STATE.menuItems = (doc.data().items||[]).map(function(it){
         return Object.assign({}, it, {
           category: (it.catIds||[])[0] || '',
@@ -655,19 +656,22 @@ function loadFromFirebase() {
         });
       });
     } else { STATE.menuCategories = SEED_CATEGORIES; STATE.menuItems = SEED_ITEMS; }
-  }).catch(()=>{ STATE.menuCategories = SEED_CATEGORIES; STATE.menuItems = SEED_ITEMS; });
+    if(_menuReady) { renderNav(); }
+  }, function(){ STATE.menuCategories = SEED_CATEGORIES; STATE.menuItems = SEED_ITEMS; });
 
-  // Load tasting menus from boh_shared
-  fbDb.collection('boh_shared').doc('tasting_menus').get().then(doc => {
+  // Real-time listener for tasting menus
+  fbDb.collection('boh_shared').doc('tasting_menus').onSnapshot(function(doc){
     if (doc.exists && doc.data().list) STATE.tastingMenus = doc.data().list.filter(t=>t.active);
     else STATE.tastingMenus = SEED_TASTING_MENUS;
-  }).catch(()=>{ STATE.tastingMenus = SEED_TASTING_MENUS; });
+    if(_menuReady && currentNav==='tasting') renderContent();
+  }, function(){ STATE.tastingMenus = SEED_TASTING_MENUS; });
 
-  // Load prix fixe menus from boh_shared
-  fbDb.collection('boh_shared').doc('prix_fixe_menus').get().then(doc => {
+  // Real-time listener for prix fixe menus
+  fbDb.collection('boh_shared').doc('prix_fixe_menus').onSnapshot(function(doc){
     if (doc.exists && doc.data().list) STATE.prixFixeMenus = doc.data().list.filter(p=>p.active);
     else STATE.prixFixeMenus = SEED_PRIX_FIXE;
-  }).catch(()=>{ STATE.prixFixeMenus = SEED_PRIX_FIXE; });
+    if(_menuReady && currentNav==='prix-fixe') renderContent();
+  }, function(){ STATE.prixFixeMenus = SEED_PRIX_FIXE; });
 
   // Listen for messages
   fbDb.collection('messages').onSnapshot(snap => {
@@ -696,6 +700,7 @@ function openMenu() {
   document.getElementById('menu-table-badge').textContent = 'Table '+STATE.tableNum;
   showScreen('menu');
   renderNav();
+  _menuReady = true;
 }
 
 // ─── Navigation ─────────────────────────────────────────────────
