@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
 <style>
 :root {
@@ -493,9 +494,143 @@ var firebaseConfig = {
   messagingSenderId: "320703681087",
   appId: "1:320703681087:web:04f7c9a17637388a039e8a"
 };
-var fbApp=null, fbDb=null, fbReady=false;
-try { fbApp=firebase.initializeApp(firebaseConfig); fbDb=firebase.firestore(); fbReady=true; } catch(e){ console.warn('Firebase init:',e); }
+var fbApp=null, fbDb=null, fbAuth=null, fbReady=false;
+try {
+  fbApp=firebase.initializeApp(firebaseConfig);
+  fbDb=firebase.firestore();
+  fbAuth=firebase.auth();
+  fbReady=true;
+} catch(e){ console.warn('Firebase init:',e); }
 
+
+/* Named Firestore adapter for the existing database ID: default.
+   It exposes the small compat-like surface used by these static apps. */
+var FIRESTORE_DATABASE_ID = 'default';
+var FIRESTORE_ROOT = 'https://firestore.googleapis.com/v1/projects/' + encodeURIComponent(firebaseConfig.projectId) + '/databases/' + encodeURIComponent(FIRESTORE_DATABASE_ID) + '/documents';
+function createNamedFirestoreAdapter(){
+  var pollers=[];
+  function ensureAuth(){
+    if(typeof fbAuth==='undefined' || !fbAuth) return Promise.resolve(null);
+    if(fbAuth.currentUser) return Promise.resolve(fbAuth.currentUser);
+    return fbAuth.signInAnonymously().then(function(result){ return result.user; });
+  }
+  function request(method,url,body){
+    return ensureAuth().then(function(user){
+      var headers={'Content-Type':'application/json'};
+      var tokenPromise=user ? user.getIdToken().then(function(token){ headers.Authorization='Bearer '+token; }) : Promise.resolve();
+      return tokenPromise.then(function(){
+        var fullUrl=url+(url.indexOf('?')>=0?'&':'?')+'key='+encodeURIComponent(firebaseConfig.apiKey);
+        return fetch(fullUrl,{method:method,headers:headers,body:body===undefined?undefined:JSON.stringify(body)}).then(function(response){
+          return response.text().then(function(text){
+            var json=text?JSON.parse(text):{};
+            if(!response.ok){
+              var error=new Error((json.error&&json.error.message)||('Firestore request failed ('+response.status+')'));
+              error.code=(json.error&&json.error.status)||('http-'+response.status);
+              throw error;
+            }
+            return json;
+          });
+        });
+      });
+    });
+  }
+  function encodeValue(value){
+    if(value===null || value===undefined) return {nullValue:null};
+    if(value instanceof Date) return {timestampValue:value.toISOString()};
+    if(Array.isArray(value)) return {arrayValue:{values:value.map(encodeValue)}};
+    if(typeof value==='boolean') return {booleanValue:value};
+    if(typeof value==='number') return Number.isInteger(value)?{integerValue:String(value)}:{doubleValue:value};
+    if(typeof value==='object') return {mapValue:{fields:encodeFields(value)}};
+    return {stringValue:String(value)};
+  }
+  function encodeFields(object){
+    var fields={};
+    Object.keys(object||{}).forEach(function(key){ if(object[key]!==undefined) fields[key]=encodeValue(object[key]); });
+    return fields;
+  }
+  function decodeValue(value){
+    if(!value) return null;
+    if(Object.prototype.hasOwnProperty.call(value,'nullValue')) return null;
+    if(Object.prototype.hasOwnProperty.call(value,'stringValue')) return value.stringValue;
+    if(Object.prototype.hasOwnProperty.call(value,'booleanValue')) return value.booleanValue;
+    if(Object.prototype.hasOwnProperty.call(value,'integerValue')) return Number(value.integerValue);
+    if(Object.prototype.hasOwnProperty.call(value,'doubleValue')) return Number(value.doubleValue);
+    if(Object.prototype.hasOwnProperty.call(value,'timestampValue')) return value.timestampValue;
+    if(Object.prototype.hasOwnProperty.call(value,'bytesValue')) return value.bytesValue;
+    if(Object.prototype.hasOwnProperty.call(value,'referenceValue')) return value.referenceValue;
+    if(Object.prototype.hasOwnProperty.call(value,'geoPointValue')) return value.geoPointValue;
+    if(Object.prototype.hasOwnProperty.call(value,'arrayValue')) return (value.arrayValue.values||[]).map(decodeValue);
+    if(Object.prototype.hasOwnProperty.call(value,'mapValue')){
+      var map={}; Object.keys(value.mapValue.fields||{}).forEach(function(key){map[key]=decodeValue(value.mapValue.fields[key]);}); return map;
+    }
+    return null;
+  }
+  function decodeFields(fields){
+    var result={}; Object.keys(fields||{}).forEach(function(key){result[key]=decodeValue(fields[key]);}); return result;
+  }
+  function docUrl(collection,id){ return FIRESTORE_ROOT+'/'+encodeURIComponent(collection)+'/'+encodeURIComponent(id); }
+  function docFrom(json,fallbackId){
+    if(!json || !json.name) return {exists:false,id:fallbackId||'',data:function(){return undefined;}};
+    var parts=json.name.split('/');
+    return {exists:true,id:parts[parts.length-1]||fallbackId||'',data:function(){return decodeFields(json.fields||{});}};
+  }
+  function getDoc(collection,id){
+    return request('GET',docUrl(collection,id)).then(function(json){return docFrom(json,id);}).catch(function(error){
+      if(error.code==='NOT_FOUND' || error.code==='http-404') return docFrom(null,id);
+      throw error;
+    });
+  }
+  function setDoc(collection,id,data,options){
+    var merged=Promise.resolve(data);
+    if(options && options.merge){
+      merged=getDoc(collection,id).then(function(existing){ return existing.exists?Object.assign({},existing.data(),data):data; });
+    }
+    return merged.then(function(payload){ return request('PATCH',docUrl(collection,id),{fields:encodeFields(payload)}); }).then(function(json){return docFrom(json,id);});
+  }
+  function updateDoc(collection,id,data){
+    return request('PATCH',docUrl(collection,id),{fields:encodeFields(data)}).then(function(json){return docFrom(json,id);});
+  }
+  function addDoc(collection,data){
+    var id='web_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,10);
+    return request('POST',FIRESTORE_ROOT+'/'+encodeURIComponent(collection)+'?documentId='+encodeURIComponent(id),{fields:encodeFields(data)}).then(function(json){return docFrom(json,id);});
+  }
+  function listDocs(collection){
+    return request('GET',FIRESTORE_ROOT+'/'+encodeURIComponent(collection)+'?pageSize=1000').then(function(json){return (json.documents||[]).map(function(doc){return docFrom(doc);});});
+  }
+  function snapshot(docs){
+    return {docs:docs,size:docs.length,empty:docs.length===0,forEach:function(callback,context){docs.forEach(function(doc){callback.call(context,doc);});}};
+  }
+  function watchDoc(collection,id,callback,onError){
+    var stopped=false;
+    function refresh(){getDoc(collection,id).then(function(doc){if(!stopped) callback(doc);}).catch(function(error){if(!stopped && onError) onError(error);});}
+    refresh();
+    var timer=setInterval(refresh,5000); pollers.push(timer);
+    return function(){stopped=true;clearInterval(timer);};
+  }
+  function watchCollection(collection,filter,callback,onError){
+    var stopped=false,last='';
+    function refresh(){listDocs(collection).then(function(docs){
+      if(filter) docs=docs.filter(function(doc){var data=doc.data()||{};return filter.op==='==' ? data[filter.field]===filter.value : true;});
+      var signature=JSON.stringify(docs.map(function(doc){return {id:doc.id,data:doc.data()};}));
+      if(!stopped && signature!==last){last=signature;callback(snapshot(docs));}
+    }).catch(function(error){if(!stopped && onError) onError(error);});}
+    refresh();
+    var timer=setInterval(refresh,5000); pollers.push(timer);
+    return function(){stopped=true;clearInterval(timer);};
+  }
+  function collection(name){
+    var ref={
+      doc:function(id){return {get:function(){return getDoc(name,id);},set:function(data,options){return setDoc(name,id,data,options);},update:function(data){return updateDoc(name,id,data);},onSnapshot:function(callback,onError){return watchDoc(name,id,callback,onError);}};},
+      add:function(data){return addDoc(name,data);},
+      onSnapshot:function(callback,onError){return watchCollection(name,null,callback,onError);},
+      where:function(field,op,value){return {onSnapshot:function(callback,onError){return watchCollection(name,{field:field,op:op,value:value},callback,onError);}};}
+    };
+    return ref;
+  }
+  return {collection:collection};
+}
+
+if (typeof fbReady !== 'undefined' && fbReady) fbDb = createNamedFirestoreAdapter();
 // ─── State ──────────────────────────────────────────────────────
 var STATE = { lang:'en', tableNum:1, menuItems:[], menuCategories:[], messages:[], tastingMenus:[], prixFixeMenus:[], customerAllergies:[] };
 
@@ -662,16 +797,24 @@ function loadFromFirebase() {
   // Real-time listener for tasting menus
   fbDb.collection('boh_shared').doc('tasting_menus').onSnapshot(function(doc){
     if (doc.exists && doc.data().list) STATE.tastingMenus = doc.data().list.filter(t=>t.active);
-    else STATE.tastingMenus = SEED_TASTING_MENUS;
+    else STATE.tastingMenus = [];
     if(_menuReady && currentNav==='tasting') renderContent();
-  }, function(){ STATE.tastingMenus = SEED_TASTING_MENUS; });
+  }, function(err){
+    console.error('Live tasting menu read failed',err);
+    STATE.tastingMenus = [];
+    if(_menuReady && currentNav==='tasting') renderContent();
+  });
 
   // Real-time listener for prix fixe menus
   fbDb.collection('boh_shared').doc('prix_fixe_menus').onSnapshot(function(doc){
     if (doc.exists && doc.data().list) STATE.prixFixeMenus = doc.data().list.filter(p=>p.active);
-    else STATE.prixFixeMenus = SEED_PRIX_FIXE;
+    else STATE.prixFixeMenus = [];
     if(_menuReady && currentNav==='prix-fixe') renderContent();
-  }, function(){ STATE.prixFixeMenus = SEED_PRIX_FIXE; });
+  }, function(err){
+    console.error('Live prix fixe menu read failed',err);
+    STATE.prixFixeMenus = [];
+    if(_menuReady && currentNav==='prix-fixe') renderContent();
+  });
 
   // Listen for messages
   fbDb.collection('messages').onSnapshot(snap => {
@@ -709,10 +852,11 @@ var currentNav = null;
 function renderNav() {
   var nav = document.getElementById('menu-nav');
   var cats = STATE.menuCategories.length ? STATE.menuCategories : SEED_CATEGORIES;
+  var selectedStillVisible = cats.some(function(c){ return c.id === currentNav; });
+  if (!selectedStillVisible) currentNav = cats[0].id;
   nav.innerHTML = cats.map((c,i) =>
-    '<div class="menu-nav-item'+(i===0?' active':'')+'" data-cat="'+c.id+'" onclick="selectNav(\''+c.id+'\')">'+c.name+'</div>'
+    '<div class="menu-nav-item'+(c.id===currentNav?' active':'')+'" data-cat="'+c.id+'" onclick="selectNav(\''+c.id+'\')">'+c.name+'</div>'
   ).join('');
-  currentNav = cats[0].id;
   renderContent();
 }
 
@@ -967,7 +1111,14 @@ function showLatestMessage() {
 function init() {
   var sel = document.getElementById('setup-table');
   for (var i=1;i<=50;i++) sel.innerHTML+='<option value="'+i+'">Table '+i+'</option>';
-  loadFromFirebase();
+  if(fbReady && fbAuth && !fbAuth.currentUser){
+    fbAuth.signInAnonymously().then(loadFromFirebase).catch(function(err){
+      console.error('iPad Firebase sign-in failed',err);
+      useSeedData();
+    });
+  } else {
+    loadFromFirebase();
+  }
 }
 document.addEventListener('DOMContentLoaded', init);
 
