@@ -548,6 +548,9 @@ function createNamedFirestoreAdapter(){
     Object.keys(object||{}).forEach(function(key){ if(object[key]!==undefined) fields[key]=encodeValue(object[key]); });
     return fields;
   }
+  function fieldMaskQuery(data){
+    return Object.keys(data||{}).filter(function(k){ return data[k]!==undefined; }).map(function(k){ return 'updateMask.fieldPaths='+encodeURIComponent(k); }).join('&');
+  }
   function decodeValue(value){
     if(!value) return null;
     if(Object.prototype.hasOwnProperty.call(value,'nullValue')) return null;
@@ -581,14 +584,17 @@ function createNamedFirestoreAdapter(){
     });
   }
   function setDoc(collection,id,data,options){
-    var merged=Promise.resolve(data);
+    var url=docUrl(collection,id);
     if(options && options.merge){
-      merged=getDoc(collection,id).then(function(existing){ return existing.exists?Object.assign({},existing.data(),data):data; });
+      var mask=fieldMaskQuery(data);
+      if(mask) url+='?'+mask;
     }
-    return merged.then(function(payload){ return request('PATCH',docUrl(collection,id),{fields:encodeFields(payload)}); }).then(function(json){return docFrom(json,id);});
+    return request('PATCH',url,{fields:encodeFields(data)}).then(function(json){return docFrom(json,id);});
   }
   function updateDoc(collection,id,data){
-    return request('PATCH',docUrl(collection,id),{fields:encodeFields(data)}).then(function(json){return docFrom(json,id);});
+    var mask=fieldMaskQuery(data);
+    var url=docUrl(collection,id)+(mask?'?'+mask:'');
+    return request('PATCH',url,{fields:encodeFields(data)}).then(function(json){return docFrom(json,id);});
   }
   function addDoc(collection,data){
     var id='web_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,10);
