@@ -855,11 +855,15 @@ function openMenu() {
 // ─── Navigation ─────────────────────────────────────────────────
 var currentNav = null;
 
+function customerCats(){
+  var cats = STATE.menuCategories.length ? STATE.menuCategories : SEED_CATEGORIES;
+  return cats.filter(function(c){ return c && c.id !== 'tasting'; });
+}
 function renderNav() {
   var nav = document.getElementById('menu-nav');
-  var cats = STATE.menuCategories.length ? STATE.menuCategories : SEED_CATEGORIES;
+  var cats = customerCats();
   var selectedStillVisible = cats.some(function(c){ return c.id === currentNav; });
-  if (!selectedStillVisible) currentNav = cats[0].id;
+  if (!selectedStillVisible) currentNav = cats[0] ? cats[0].id : 'prix-fixe';
   nav.innerHTML = cats.map((c,i) =>
     '<div class="menu-nav-item'+(c.id===currentNav?' active':'')+'" data-cat="'+c.id+'" onclick="selectNav(\''+c.id+'\')">'+c.name+'</div>'
   ).join('');
@@ -875,7 +879,7 @@ function selectNav(catId) {
 // ─── Content Rendering ──────────────────────────────────────────
 function renderContent() {
   var c = document.getElementById('menu-content');
-  if (currentNav === 'tasting') { renderTastingMenus(c); return; }
+  if (currentNav === 'tasting') { currentNav = 'prix-fixe'; }
   if (currentNav === 'prix-fixe') { renderPrixFixe(c); return; }
   renderRegularMenu(c);
 }
