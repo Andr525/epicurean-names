@@ -11,6 +11,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
+<script src="scalini-dining.js"></script>
 <style>
 :root {
   --bg: #0A0A0A;
@@ -671,102 +672,13 @@ var SEED_ITEMS = [
   {id:'i14',code:'SD01',name:'Truffle Fries',desc:'Hand-cut fries, truffle oil, parmesan, herbs',price:12,cost:3,category:'sides',station:'Fry',cookTime:6,allergens:['Dairy'],dietary:['Vegetarian','GF'],modifiers:[]}
 ];
 
-var SEED_TASTING_MENUS = [
-  {
-    id:'tm1', name:"Chef's Tasting", subtitle:'7-Course Seasonal Journey',
-    price:145, duration:'~3 hours',
-    courses:[
-      {num:1, name:'Amuse-Bouche', desc:'Seasonal micro-bite from the chef'},
-      {num:2, name:'Ceviche Course', desc:'Corvina, leche de tigre, sweet potato crisp'},
-      {num:3, name:'Cold Plate', desc:'Tuna tartare, avocado mousse, sesame'},
-      {num:4, name:'Soup', desc:'Seasonal bisque, herb oil, crouton'},
-      {num:5, name:'Fish', desc:'Pan-seared salmon, beurre blanc, asparagus'},
-      {num:6, name:'Meat', desc:'Wagyu ribeye, chimichurri, roasted garlic'},
-      {num:7, name:'Dessert', desc:'Chocolate torte, raspberry, gold leaf'}
-    ],
-    pairings:[
-      {name:'Wine Pairing', desc:'Sommelier-selected wines per course', price:85},
-      {name:'Premium Pairing', desc:'Reserve & rare selections', price:145}
-    ],
-    active:true, mealPeriod:'dinner'
-  },
-  {
-    id:'tm2', name:'Chocolate Experience', subtitle:'5-Course Cacao Journey',
-    price:95, duration:'~2 hours',
-    courses:[
-      {num:1, name:'Cacao Amuse', desc:'White chocolate sphere, passion fruit'},
-      {num:2, name:'Savory Cacao', desc:'Mole-rubbed quail, cacao nib salad'},
-      {num:3, name:'Intermezzo', desc:'Dark chocolate sorbet, sea salt'},
-      {num:4, name:'Main', desc:'Cocoa-crusted lamb, cherry reduction'},
-      {num:5, name:'Grand Finale', desc:'Chocolate Studio signature torte'}
-    ],
-    pairings:[
-      {name:'Dessert Wine Pairing', desc:'Sweet wines & ports', price:65}
-    ],
-    active:true, mealPeriod:'dinner'
-  }
-];
+var SEED_TASTING_MENUS = (typeof EPICUREAN_SCALINI!=='undefined' && EPICUREAN_SCALINI.tasting)
+  ? [JSON.parse(JSON.stringify(EPICUREAN_SCALINI.tasting))]
+  : [];
 
-var SEED_PRIX_FIXE = [
-  {
-    id:'pf1', name:'Lunch Prix Fixe', desc:'Choose one from each course',
-    price:42, mealPeriod:'lunch', active:true,
-    courseGroups:[
-      {
-        label:'Appetizer', choose:1,
-        options:[
-          {name:'Soup of the Day', desc:'Seasonal creation', upcharge:0},
-          {name:'Tuna Tartare', desc:'Ahi tuna, avocado, ponzu', upcharge:0},
-          {name:'Peruvian Ceviche', desc:'Corvina, leche de tigre', upcharge:4}
-        ]
-      },
-      {
-        label:'Main Course', choose:1,
-        options:[
-          {name:'Pan-Seared Salmon', desc:'Beurre blanc, asparagus', upcharge:0},
-          {name:'Grilled Chicken', desc:'Herb-roasted, seasonal vegetables', upcharge:0},
-          {name:'Wagyu Ribeye', desc:'Chimichurri, roasted garlic', upcharge:18}
-        ]
-      },
-      {
-        label:'Dessert', choose:1,
-        options:[
-          {name:'Crème Brûlée', desc:'Madagascar vanilla', upcharge:0},
-          {name:'Chocolate Torte', desc:'Ganache, raspberry coulis', upcharge:0},
-          {name:'Cheese Plate', desc:'Artisanal selection', upcharge:6}
-        ]
-      }
-    ]
-  },
-  {
-    id:'pf2', name:'Sunday Brunch Prix Fixe', desc:'Three courses with a welcome cocktail',
-    price:55, mealPeriod:'brunch', active:true,
-    courseGroups:[
-      {
-        label:'Starter', choose:1,
-        options:[
-          {name:'Shrimp Ceviche', desc:'Mango, habanero, coconut', upcharge:0},
-          {name:'Avocado Toast', desc:'Poached egg, microgreens', upcharge:0}
-        ]
-      },
-      {
-        label:'Main', choose:1,
-        options:[
-          {name:'Eggs Benedict', desc:'Hollandaise, Canadian bacon', upcharge:0},
-          {name:'Steak & Eggs', desc:'Wagyu flat iron, sunny side', upcharge:12},
-          {name:'Lobster Omelette', desc:'Gruyère, chives, crème fraîche', upcharge:15}
-        ]
-      },
-      {
-        label:'Dessert', choose:1,
-        options:[
-          {name:'French Toast', desc:'Brioche, berries, maple', upcharge:0},
-          {name:'Chocolate Soufflé', desc:'Warm, with vanilla ice cream', upcharge:5}
-        ]
-      }
-    ]
-  }
-];
+var SEED_PRIX_FIXE = (typeof EPICUREAN_SCALINI!=='undefined' && EPICUREAN_SCALINI.prixFixe)
+  ? [JSON.parse(JSON.stringify(EPICUREAN_SCALINI.prixFixe))]
+  : [];
 
 // ─── Helpers ────────────────────────────────────────────────────
 function showScreen(id) {
@@ -802,23 +714,25 @@ function loadFromFirebase() {
 
   // Real-time listener for tasting menus
   fbDb.collection('boh_shared').doc('tasting_menus').onSnapshot(function(doc){
-    if (doc.exists && doc.data().list) STATE.tastingMenus = doc.data().list.filter(t=>t.active);
-    else STATE.tastingMenus = [];
-    if(_menuReady && currentNav==='tasting') renderContent();
+    if (doc.exists && Array.isArray((doc.data()||{}).list) && doc.data().list.length) {
+      STATE.tastingMenus = doc.data().list.filter(function(t){ return t && t.active !== false; });
+    } else STATE.tastingMenus = SEED_TASTING_MENUS.slice();
+    if(_menuReady && (currentNav==='tasting' || currentNav==='prix-fixe')) renderContent();
   }, function(err){
     console.error('Live tasting menu read failed',err);
-    STATE.tastingMenus = [];
+    STATE.tastingMenus = SEED_TASTING_MENUS.slice();
     if(_menuReady && currentNav==='tasting') renderContent();
   });
 
   // Real-time listener for prix fixe menus
   fbDb.collection('boh_shared').doc('prix_fixe_menus').onSnapshot(function(doc){
-    if (doc.exists && doc.data().list) STATE.prixFixeMenus = doc.data().list.filter(p=>p.active);
-    else STATE.prixFixeMenus = [];
+    if (doc.exists && Array.isArray((doc.data()||{}).list) && doc.data().list.length) {
+      STATE.prixFixeMenus = doc.data().list.filter(function(p){ return p && p.active !== false; });
+    } else STATE.prixFixeMenus = SEED_PRIX_FIXE.slice();
     if(_menuReady && currentNav==='prix-fixe') renderContent();
   }, function(err){
     console.error('Live prix fixe menu read failed',err);
-    STATE.prixFixeMenus = [];
+    STATE.prixFixeMenus = SEED_PRIX_FIXE.slice();
     if(_menuReady && currentNav==='prix-fixe') renderContent();
   });
 
@@ -855,9 +769,36 @@ function openMenu() {
 // ─── Navigation ─────────────────────────────────────────────────
 var currentNav = null;
 
+function t(key){
+  var ui=(typeof EPICUREAN_SCALINI!=='undefined' && EPICUREAN_SCALINI.ui) || {};
+  var pack=ui[STATE.lang]||ui.en||{};
+  return pack[key] || (ui.en&&ui.en[key]) || key;
+}
+function locText(item){
+  if (!item) return {name:'', desc:''};
+  var pack=item.i18n && item.i18n[STATE.lang];
+  return { name:(pack&&pack.name)||item.name||'', desc:(pack&&pack.desc)||item.desc||item.description||'' };
+}
+function courseModeOf(c){
+  return (c && c.mode) || (c && c.fireEach ? 'auto' : 'choose');
+}
+function optionHasAllergen(opt){
+  if (!STATE.customerAllergies.length) return false;
+  return (opt.allergens||[]).some(function(a){ return STATE.customerAllergies.indexOf(a)>-1; });
+}
+
 function customerCats(){
-  var cats = STATE.menuCategories.length ? STATE.menuCategories : SEED_CATEGORIES;
-  return cats.filter(function(c){ return c && c.id !== 'tasting'; });
+  var cats = (STATE.menuCategories.length ? STATE.menuCategories : SEED_CATEGORIES).slice();
+  var specials=[
+    {id:'prix-fixe', name:t('prixFixe'), visible:true, type:'special'},
+    {id:'tasting', name:t('tasting'), visible:true, type:'special'}
+  ];
+  specials.forEach(function(s){
+    var hit=cats.filter(function(c){ return c.id===s.id; })[0];
+    if (hit) { hit.name=s.name; hit.visible=true; }
+    else cats.unshift(s);
+  });
+  return cats.filter(function(c){ return c && c.visible!==false; });
 }
 function renderNav() {
   var nav = document.getElementById('menu-nav');
@@ -879,7 +820,7 @@ function selectNav(catId) {
 // ─── Content Rendering ──────────────────────────────────────────
 function renderContent() {
   var c = document.getElementById('menu-content');
-  if (currentNav === 'tasting') { currentNav = 'prix-fixe'; }
+  if (currentNav === 'tasting') { renderTastingMenus(c); return; }
   if (currentNav === 'prix-fixe') { renderPrixFixe(c); return; }
   renderRegularMenu(c);
 }
@@ -940,60 +881,77 @@ function renderRegularMenu(container) {
   container.innerHTML = html;
 }
 
+function courseCaption(cg){
+  var mode=courseModeOf(cg);
+  if (mode==='auto') return cg.label+' — '+t('servedAuto');
+  if (mode==='entremets') return cg.label+' — '+t('entremetsNote');
+  if (mode==='later') return cg.label+' — '+t('dessertLater');
+  return cg.label+' — '+t('choose')+' '+(cg.choose||1);
+}
+function optionRowHtml(o){
+  var loc=locText(o);
+  var hits=(o.allergens||[]).filter(function(a){ return STATE.customerAllergies.indexOf(a)>-1; });
+  var extra='';
+  if (o.upcharge) extra+='<span class="upcharge">+$'+o.upcharge+'</span>';
+  if (o.chooseCount) extra+='<span class="upcharge">'+t('threeScoops')+'</span>';
+  if (o.cookNote) extra+='<span class="upcharge">'+o.cookNote+'</span>';
+  return '<div class="prix-fixe-option'+(hits.length?' has-allergen':'')+'"><span>'+loc.name+'</span>'+extra+'</div>'+
+    (loc.desc?'<div class="prix-fixe-option" style="border:none;padding-top:0;color:var(--text-muted);font-size:0.72rem;">'+loc.desc+(hits.length?' · ⚠ '+hits.join(', '):'')+'</div>':'');
+}
+
 function renderTastingMenus(container) {
   var menus = STATE.tastingMenus.length ? STATE.tastingMenus : SEED_TASTING_MENUS;
-  var html = '<div class="section-header"><div class="section-label">Experience</div><div class="section-title">Tasting Menus</div></div>';
+  var html = '<div class="section-header"><div class="section-label">'+t('experience')+'</div><div class="section-title">'+t('tastingMenus')+'</div></div>';
   html += '<div class="tasting-section">';
-  html += menus.map(tm =>
-    '<div class="tasting-card" onclick="openTasting(\''+tm.id+'\')">'+
+  html += menus.map(function(tm){
+    return '<div class="tasting-card" onclick="openTasting(\''+tm.id+'\')">'+
       '<div class="tasting-card-header">'+
         '<div><div class="tasting-card-title">'+tm.name+'</div>'+
         '<div class="tasting-card-subtitle">'+tm.subtitle+'</div></div>'+
-        '<div class="tasting-card-price">$'+tm.price+'<small>per person</small></div>'+
+        '<div class="tasting-card-price">$'+tm.price+'<small>'+t('perPerson')+'</small></div>'+
       '</div>'+
       '<ul class="tasting-courses-list">'+
-        tm.courses.slice(0,4).map(c =>
-          '<li><span class="course-num">'+c.num+'</span>'+c.name+'</li>'
-        ).join('')+
-        (tm.courses.length>4 ? '<li style="color:var(--text-muted);font-style:italic;">+ '+(tm.courses.length-4)+' more courses</li>' : '')+
+        (tm.courses||[]).map(function(c){
+          var loc=locText(c);
+          return '<li class="'+(optionHasAllergen(c)?'has-allergen':'')+'"><span class="course-num">'+(c.num||'')+'</span>'+loc.name+'</li>';
+        }).join('')+
       '</ul>'+
-      (tm.pairings.length ? tm.pairings.map(p =>
-        '<div class="tasting-pairing">🍷 '+p.name+' <span class="pairing-price">+$'+p.price+'</span></div>'
-      ).join('') : '')+
-    '</div>'
-  ).join('');
+      ((tm.pairings||[]).length ? tm.pairings.map(function(p){
+        return '<div class="tasting-pairing">🍷 '+p.name+' <span class="pairing-price">+$'+p.price+'</span></div>';
+      }).join('') : '')+
+    '</div>';
+  }).join('');
   html += '</div>';
   container.innerHTML = html;
 }
 
 function getPfCourses(pf) {
-  // Handle both BOH format (courses) and seed format (courseGroups)
   if (pf.courseGroups) return pf.courseGroups;
-  if (pf.courses) return pf.courses.map(c => ({label:c.label, choose:1, options:c.options}));
+  if (pf.courses) return pf.courses.map(function(c){
+    return {label:c.label, choose:c.mode==='choose'||c.mode==='later'?1:0, mode:c.mode, fireEach:c.fireEach, options:c.options||[]};
+  });
   return [];
 }
 function getPfDesc(pf) { return pf.desc || pf.subtitle || ''; }
 
 function renderPrixFixe(container) {
   var menus = STATE.prixFixeMenus.length ? STATE.prixFixeMenus : SEED_PRIX_FIXE;
-  var html = '<div class="section-header"><div class="section-label">Prix Fixe</div><div class="section-title">Set Menus</div></div>';
-  html += menus.map(pf => {
+  var html = '<div class="section-header"><div class="section-label">'+t('prixFixe')+'</div><div class="section-title">'+t('setMenus')+'</div></div>';
+  html += menus.map(function(pf){
     var courses = getPfCourses(pf);
     return '<div class="prix-fixe-card" onclick="openPrixFixe(\''+pf.id+'\')">'+ 
       '<div class="prix-fixe-header">'+
         '<div><div class="prix-fixe-title">'+pf.name+'</div>'+
         '<div class="prix-fixe-desc">'+getPfDesc(pf)+'</div></div>'+
-        '<div class="prix-fixe-price">$'+pf.price+'<small>per person</small></div>'+
+        '<div class="prix-fixe-price">$'+pf.price+'<small>'+t('perPerson')+'</small></div>'+
       '</div>'+
       '<div class="prix-fixe-courses">'+
-        courses.map(cg =>
-          '<div class="prix-fixe-course-group">'+
-            '<div class="prix-fixe-course-label">'+cg.label+' \u2014 choose '+(cg.choose||1)+'</div>'+
-            cg.options.map(o =>
-              '<div class="prix-fixe-option"><span>'+o.name+'</span>'+(o.upcharge?'<span class="upcharge">+$'+o.upcharge+'</span>':'')+'</div>'
-            ).join('')+
-          '</div>'
-        ).join('')+
+        courses.map(function(cg){
+          return '<div class="prix-fixe-course-group">'+
+            '<div class="prix-fixe-course-label">'+courseCaption(cg)+'</div>'+
+            (cg.options||[]).map(optionRowHtml).join('')+
+          '</div>';
+        }).join('')+
       '</div>'+
     '</div>';
   }).join('');
@@ -1028,65 +986,70 @@ function openDish(itemId) {
 function closeDishModal() { document.getElementById('dish-modal').classList.remove('open'); }
 
 function openTasting(tmId) {
-  var tm = (STATE.tastingMenus.length?STATE.tastingMenus:SEED_TASTING_MENUS).find(t=>t.id===tmId);
+  var tm = (STATE.tastingMenus.length?STATE.tastingMenus:SEED_TASTING_MENUS).find(function(t){return t.id===tmId;});
   if (!tm) return;
   var modal = document.getElementById('tasting-modal');
   var content = document.getElementById('tasting-modal-content');
   content.innerHTML = '<button style="position:absolute;top:1rem;right:1.2rem;background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--text-muted);" onclick="closeTastingModal()">×</button>'+
-    '<div class="section-label" style="margin-bottom:0.3rem;">Tasting Experience</div>'+
+    '<div class="section-label" style="margin-bottom:0.3rem;">'+t('tasting')+'</div>'+
     '<h2 style="font-family:var(--font-display);font-size:1.8rem;font-weight:300;">'+tm.name+'</h2>'+
-    '<p style="color:var(--text-secondary);font-size:0.8rem;margin-top:0.3rem;">'+tm.subtitle+' · '+tm.duration+'</p>'+
-    '<p style="font-family:var(--font-display);font-size:1.4rem;color:var(--gold);margin-top:1rem;">$'+tm.price+' <span style="font-size:0.7rem;color:var(--text-muted);font-family:var(--font-body);">per person</span></p>'+
+    '<p style="color:var(--text-secondary);font-size:0.8rem;margin-top:0.3rem;">'+tm.subtitle+' · '+(tm.duration||'')+'</p>'+
+    '<p style="font-family:var(--font-display);font-size:1.4rem;color:var(--gold);margin-top:1rem;">$'+tm.price+' <span style="font-size:0.7rem;color:var(--text-muted);font-family:var(--font-body);">'+t('perPerson')+'</span></p>'+
+    '<p style="color:var(--text-muted);font-size:0.75rem;margin-top:0.8rem;">'+t('servedAuto')+' · '+t('tastingDessertLater')+'</p>'+
     '<div class="tasting-modal-courses">'+
-      tm.courses.map(c =>
-        '<div class="tasting-modal-course">'+
-          '<div class="tasting-modal-course-num">Course '+c.num+'</div>'+
-          '<div class="tasting-modal-course-name">'+c.name+'</div>'+
-          '<div class="tasting-modal-course-desc">'+c.desc+'</div>'+
-        '</div>'
-      ).join('')+
+      (tm.courses||[]).map(function(c){
+        var loc=locText(c);
+        var hits=(c.allergens||[]).filter(function(a){ return STATE.customerAllergies.indexOf(a)>-1; });
+        return '<div class="tasting-modal-course'+(hits.length?' has-allergen':'')+'">'+
+          '<div class="tasting-modal-course-num">Course '+(c.num||'')+'</div>'+
+          '<div class="tasting-modal-course-name">'+loc.name+'</div>'+
+          '<div class="tasting-modal-course-desc">'+loc.desc+(hits.length?' · ⚠ '+hits.join(', '):'')+'</div>'+
+        '</div>';
+      }).join('')+
     '</div>'+
-    (tm.pairings.length ? '<div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border);">'+
+    ((tm.pairings||[]).length ? '<div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border);">'+
       '<div class="section-label" style="margin-bottom:0.8rem;">Wine Pairings</div>'+
-      tm.pairings.map(p =>
-        '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0;">'+
+      tm.pairings.map(function(p){
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0;">'+
           '<div><div style="font-size:0.85rem;color:var(--text-primary);">'+p.name+'</div>'+
-          '<div style="font-size:0.7rem;color:var(--text-muted);">'+p.desc+'</div></div>'+
+          '<div style="font-size:0.7rem;color:var(--text-muted);">'+(p.desc||'')+'</div></div>'+
           '<div style="color:var(--gold);font-size:0.9rem;">+$'+p.price+'</div>'+
-        '</div>'
-      ).join('')+
+        '</div>';
+      }).join('')+
     '</div>' : '');
   modal.classList.add('open');
 }
 function closeTastingModal() { document.getElementById('tasting-modal').classList.remove('open'); }
 
 function openPrixFixe(pfId) {
-  var pf = (STATE.prixFixeMenus.length?STATE.prixFixeMenus:SEED_PRIX_FIXE).find(p=>p.id===pfId);
+  var pf = (STATE.prixFixeMenus.length?STATE.prixFixeMenus:SEED_PRIX_FIXE).find(function(p){return p.id===pfId;});
   if (!pf) return;
   var modal = document.getElementById('tasting-modal');
   var content = document.getElementById('tasting-modal-content');
   var courses = getPfCourses(pf);
   content.innerHTML = '<button style="position:absolute;top:1rem;right:1.2rem;background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--text-muted);" onclick="closeTastingModal()">×</button>'+
-    '<div class="section-label" style="margin-bottom:0.3rem;">Prix Fixe</div>'+
+    '<div class="section-label" style="margin-bottom:0.3rem;">'+t('prixFixe')+'</div>'+
     '<h2 style="font-family:var(--font-display);font-size:1.8rem;font-weight:300;">'+pf.name+'</h2>'+
     '<p style="color:var(--text-secondary);font-size:0.8rem;margin-top:0.3rem;">'+getPfDesc(pf)+'</p>'+
-    '<p style="font-family:var(--font-display);font-size:1.4rem;color:var(--gold);margin-top:1rem;">$'+pf.price+' <span style="font-size:0.7rem;color:var(--text-muted);font-family:var(--font-body);">per person</span></p>'+
+    '<p style="font-family:var(--font-display);font-size:1.4rem;color:var(--gold);margin-top:1rem;">$'+pf.price+' <span style="font-size:0.7rem;color:var(--text-muted);font-family:var(--font-body);">'+t('perPerson')+'</span></p>'+
     '<div style="margin-top:1.5rem;">'+
-      courses.map(cg =>
-        '<div style="margin-bottom:1.5rem;">'+
-          '<div class="prix-fixe-course-label">'+cg.label+' \u2014 choose '+(cg.choose||1)+'</div>'+
-          cg.options.map(o =>
-            '<div style="padding:0.6rem 0;border-bottom:1px solid var(--border);">'+
+      courses.map(function(cg){
+        return '<div style="margin-bottom:1.5rem;">'+
+          '<div class="prix-fixe-course-label">'+courseCaption(cg)+'</div>'+
+          (cg.options||[]).map(function(o){
+            var loc=locText(o);
+            var hits=(o.allergens||[]).filter(function(a){ return STATE.customerAllergies.indexOf(a)>-1; });
+            return '<div style="padding:0.6rem 0;border-bottom:1px solid var(--border);" class="'+(hits.length?'has-allergen':'')+'">'+
               (o.photoUrl?'<img src="'+o.photoUrl+'" style="width:100%;height:120px;object-fit:cover;border-radius:6px;margin-bottom:0.4rem;">':'')+
               '<div style="display:flex;justify-content:space-between;align-items:center;">'+
-                '<span style="font-size:0.85rem;color:var(--text-primary);">'+o.name+'</span>'+
+                '<span style="font-size:0.85rem;color:var(--text-primary);">'+loc.name+'</span>'+
                 (o.upcharge?'<span style="color:var(--gold);font-size:0.75rem;">+$'+o.upcharge+'</span>':'')+
               '</div>'+
-              '<div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.2rem;">'+(o.desc||'')+'</div>'+
-            '</div>'
-          ).join('')+
-        '</div>'
-      ).join('')+
+              '<div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.2rem;">'+loc.desc+(o.chooseCount?' · '+t('threeScoops'):'')+(o.cookNote?' · '+o.cookNote:'')+(hits.length?' · ⚠ '+hits.join(', '):'')+'</div>'+
+            '</div>';
+          }).join('')+
+        '</div>';
+      }).join('')+
     '</div>';
   modal.classList.add('open');
 }
@@ -1094,7 +1057,7 @@ function openPrixFixe(pfId) {
 function switchLang(lang) {
   STATE.lang = lang;
   document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang===lang));
-  renderContent();
+  renderNav();
 }
 
 // ─── Call Server ────────────────────────────────────────────────
