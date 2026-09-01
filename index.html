@@ -850,6 +850,11 @@ function applyChrome(){
   if (ta) ta.placeholder=t('orderPadPlaceholder');
   var send=document.getElementById('order-pad-send');
   if (send && !send.dataset.busy) send.textContent=t('orderPadSend');
+  var status=document.getElementById('order-pad-status');
+  if (status && status.classList.contains('ok')) {
+    var en=status.textContent.split(' — ').slice(1).join(' — ');
+    status.textContent=t('orderPadSent')+(en ? ' — '+en : '');
+  }
   var badge=document.getElementById('menu-table-badge');
   if (badge && STATE.tableNum) badge.textContent=t('table')+' '+STATE.tableNum;
   var sel=document.getElementById('setup-table');
