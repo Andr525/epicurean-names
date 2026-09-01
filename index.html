@@ -690,6 +690,13 @@ function toast(msg, duration) {
   t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), duration||3000);
 }
+function mergeScaliniIpad(list, seed, dummyIds){
+  seed = seed && seed[0] ? JSON.parse(JSON.stringify(seed[0])) : null;
+  dummyIds = dummyIds || [];
+  list = (list||[]).filter(function(x){ return x && dummyIds.indexOf(x.id)<0; });
+  if (seed && !list.some(function(x){ return x.id===seed.id; })) list.unshift(seed);
+  return list.filter(function(x){ return x && x.active !== false; });
+}
 
 // ─── Firebase load ──────────────────────────────────────────────
 var _menuReady = false;
@@ -714,9 +721,8 @@ function loadFromFirebase() {
 
   // Real-time listener for tasting menus
   fbDb.collection('boh_shared').doc('tasting_menus').onSnapshot(function(doc){
-    if (doc.exists && Array.isArray((doc.data()||{}).list) && doc.data().list.length) {
-      STATE.tastingMenus = doc.data().list.filter(function(t){ return t && t.active !== false; });
-    } else STATE.tastingMenus = SEED_TASTING_MENUS.slice();
+    var list = (doc.exists && Array.isArray((doc.data()||{}).list)) ? doc.data().list : [];
+    STATE.tastingMenus = mergeScaliniIpad(list, SEED_TASTING_MENUS, ['tm_chef7','tm_choc5','tm1','tm2']);
     if(_menuReady && (currentNav==='tasting' || currentNav==='prix-fixe')) renderContent();
   }, function(err){
     console.error('Live tasting menu read failed',err);
@@ -726,9 +732,8 @@ function loadFromFirebase() {
 
   // Real-time listener for prix fixe menus
   fbDb.collection('boh_shared').doc('prix_fixe_menus').onSnapshot(function(doc){
-    if (doc.exists && Array.isArray((doc.data()||{}).list) && doc.data().list.length) {
-      STATE.prixFixeMenus = doc.data().list.filter(function(p){ return p && p.active !== false; });
-    } else STATE.prixFixeMenus = SEED_PRIX_FIXE.slice();
+    var list = (doc.exists && Array.isArray((doc.data()||{}).list)) ? doc.data().list : [];
+    STATE.prixFixeMenus = mergeScaliniIpad(list, SEED_PRIX_FIXE, ['pf_lunch','pf_brunch','pf1','pf2']);
     if(_menuReady && currentNav==='prix-fixe') renderContent();
   }, function(err){
     console.error('Live prix fixe menu read failed',err);
