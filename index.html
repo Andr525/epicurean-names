@@ -317,6 +317,36 @@ body { font-family:var(--font-body); color:var(--text-primary); background:var(-
 .lang-btn:hover { border-color:var(--text-secondary); color:var(--text-secondary); }
 .lang-btn.active { border-color:var(--gold); color:var(--gold); background:var(--gold-glow); }
 
+/* ─── Guest order pad (translated to English for Food Master) ─── */
+.guest-order-pad {
+  flex-shrink:0; border-top:1px solid var(--border-gold);
+  background:var(--bg-elevated); padding:0.75rem 1.5rem 0.9rem;
+}
+.guest-order-pad h3 {
+  font-family:var(--font-display); font-size:1.05rem; font-weight:400;
+  color:var(--text-primary); margin-bottom:0.2rem;
+}
+.guest-order-pad .pad-hint {
+  font-size:0.68rem; color:var(--text-muted); margin-bottom:0.5rem; font-weight:300; line-height:1.45;
+}
+.guest-order-pad textarea {
+  width:100%; min-height:72px; max-height:140px; resize:vertical;
+  padding:0.7rem 0.8rem; border-radius:var(--radius);
+  border:1px solid var(--border); background:var(--bg);
+  color:var(--text-primary); font-family:var(--font-body); font-size:0.9rem; line-height:1.45;
+}
+.guest-order-pad textarea:focus { outline:none; border-color:var(--gold); }
+.guest-order-pad .pad-row { display:flex; gap:0.6rem; align-items:center; margin-top:0.55rem; }
+.guest-order-pad .pad-send {
+  border:none; border-radius:var(--radius); background:var(--gold); color:var(--bg);
+  padding:0.7rem 1rem; font-size:0.75rem; font-weight:500; letter-spacing:0.06em;
+  text-transform:uppercase; cursor:pointer;
+}
+.guest-order-pad .pad-send:disabled { opacity:0.55; cursor:wait; }
+.guest-order-pad .pad-status { font-size:0.7rem; color:var(--text-secondary); flex:1; line-height:1.4; }
+.guest-order-pad .pad-status.ok { color:var(--sage); }
+.guest-order-pad .pad-status.err { color:var(--wine); }
+
 /* ─── DISH DETAIL MODAL ─── */
 .modal-overlay {
   position:fixed; inset:0; background:rgba(0,0,0,0.8); backdrop-filter:blur(8px);
@@ -438,7 +468,7 @@ body { font-family:var(--font-body); color:var(--text-primary); background:var(-
   </div>
   <div class="setup-form">
     <select id="setup-table"><option value="">Select table</option></select>
-    <button class="btn-open" onclick="openMenu()">View Menu</button>
+    <button class="btn-open" id="setup-open-btn" onclick="openMenu()">View Menu</button>
   </div>
 </div>
 
@@ -448,10 +478,19 @@ body { font-family:var(--font-body); color:var(--text-primary); background:var(-
     <span class="brand">The Epicurean House</span>
     <span class="table-badge" id="menu-table-badge">Table 1</span>
     <button class="allergy-filter-btn" id="allergy-btn" onclick="openAllergyFilter()">Allergies</button>
-    <button class="call-server-btn" onclick="callServer()">Call Server</button>
+    <button class="call-server-btn" id="call-server-btn" onclick="callServer()">Call Server</button>
   </div>
   <div class="menu-nav" id="menu-nav"></div>
   <div class="menu-content" id="menu-content"></div>
+  <div class="guest-order-pad" id="guest-order-pad">
+    <h3 id="order-pad-title">Write your order</h3>
+    <p class="pad-hint" id="order-pad-hint">Type in your language. We send an English copy to your Food Master.</p>
+    <textarea id="guest-order-text" maxlength="800" placeholder="Example: I would like the smoked salmon, no onions, and I am allergic to nuts"></textarea>
+    <div class="pad-row">
+      <button type="button" class="pad-send" id="order-pad-send" onclick="sendGuestOrder()">Send to Food Master</button>
+      <div class="pad-status" id="order-pad-status"></div>
+    </div>
+  </div>
   <div class="menu-footer">
     <div class="lang-selector">
       <button class="lang-btn active" data-lang="en" onclick="switchLang('en')">EN</button>
@@ -760,13 +799,14 @@ function setLang(lang, el) {
   STATE.lang = lang;
   document.querySelectorAll('.lang-card').forEach(c=>c.classList.remove('selected'));
   if (el) el.classList.add('selected');
+  applyChrome();
 }
 
 function openMenu() {
   var sel = document.getElementById('setup-table');
   if (sel.value) STATE.tableNum = parseInt(sel.value);
-  document.getElementById('menu-table-badge').textContent = 'Table '+STATE.tableNum;
   showScreen('menu');
+  applyChrome();
   renderNav();
   _menuReady = true;
 }
@@ -783,6 +823,42 @@ function locText(item){
   if (!item) return {name:'', desc:''};
   var pack=item.i18n && item.i18n[STATE.lang];
   return { name:(pack&&pack.name)||item.name||'', desc:(pack&&pack.desc)||item.desc||item.description||'' };
+}
+function locMenuCopy(item){
+  var pack=item && item.i18n && item.i18n[STATE.lang];
+  return {
+    subtitle:(pack&&pack.subtitle)||(item&&item.subtitle)||'',
+    desc:(pack&&pack.desc)||(item&&item.desc)||(item&&item.subtitle)||''
+  };
+}
+function applyChrome(){
+  var openBtn=document.getElementById('setup-open-btn');
+  if (openBtn) openBtn.textContent=t('viewMenu');
+  var allergyBtn=document.getElementById('allergy-btn');
+  if (allergyBtn){
+    allergyBtn.textContent=STATE.customerAllergies.length
+      ? t('allergies')+' ('+STATE.customerAllergies.length+')'
+      : t('allergies');
+  }
+  var callBtn=document.getElementById('call-server-btn');
+  if (callBtn) callBtn.textContent=t('callServer');
+  var title=document.getElementById('order-pad-title');
+  if (title) title.textContent=t('orderPadTitle');
+  var hint=document.getElementById('order-pad-hint');
+  if (hint) hint.textContent=t('orderPadHint');
+  var ta=document.getElementById('guest-order-text');
+  if (ta) ta.placeholder=t('orderPadPlaceholder');
+  var send=document.getElementById('order-pad-send');
+  if (send && !send.dataset.busy) send.textContent=t('orderPadSend');
+  var badge=document.getElementById('menu-table-badge');
+  if (badge && STATE.tableNum) badge.textContent=t('table')+' '+STATE.tableNum;
+  var sel=document.getElementById('setup-table');
+  if (sel && sel.options[0] && !sel.options[0].value) sel.options[0].textContent=t('selectTable');
+}
+function escHtml(s){
+  return String(s||'').replace(/[&<>"']/g, function(c){
+    return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];
+  });
 }
 function courseModeOf(c){
   return (c && c.mode) || (c && c.fireEach ? 'auto' : 'choose');
@@ -912,7 +988,7 @@ function renderTastingMenus(container) {
     return '<div class="tasting-card" onclick="openTasting(\''+tm.id+'\')">'+
       '<div class="tasting-card-header">'+
         '<div><div class="tasting-card-title">'+tm.name+'</div>'+
-        '<div class="tasting-card-subtitle">'+tm.subtitle+'</div></div>'+
+        '<div class="tasting-card-subtitle">'+escHtml(locMenuCopy(tm).subtitle)+'</div></div>'+
         '<div class="tasting-card-price">$'+tm.price+'<small>'+t('perPerson')+'</small></div>'+
       '</div>'+
       '<ul class="tasting-courses-list">'+
@@ -937,7 +1013,7 @@ function getPfCourses(pf) {
   });
   return [];
 }
-function getPfDesc(pf) { return pf.desc || pf.subtitle || ''; }
+function getPfDesc(pf) { return locMenuCopy(pf).desc; }
 
 function renderPrixFixe(container) {
   var menus = STATE.prixFixeMenus.length ? STATE.prixFixeMenus : SEED_PRIX_FIXE;
@@ -998,7 +1074,7 @@ function openTasting(tmId) {
   content.innerHTML = '<button style="position:absolute;top:1rem;right:1.2rem;background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--text-muted);" onclick="closeTastingModal()">×</button>'+
     '<div class="section-label" style="margin-bottom:0.3rem;">'+t('tasting')+'</div>'+
     '<h2 style="font-family:var(--font-display);font-size:1.8rem;font-weight:300;">'+tm.name+'</h2>'+
-    '<p style="color:var(--text-secondary);font-size:0.8rem;margin-top:0.3rem;">'+tm.subtitle+' · '+(tm.duration||'')+'</p>'+
+    '<p style="color:var(--text-secondary);font-size:0.8rem;margin-top:0.3rem;">'+escHtml(locMenuCopy(tm).subtitle)+' · '+(tm.duration||'')+'</p>'+
     '<p style="font-family:var(--font-display);font-size:1.4rem;color:var(--gold);margin-top:1rem;">$'+tm.price+' <span style="font-size:0.7rem;color:var(--text-muted);font-family:var(--font-body);">'+t('perPerson')+'</span></p>'+
     '<p style="color:var(--text-muted);font-size:0.75rem;margin-top:0.8rem;">'+t('servedAuto')+' · '+t('tastingDessertLater')+'</p>'+
     '<div class="tasting-modal-courses">'+
@@ -1062,7 +1138,138 @@ function openPrixFixe(pfId) {
 function switchLang(lang) {
   STATE.lang = lang;
   document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang===lang));
+  applyChrome();
   renderNav();
+}
+
+function langLabel(code){
+  return ({en:'English', es:'Spanish', fr:'French', ja:'Japanese'})[code] || code;
+}
+function looksEnglish(text){
+  var t=String(text||'').trim();
+  if (!t) return true;
+  if (/[\u3040-\u30ff\u3400-\u9fff]/.test(t)) return false;
+  var letters=t.replace(/[^A-Za-zÀ-ÿ]/g,'');
+  if (!letters) return false;
+  var ascii=(t.match(/[A-Za-z]/g)||[]).length;
+  return ascii/Math.max(letters.length,1) > 0.85;
+}
+function parseGoogleTranslate(data){
+  return (data && data[0] || []).map(function(row){ return row && row[0] ? row[0] : ''; }).join('');
+}
+function translateToEnglish(text, sourceLang){
+  var original=String(text||'').trim().slice(0,800);
+  if (!original) return Promise.resolve({ en:'', original:'', via:'empty' });
+  if (sourceLang==='en') {
+    return Promise.resolve({ en:original, original:original, via:'english' });
+  }
+  var sl=sourceLang==='ja'?'ja':(sourceLang||'auto');
+  var q=encodeURIComponent(original);
+  function fromMyMemory(){
+    return fetch('https://api.mymemory.translated.net/get?q='+q+'&langpair='+encodeURIComponent(sl)+'|en')
+      .then(function(r){ if(!r.ok) throw new Error('mm '+r.status); return r.json(); })
+      .then(function(data){
+        var en=(data && data.responseData && data.responseData.translatedText || '').trim();
+        if (!en || /^MYMEMORY WARNING/i.test(en)) throw new Error('empty mm');
+        return { en:en, original:original, via:'mymemory' };
+      });
+  }
+  function fromGoogle(){
+    return fetch('https://translate.googleapis.com/translate_a/single?client=gtx&sl='+encodeURIComponent(sl)+'&tl=en&dt=t&q='+q)
+      .then(function(r){ if(!r.ok) throw new Error('gtx '+r.status); return r.json(); })
+      .then(function(data){
+        var en=parseGoogleTranslate(data).trim();
+        if (!en) throw new Error('empty gtx');
+        return { en:en, original:original, via:'google' };
+      });
+  }
+  return fromMyMemory().catch(fromGoogle).catch(function(){
+    return { en:original, original:original, via:'untranslated' };
+  });
+}
+function publishKitchenGuestOrder(order, docId){
+  if (!fbReady) return Promise.resolve();
+  var feedRef=fbDb.collection('boh_shared').doc('active_orders');
+  return feedRef.get().then(function(doc){
+    var data=doc.exists && doc.data() || {};
+    var list=Array.isArray(data.list) ? data.list.filter(function(item){ return item && item.status==='new' && item.id!==docId; }) : [];
+    list.push(Object.assign({}, order, {id:docId, status:'new'}));
+    if (list.length>80) list=list.slice(list.length-80);
+    return feedRef.set({list:list, updatedAt:Date.now()},{merge:true});
+  }).catch(function(err){ console.warn('iPad kitchen feed', err); });
+}
+function sendGuestOrder(){
+  var ta=document.getElementById('guest-order-text');
+  var send=document.getElementById('order-pad-send');
+  var status=document.getElementById('order-pad-status');
+  var original=(ta && ta.value || '').trim();
+  if (!original){
+    if (status){ status.className='pad-status err'; status.textContent=t('orderPadEmpty'); }
+    return;
+  }
+  send.disabled=true;
+  send.dataset.busy='1';
+  send.textContent=t('orderPadSending');
+  if (status){ status.className='pad-status'; status.textContent=''; }
+  translateToEnglish(original, STATE.lang).then(function(tr){
+    var en=tr.en || original;
+    var payload={
+      table: STATE.tableNum,
+      from: 'guest',
+      kind: 'ipad_order',
+      lang: STATE.lang,
+      langLabel: langLabel(STATE.lang),
+      text: en,
+      original: original,
+      translated: tr.via!=='untranslated' && en!==original,
+      via: tr.via,
+      time: Date.now()
+    };
+    var kitchenOrder={
+      table: STATE.tableNum,
+      guestCount: 1,
+      server: 'iPad',
+      serverRole: 'Guest',
+      type: 'ipad_guest_order',
+      items: [{
+        name: 'iPad guest order',
+        station: 'Expo',
+        notes: en,
+        cookTime: 0,
+        qty: 1
+      }],
+      guestNote: en,
+      originalNote: original,
+      lang: STATE.lang,
+      status: 'new',
+      sentAt: Date.now()
+    };
+    window.__lastGuestOrder={ payload:payload, kitchenOrder:kitchenOrder, via:tr.via };
+    var writes=[];
+    if (fbReady){
+      writes.push(fbDb.collection('messages').add(payload));
+      writes.push(fbDb.collection('orders').add(kitchenOrder).then(function(ref){
+        return publishKitchenGuestOrder(kitchenOrder, ref.id);
+      }));
+    }
+    return Promise.all(writes).then(function(){
+      send.disabled=false;
+      delete send.dataset.busy;
+      send.textContent=t('orderPadSend');
+      if (status){
+        status.className='pad-status ok';
+        status.textContent=t('orderPadSent')+(en ? ' — '+en : '');
+      }
+      if (ta) ta.value='';
+      toast(t('orderPadSent'));
+    });
+  }).catch(function(err){
+    console.error('iPad guest order', err);
+    send.disabled=false;
+    delete send.dataset.busy;
+    send.textContent=t('orderPadSend');
+    if (status){ status.className='pad-status err'; status.textContent=t('orderPadFail'); }
+  });
 }
 
 // ─── Call Server ────────────────────────────────────────────────
@@ -1087,6 +1294,7 @@ function showLatestMessage() {
 
 // ─── Init ───────────────────────────────────────────────────────
 function init() {
+  applyChrome();
   var sel = document.getElementById('setup-table');
   for (var i=1;i<=50;i++) sel.innerHTML+='<option value="'+i+'">Table '+i+'</option>';
   if(fbReady && fbAuth && !fbAuth.currentUser){
@@ -1121,7 +1329,7 @@ function applyAllergyFilter() {
   STATE.customerAllergies = Array.from(document.querySelectorAll('#allergy-checkboxes input:checked')).map(cb=>cb.value);
   var btn = document.getElementById('allergy-btn');
   btn.classList.toggle('active', STATE.customerAllergies.length > 0);
-  btn.textContent = STATE.customerAllergies.length ? 'Allergies ('+STATE.customerAllergies.length+')' : 'Allergies';
+  btn.textContent = STATE.customerAllergies.length ? t('allergies')+' ('+STATE.customerAllergies.length+')' : t('allergies');
   closeAllergyModal();
   renderContent();
   if (STATE.customerAllergies.length) toast('Menu updated — flagged items contain your allergens');
@@ -1131,7 +1339,7 @@ function clearAllergyFilter() {
   document.querySelectorAll('#allergy-checkboxes input').forEach(cb=>{cb.checked=false;cb.closest('.allergy-check').classList.remove('selected');});
   var btn = document.getElementById('allergy-btn');
   btn.classList.remove('active');
-  btn.textContent = 'Allergies';
+  btn.textContent = t('allergies');
   closeAllergyModal();
   renderContent();
   toast('Allergy filter cleared');
