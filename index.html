@@ -1295,7 +1295,8 @@ function openGuestDish(kind, menuId, itemId){
     var box = document.getElementById('dish-story-block');
     if (story && st){ st.textContent = story; if (box) box.style.display=''; }
   }
-  if (STATE.lang==='en'){ showLang(enExplain, storyEn); return; }
+  showLang(enExplain, storyEn);
+  if (STATE.lang==='en') return;
   Promise.all([
     translateText(enExplain, 'en', STATE.lang),
     storyEn ? translateText(storyEn, 'en', STATE.lang) : Promise.resolve('')
@@ -1383,10 +1384,35 @@ function looksEnglish(text){
 function parseGoogleTranslate(data){
   return (data && data[0] || []).map(function(row){ return row && row[0] ? row[0] : ''; }).join('');
 }
+function glossaryToEnglish(text){
+  var key=String(text||'').trim().toLowerCase()
+    .replace(/^[¡!]+/,'').replace(/[.!?…]+$/,'').replace(/\s+/g,' ');
+  return ({
+    'hola':'Hello',
+    'buenos días':'Good morning',
+    'buenos dias':'Good morning',
+    'buenas tardes':'Good afternoon',
+    'buenas noches':'Good evening',
+    'gracias':'Thank you',
+    'por favor':'Please',
+    'bonjour':'Hello',
+    'bonsoir':'Good evening',
+    'merci':'Thank you',
+    'salut':'Hi',
+    '你好':'Hello',
+    '您好':'Hello',
+    '谢谢':'Thank you',
+    '謝謝':'Thank you'
+  })[key] || '';
+}
 function translateText(text, sourceLang, targetLang){
   var original=String(text||'').trim().slice(0,800);
   if (!original) return Promise.resolve('');
   if (!targetLang || sourceLang===targetLang) return Promise.resolve(original);
+  if (targetLang==='en') {
+    var gloss=glossaryToEnglish(original);
+    if (gloss) return Promise.resolve(gloss);
+  }
   var sl=gtxLang(sourceLang);
   var tl=gtxLang(targetLang);
   var q=encodeURIComponent(original);
