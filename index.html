@@ -678,7 +678,32 @@ function createNamedFirestoreAdapter(){
 
 if (typeof fbReady !== 'undefined' && fbReady) fbDb = createNamedFirestoreAdapter();
 // ─── State ──────────────────────────────────────────────────────
-var STATE = { lang:'en', tableNum:1, menuItems:[], menuCategories:[], messages:[], tastingMenus:[], prixFixeMenus:[], customerAllergies:[] };
+var STATE = { lang:'en', tableNum:1, menuItems:[], menuCategories:[], messages:[], tastingMenus:[], prixFixeMenus:[], customerAllergies:[], menuPhotos:{} };
+
+function bohPhoto(id, fallback){
+  var u = (STATE.menuPhotos && id && STATE.menuPhotos[id]) || '';
+  return u || fallback || '';
+}
+function applyBohMenuPhotos(){
+  var map = STATE.menuPhotos || {};
+  function fill(obj, key){
+    if (!obj) return;
+    var u = map[key];
+    if (!u) return;
+    if (!obj.photoUrl) obj.photoUrl = u;
+    if (!obj.photo) obj.photo = u;
+  }
+  (STATE.menuItems || []).forEach(function(it){ fill(it, it.id); });
+  (STATE.prixFixeMenus || []).forEach(function(pf){
+    (pf.dishes || []).forEach(function(d){ fill(d, 'pfdish:' + pf.id + '|' + d.id); });
+    (pf.courses || []).forEach(function(c){
+      (c.options || []).forEach(function(o){ fill(o, 'pfdish:' + pf.id + '|' + (o.id || '')); });
+    });
+  });
+  (STATE.tastingMenus || []).forEach(function(tm){
+    (tm.courses || []).forEach(function(c){ fill(c, 'tmcourse:' + tm.id + '|' + c.id); });
+  });
+}
 
 var SEED_CATEGORIES = [
   {id:'tasting',name:'Tasting Menus',visible:true,type:'special'},
@@ -749,11 +774,12 @@ function loadFromFirebase() {
       STATE.menuItems = (doc.data().items||[]).map(function(it){
         return Object.assign({}, it, {
           category: (it.catIds||[])[0] || '',
-          photo: it.photoUrl || it.photo || '',
+          photo: bohPhoto(it.id, it.photoUrl || it.photo),
           dietary: it.diet || it.dietary || [],
           allergens: it.allergens || []
         });
       });
+      applyBohMenuPhotos();
     } else { STATE.menuCategories = SEED_CATEGORIES; STATE.menuItems = SEED_ITEMS; }
     if(_menuReady) { renderNav(); }
   }, function(){ STATE.menuCategories = SEED_CATEGORIES; STATE.menuItems = SEED_ITEMS; });
@@ -762,6 +788,7 @@ function loadFromFirebase() {
   fbDb.collection('boh_shared').doc('tasting_menus').onSnapshot(function(doc){
     var list = (doc.exists && Array.isArray((doc.data()||{}).list)) ? doc.data().list : [];
     STATE.tastingMenus = mergeScaliniIpad(list, SEED_TASTING_MENUS, ['tm_chef7','tm_choc5','tm1','tm2']);
+    applyBohMenuPhotos();
     if(_menuReady && (currentNav==='tasting' || currentNav==='prix-fixe')) renderContent();
   }, function(err){
     console.error('Live tasting menu read failed',err);
@@ -773,12 +800,19 @@ function loadFromFirebase() {
   fbDb.collection('boh_shared').doc('prix_fixe_menus').onSnapshot(function(doc){
     var list = (doc.exists && Array.isArray((doc.data()||{}).list)) ? doc.data().list : [];
     STATE.prixFixeMenus = mergeScaliniIpad(list, SEED_PRIX_FIXE, ['pf_lunch','pf_brunch','pf1','pf2']);
+    applyBohMenuPhotos();
     if(_menuReady && currentNav==='prix-fixe') renderContent();
   }, function(err){
     console.error('Live prix fixe menu read failed',err);
     STATE.prixFixeMenus = SEED_PRIX_FIXE.slice();
     if(_menuReady && currentNav==='prix-fixe') renderContent();
   });
+
+  fbDb.collection('boh_shared').doc('menu_photos').onSnapshot(function(doc){
+    STATE.menuPhotos = (doc.exists && doc.data() && doc.data().urls) ? doc.data().urls : {};
+    applyBohMenuPhotos();
+    if(_menuReady) renderNav();
+  }, function(){});
 
   // Listen for messages
   fbDb.collection('messages').onSnapshot(snap => {
@@ -1087,6 +1121,7 @@ function openTasting(tmId) {
         var loc=locText(c);
         var hits=(c.allergens||[]).filter(function(a){ return STATE.customerAllergies.indexOf(a)>-1; });
         return '<div class="tasting-modal-course'+(hits.length?' has-allergen':'')+'">'+
+          (c.photoUrl||c.photo?'<img src="'+(c.photoUrl||c.photo)+'" style="width:100%;height:120px;object-fit:cover;border-radius:6px;margin-bottom:0.4rem;">':'')+
           '<div class="tasting-modal-course-num">Course '+(c.num||'')+'</div>'+
           '<div class="tasting-modal-course-name">'+loc.name+'</div>'+
           '<div class="tasting-modal-course-desc">'+loc.desc+(hits.length?' · ⚠ '+hits.join(', '):'')+'</div>'+
