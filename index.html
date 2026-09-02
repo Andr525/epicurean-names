@@ -1235,8 +1235,15 @@ function findGuestItem(kind, menuId, itemId){
     if (!pf) return null;
     var hit = (pf.dishes||[]).filter(function(d){ return d.id===itemId; })[0];
     getPfCourses(pf).forEach(function(cg){
-      (cg.options||[]).forEach(function(o){ if (o.id===itemId) hit = hit || o; });
+      (cg.options||[]).forEach(function(o){ if (o.id===itemId) hit = Object.assign({}, o, hit || {}); });
     });
+    if (hit && !hit.story) {
+      (SEED_PRIX_FIXE||[]).forEach(function(seedPf){
+        (seedPf.dishes||[]).concat((seedPf.courses||[]).reduce(function(acc,c){ return acc.concat(c.options||[]); }, [])).forEach(function(d){
+          if (d && d.id===itemId && d.story) hit.story = d.story;
+        });
+      });
+    }
     return hit || null;
   }
   if (kind==='tm'){
