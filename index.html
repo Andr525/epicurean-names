@@ -1461,6 +1461,8 @@ function onGuestOrderInput(){
   var original=(ta && ta.value || '').trim();
   if (!original){ out.textContent=''; window.__liveGuestEnglish=''; return; }
   if (STATE.lang==='en'){ out.textContent=original; window.__liveGuestEnglish=original; return; }
+  var gloss=glossaryToEnglish(original);
+  if (gloss){ out.textContent=gloss; window.__liveGuestEnglish=gloss; return; }
   out.textContent=t('translatingLive');
   clearTimeout(_padTimer);
   var gen=++_padGen;
