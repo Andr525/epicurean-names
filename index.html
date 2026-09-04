@@ -11,7 +11,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
-<script src="scalini-dining.js?v=print-115-btg"></script>
+<script src="scalini-dining.js?v=print-115-btg2"></script>
 <style>
 :root {
   --bg: #F6F1E8;
@@ -342,6 +342,22 @@ body { font-family:var(--font-body); color:var(--text-primary); background:var(-
 .story-block p, .ai-block p {
   font-size:1.05rem; line-height:1.55; color:var(--text-primary); font-weight:400;
 }
+.story-block {
+  max-height:9.5rem; overflow-y:auto;
+}
+.dish-order-box {
+  margin-top:0.9rem; padding:0.85rem 0.95rem; border-radius:var(--radius);
+  background:#fff; border:1px solid var(--border-gold);
+}
+.dish-order-box h4 {
+  font-size:0.72rem; letter-spacing:0.14em; text-transform:uppercase;
+  color:var(--gold); margin-bottom:0.45rem; font-weight:500;
+}
+.dish-add {
+  margin-top:0.7rem; width:100%; border:none; border-radius:var(--radius);
+  background:var(--gold); color:#fff; padding:0.85rem 1rem; font-size:0.85rem;
+  letter-spacing:0.08em; text-transform:uppercase; cursor:pointer; font-weight:500;
+}
 .tap-hint { font-size:0.72rem; color:var(--gold-dim); margin-top:0.25rem; letter-spacing:0.04em; }
 .btg-group-name {
   font-size:0.72rem; letter-spacing:0.14em; text-transform:uppercase;
@@ -358,11 +374,6 @@ body { font-family:var(--font-body); color:var(--text-primary); background:var(-
   font-size:0.82rem; cursor:pointer; color:var(--text-secondary);
 }
 .temp-row input { accent-color:var(--gold); margin-right:0.35rem; }
-.dish-add {
-  margin-top:1.1rem; width:100%; border:none; border-radius:var(--radius);
-  background:var(--gold); color:#fff; padding:0.85rem 1rem; font-size:0.85rem;
-  letter-spacing:0.08em; text-transform:uppercase; cursor:pointer; font-weight:500;
-}
 .story-link { display:inline-block; margin-top:0.5rem; color:var(--gold); font-size:0.88rem; }
 
 /* ─── FOOTER ─── */
@@ -1165,7 +1176,7 @@ function wineCardHtml(w, kind){
     '<div class="dish-info">'+
       '<div class="dish-name">'+escHtml(name)+'</div>'+
       '<div class="dish-desc">'+escHtml(desc)+'</div>'+
-      '<div class="tap-hint">'+t('tapForStory')+'</div>'+
+      '<div class="tap-hint">'+t('tapForWine')+'</div>'+
     '</div>'+
     '<div class="dish-price">$'+price+(extra?'<small style="display:block;font-size:0.65rem;letter-spacing:0.06em;">'+escHtml(extra)+'</small>':'')+'</div>'+
   '</div>';
@@ -1207,7 +1218,7 @@ function scaliniBtgSectionHtml(){
       html += '<div class="pf-dish" onclick="event.stopPropagation(); openGuestDish(\'wine\',\'\',\''+escHtml(w.id)+'\')">'+
         '<div class="pf-dish-copy"><div class="pf-dish-name">'+escHtml(w.name)+' <span class="upcharge">$'+w.glassPrice+' '+t('glassPrice')+'</span></div>'+
         (w.desc?'<div class="pf-dish-desc">'+escHtml(w.desc)+'</div>':'')+
-        '<div class="tap-hint">'+t('tapForStory')+'</div></div></div>';
+        '<div class="tap-hint">'+t('tapForWine')+'</div></div></div>';
     });
   });
   html += '</div>';
@@ -1449,21 +1460,21 @@ function openGuestDish(kind, menuId, itemId){
   if (item.pairDessert) pairHtml += '<div class="pair-row"><strong>'+t('dessertWine')+':</strong> '+escHtml(item.pairDessert)+'</div>';
   var chips = String(item.ingredients||'').split(',').map(function(s){ return s.trim(); }).filter(Boolean).map(function(p){ return '<span class="ing-chip">'+escHtml(p)+'</span>'; }).join('');
   var temps = tempOptionsFor(item);
-  var tempHtml = temps.length ? '<div class="ai-block"><h4>'+t('chooseTemp')+'</h4><div class="temp-row" id="dish-temp-row">'+temps.map(function(tmp,i){
+  var tempHtml = temps.length ? '<h4>'+t('chooseTemp')+'</h4><div class="temp-row" id="dish-temp-row">'+temps.map(function(tmp,i){
     return '<label><input type="radio" name="dish-temp" value="'+escHtml(tmp)+'"'+(i===1?' checked':'')+'> '+escHtml(tmp)+'</label>';
-  }).join('')+'</div></div>' : '';
+  }).join('')+'</div>' : '';
   var storyLink = item.storyUrl ? '<a class="story-link" href="'+escHtml(item.storyUrl)+'" target="_blank" rel="noopener">'+t('storyLink')+'</a>' : '';
   content.innerHTML = '<button style="position:absolute;top:1rem;right:1.2rem;background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--text-muted);" onclick="closeDishModal()">×</button>'+
-    (photo ? '<img src="'+escHtml(photo)+'" alt="'+escHtml(loc.name)+'" style="width:100%;height:220px;object-fit:cover;border-radius:var(--radius);margin-bottom:1.2rem;">' : photoThumbHtml('', loc.name))+
+    (photo ? '<img src="'+escHtml(photo)+'" alt="'+escHtml(loc.name)+'" style="width:100%;height:160px;object-fit:cover;border-radius:var(--radius);margin-bottom:0.9rem;">' : photoThumbHtml('', loc.name))+
     '<div class="section-label" style="margin-bottom:0.3rem;">'+t('aboutDish')+'</div>'+
     '<h2>'+escHtml(loc.name)+'</h2>'+
     '<p style="color:var(--text-secondary);margin-bottom:0.5rem;font-size:1.08rem;font-weight:400;line-height:1.6;">'+escHtml(loc.desc||'')+'</p>'+
     price+allergenWarning+allergens+dietary+pairHtml+
+    '<div class="dish-order-box">'+tempHtml+
+    '<button type="button" class="dish-add" onclick="addDishFromModal()">'+t('addToOrder')+'</button></div>'+
     (chips ? '<div class="ing-chips"><h4 style="font-size:0.72rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);margin-bottom:0.35rem;">'+t('ingredientsTitle')+'</h4>'+chips+'</div>' : '')+
     '<div class="story-block" id="dish-story-block" style="'+(item.story?'':'display:none')+'"><h4>'+t('fromTheKitchen')+'</h4><p id="dish-story-text">'+escHtml(item.story||'')+'</p>'+storyLink+'</div>'+
-    '<div class="ai-block"><h4>'+t('aiExplain')+'</h4><p id="dish-ai-text">'+t('translatingLive')+'</p></div>'+
-    tempHtml+
-    '<button type="button" class="dish-add" onclick="addDishFromModal()">'+t('addToOrder')+'</button>';
+    '<div class="ai-block"><h4>'+t('aiExplain')+'</h4><p id="dish-ai-text">'+t('translatingLive')+'</p></div>';
   modal.classList.add('open');
   var enExplain = composeDishExplanation(item);
   var storyEn = item.story || '';
