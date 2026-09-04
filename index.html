@@ -1109,12 +1109,25 @@ function customerCats(){
     if (hit) { hit.name=s.name; hit.visible=true; }
     else cats.unshift(s);
   });
-  var glassHit=cats.filter(function(c){ return c.id==='wine-glass'; })[0];
-  if (glassHit) glassHit.name=t('winesByGlass');
-  else cats.push({id:'wine-glass', name:t('winesByGlass'), visible:true, type:'special'});
   var wineHit=cats.filter(function(c){ return c.id==='wine'; })[0];
   if (wineHit) wineHit.name=t('wineBottles');
   else cats.push({id:'wine', name:t('wineBottles'), visible:true});
+  var glassHit=cats.filter(function(c){ return c.id==='wine-glass'; })[0];
+  var wineIdx=-1;
+  cats.forEach(function(c,i){ if (c.id==='wine') wineIdx=i; });
+  if (glassHit) {
+    glassHit.name=t('winesByGlass');
+    if (wineIdx>=0) {
+      cats = cats.filter(function(c){ return c.id!=='wine-glass'; });
+      wineIdx=-1;
+      cats.forEach(function(c,i){ if (c.id==='wine') wineIdx=i; });
+      cats.splice(wineIdx+1, 0, glassHit);
+    }
+  } else if (wineIdx>=0) {
+    cats.splice(wineIdx+1, 0, {id:'wine-glass', name:t('winesByGlass'), visible:true, type:'special'});
+  } else {
+    cats.push({id:'wine-glass', name:t('winesByGlass'), visible:true, type:'special'});
+  }
   return cats.filter(function(c){ return c && c.visible!==false; });
 }
 function renderNav() {
