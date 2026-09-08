@@ -12,7 +12,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
 <script src="cellar.js?v=binwise-375-park-v1"></script>
-<script src="scalini-dining.js?v=cellar-btg-20260910"></script>
+<script src="scalini-dining.js?v=concerto-20260910"></script>
 <style>
 :root {
   --bg: #F6F1E8;
@@ -1744,6 +1744,7 @@ function generalWinePairing(item){
   if (/whiskey|whisky|spirit|cognac|mezcal|gin|vodka|rum|tequila/.test(blob)) return 'After dinner, or with dark chocolate and nuts.';
   if (/port|tawny|ruby/.test(blob)) return 'Blue cheese, walnuts, and dark chocolate.';
   if (/ice wine|eiswein|moscato/.test(blob)) return 'Fruit tarts and cheeses that are not too salty.';
+  if (/lambrusco/.test(blob)) return 'Salumi, fried vegetables, and pizza.';
   if (/champagne|prosecco|sparkling|brut|krug|cuv[eé]e/.test(blob)) return 'Oysters, caviar, and simply prepared fish; also as an aperitif.';
   if (/pinot blanc|pinot bianco|sauvignon|gavi|auxerrois|cortese/.test(blob)) return 'Shellfish, salads, and dishes with herbs or citrus.';
   if (/chardonnay/.test(blob)) return 'Rich fish, lobster, and dishes with butter or cream.';
