@@ -1392,7 +1392,7 @@ function wineCardHtml(w, kind){
     '<div class="dish-info">'+
       '<div class="dish-name">'+escHtml(name)+'</div>'+
       '<div class="dish-desc">'+escHtml(desc)+'</div>'+
-      '<div class="tap-hint">'+t('tapForWine')+'</div>'+
+      '<div class="tap-hint">'+(kind==='glass'?t('tapForWine'):'Tap to add this bottle')+'</div>'+
     '</div>'+
     '<div class="dish-price">'+priceHtml+'</div>'+
   '</div>';
