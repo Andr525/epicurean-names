@@ -1451,7 +1451,13 @@ function renderWineGlass(container){
 var _wineFind='';
 function onWineFind(el){
   _wineFind=String(el && el.value || '');
+  var s=el ? el.selectionStart : _wineFind.length;
   if (isWineBottleNav(currentNav)) renderWineBottles(document.getElementById('menu-content'));
+  var inp=document.querySelector('.wine-find');
+  if (inp){
+    inp.focus();
+    try { inp.setSelectionRange(s, s); } catch (e) {}
+  }
 }
 function renderWineBottles(container){
   var list = cellarMenuList();
