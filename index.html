@@ -1016,7 +1016,10 @@ function scaliniBtgList(){
 }
 function ipadWineName(w){
   if (!w) return '';
-  return String(w.name||'').trim()+(w.vintage && w.vintage!=='NV' ? ' '+w.vintage : '');
+  var name = String(w.name||'').trim();
+  var vintage = w.vintage && w.vintage!=='NV' ? String(w.vintage) : '';
+  if (vintage && name.indexOf(vintage)===-1) name += ' '+vintage;
+  return name;
 }
 function flattenIpadWines(){
   var all=[], n=STATE._wineChunkCount||1;
@@ -1203,8 +1206,9 @@ function customerCats(){
   });
   if (!bottleKeep) bottleKeep={id:'wine', name:t('wineBottles'), visible:true};
   if (!glassKeep) glassKeep={id:'wine-glass', name:t('winesByGlass'), visible:true, type:'special'};
-  cats.push(bottleKeep);
-  cats.push(glassKeep);
+  var insertAt = 0;
+  cats.forEach(function(c,i){ if (c.id==='tasting' || c.id==='prix-fixe') insertAt=i+1; });
+  cats.splice(insertAt, 0, glassKeep, bottleKeep);
   return cats.filter(function(c){ return c && c.visible!==false; });
 }
 function renderNav() {
@@ -1514,37 +1518,30 @@ function composeDishExplanation(item){
   var desc = loc.desc || item.desc || '';
   var parts = [];
   parts.push(name + (desc ? ': ' + desc.replace(/[.]$/,'') + '.' : '.'));
-  var ing = ingredientExplain(item);
-  if (ing) parts.push('Ingredients: ' + ing);
+  if (item.story) parts.push(item.story);
   if (item.pairWhite) parts.push('Suggested white by the glass: ' + item.pairWhite + '.');
   if (item.pairRed) parts.push('Suggested red by the glass: ' + item.pairRed + '.');
   if (item.pairDessert) parts.push('Dessert wine: ' + item.pairDessert + '.');
   if (item.pairing && !item.pairWhite && !item.pairRed) parts.push('Suggested pairing: ' + item.pairing + '.');
   if ((item.allergens||[]).length) parts.push('Please tell your server about allergies. This dish may contain: ' + item.allergens.join(', ') + '.');
   if (item.upcharge) parts.push('There is a supplement of $' + item.upcharge + '.');
-  if (item.story) parts.push(item.story);
   return parts.join(' ');
 }
 function composeWineExplanation(item){
   var notes = (typeof EPICUREAN_SCALINI !== 'undefined' && EPICUREAN_SCALINI.wineNotes) || {};
+  var note = notes[item.id] || item.note || '';
+  if (note) {
+    if ((item.allergens||[]).length) note += ' Contains: ' + item.allergens.join(', ') + '.';
+    return note;
+  }
   var name = item.name || 'This wine';
   var vintage = item.vintage && item.vintage !== 'NV' ? item.vintage : 'non-vintage';
   var grape = item.varietal || item.grape || '';
-  var region = item.region || '';
-  var country = item.country || '';
-  var producer = item.producer || '';
-  var parts = [];
-  parts.push(name + ' is a ' + (item.group ? String(item.group).toLowerCase()+' ' : '') + 'wine.');
-  if (producer) parts.push('Producer: ' + producer + '.');
-  parts.push('Vintage: ' + vintage + '.');
-  if (country || region) parts.push('From ' + [region, country].filter(Boolean).join(', ') + '.');
-  if (grape) parts.push('Grape: ' + grape + '.');
-  if (item.glassPrice) parts.push('Glass $' + item.glassPrice + (item.bottlePrice ? '; bottle $' + item.bottlePrice : '') + '.');
-  else if (item.bottlePrice || item.price) parts.push('Bottle $' + (item.bottlePrice || item.price) + '.');
-  var note = notes[item.id] || item.note || '';
-  if (note) parts.push(note);
-  if ((item.allergens||[]).length) parts.push('Contains: ' + item.allergens.join(', ') + '.');
-  return parts.join(' ');
+  var bits = [name + ' is from ' + [item.region, item.country].filter(Boolean).join(', ') + '.'];
+  bits.push('Vintage: ' + vintage + '.');
+  if (grape) bits.push('Grape: ' + grape + '.');
+  if (item.glassPrice) bits.push('Glass $' + item.glassPrice + (item.bottlePrice ? '; bottle $' + item.bottlePrice : '') + '.');
+  return bits.join(' ');
 }
 function isWineItem(item, kind){
   return kind==='wine' || !!(item && (item.kind==='wine' || item.byTheGlass || item.glassPrice));
