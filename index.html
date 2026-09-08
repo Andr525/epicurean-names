@@ -11,7 +11,8 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
-<script src="scalini-dining.js?v=print-btg-20260909"></script>
+<script src="cellar.js?v=binwise-375-park-v1"></script>
+<script src="scalini-dining.js?v=cellar-btg-20260910"></script>
 <style>
 :root {
   --bg: #F6F1E8;
@@ -118,6 +119,9 @@ body { font-family:var(--font-body); color:var(--text-primary); background:var(-
   width:100%; padding:0.7rem 0.85rem; border-radius:8px;
   border:1px solid var(--border); background:var(--bg-elevated);
   font-size:0.85rem; margin:0 0 1rem; font-family:var(--font-body);
+}
+.wine-count {
+  color:var(--text-muted); font-size:0.75rem; margin:-0.35rem 0 0.85rem;
 }
 .wine-brief {
   color:var(--text-secondary); font-size:0.95rem; line-height:1.55;
@@ -972,6 +976,7 @@ function mergeScaliniIpad(list, seed, dummyIds){
 var _menuReady = false;
 function loadFromFirebase() {
   if (!fbReady) { useSeedData(); return; }
+  applyBinwiseCellar(false);
 
   // Real-time listener for regular menu items
   fbDb.collection('boh_shared').doc('menu').onSnapshot(function(doc){
@@ -1035,8 +1040,11 @@ function useSeedData() {
   STATE.tastingMenus = SEED_TASTING_MENUS;
   STATE.prixFixeMenus = SEED_PRIX_FIXE;
   STATE.wines = scaliniBtgList();
-  STATE.wineBottles = SEED_ITEMS.filter(function(i){ return i.category==='wine'; });
   STATE.barDrinks = [];
+  applyBinwiseCellar(true);
+  if (!(STATE.wineBottles||[]).length) {
+    STATE.wineBottles = SEED_ITEMS.filter(function(i){ return i.category==='wine'; });
+  }
 }
 function scaliniBtgList(){
   return (typeof EPICUREAN_SCALINI!=='undefined' && Array.isArray(EPICUREAN_SCALINI.winesByGlass))
@@ -1086,6 +1094,7 @@ function cellarGroup(w){
   return 'Wine';
 }
 function cellarMenuList(){
+  if (!(STATE.wineBottles&&STATE.wineBottles.length>=50)) applyBinwiseCellar(true);
   var bottles=((STATE.wineBottles&&STATE.wineBottles.length)?STATE.wineBottles:SEED_ITEMS.filter(function(i){ return i.category==='wine'; })).slice();
   var seen={};
   bottles.forEach(function(w){ if (w && w.id) seen[w.id]=1; });
@@ -1107,16 +1116,41 @@ function cellarMenuList(){
   });
   return bottles.filter(function(w){ return w && w.visible!==false && String(w.name||'').trim(); });
 }
+function cloneCellarList(list){ return JSON.parse(JSON.stringify(list||[])); }
+function applyBinwiseCellar(force){
+  var seed=typeof BINWISE_CELLAR!=='undefined' ? BINWISE_CELLAR : null;
+  if (!seed || !Array.isArray(seed.wines) || !seed.wines.length) return false;
+  var have=(STATE.wineBottles||[]).length;
+  if (force || have<50) {
+    STATE.wineBottles = cloneCellarList(seed.wines).filter(function(w){
+      return w && w.visible!==false && w.active!==false && String(w.name||'').trim();
+    });
+  }
+  var drinks=cloneCellarList(seed.beers||[]).concat(cloneCellarList(seed.spirits||[])).filter(function(b){
+    return b && b.visible!==false && b.active!==false && String(b.name||'').trim();
+  });
+  if (drinks.length && (!(STATE.barDrinks||[]).length || STATE.barDrinks.length<5)) {
+    STATE.barDrinks = drinks;
+  }
+  return true;
+}
 function flattenIpadWines(){
   var all=[], n=STATE._wineChunkCount||1;
   for (var i=0;i<n;i++) all=all.concat(STATE._wineParts[i]||[]);
-  STATE.wineBottles = all.filter(function(w){ return w && w.visible!==false && String(w.name||'').trim(); });
+  var live = all.filter(function(w){ return w && w.visible!==false && String(w.name||'').trim(); });
+  if (live.length>=50) STATE.wineBottles = live;
+  else applyBinwiseCellar(true);
   if(_menuReady) renderNav();
 }
 function listenIpadWines(){
+  applyBinwiseCellar(false);
   if (!fbReady) return;
   fbDb.collection('boh_shared').doc('wines').onSnapshot(function(doc){
-    if (!doc.exists || !doc.data()) return;
+    if (!doc.exists || !doc.data()) {
+      applyBinwiseCellar(true);
+      if(_menuReady) renderNav();
+      return;
+    }
     var d=doc.data();
     STATE._wineChunkCount=Number(d.chunkCount)||1;
     STATE._wineParts=STATE._wineParts||[];
@@ -1135,14 +1169,16 @@ function listenIpadWines(){
       }
     }
     flattenIpadWines();
-  }, function(){});
+  }, function(){ applyBinwiseCellar(true); if(_menuReady) renderNav(); });
   fbDb.collection('boh_shared').doc('bar').onSnapshot(function(doc){
     var list = doc.exists && doc.data() && Array.isArray(doc.data().list) ? doc.data().list : [];
-    STATE.barDrinks = list.filter(function(b){
+    var beers = list.filter(function(b){
       if (!b || b.visible===false || !String(b.name||'').trim()) return false;
       var k=String(b.kind||b.category||'').toLowerCase();
       return k==='beer' || k==='spirit' || k==='spirits';
     });
+    if (beers.length>=5) STATE.barDrinks = beers;
+    else applyBinwiseCellar(false);
     if(_menuReady) renderNav();
   }, function(){});
 }
@@ -1424,15 +1460,20 @@ function renderWineBottles(container){
     var blob=[w.name,w.producer,w.region,w.vintage,w.varietal,w.grape,w.kind,w.desc,w.size].join(' ').toLowerCase();
     return blob.indexOf(q)>=0;
   });
+  var total = list.length;
+  var shown = list;
+  if (!q && total>120) shown = list.slice(0,120);
+  else if (q && total>400) shown = list.slice(0,400);
   var html = '<div class="section-header"><div class="section-label">'+t('wineBottles')+'</div><div class="section-title">'+t('wineBottles')+'</div></div>';
   html += '<input class="wine-find" value="'+escHtml(_wineFind)+'" placeholder="'+escHtml(t('findCellar'))+'" oninput="onWineFind(this)">';
+  html += '<div class="wine-count">'+total+' labels in the cellar'+(shown.length<total?' · showing '+shown.length+' — type to find any bottle':'')+'.</div>';
   if (!list.length) {
     container.innerHTML = html + '<p style="color:var(--text-muted);padding:2rem;">No bottles listed.</p>';
     return;
   }
   var groups=['Wine','Beer','Spirits'];
   groups.forEach(function(g){
-    var rows=list.filter(function(w){ return cellarGroup(w)===g; });
+    var rows=shown.filter(function(w){ return cellarGroup(w)===g; });
     if (!rows.length) return;
     html += '<div class="btg-group-name">'+escHtml(g==='Wine'?t('wineBottles'):(g==='Beer'?t('cellarBeer'):t('cellarSpirits')))+'</div>';
     rows.forEach(function(w){ html += wineCardHtml(w, 'bottle'); });
