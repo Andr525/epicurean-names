@@ -7,32 +7,34 @@
 <meta name="mobile-web-app-capable" content="yes">
 <title>The Epicurean House — Menu</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Great+Vibes&family=Inter:wght@300;400;500&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
 <script src="cellar.js?v=binwise-375-park-v1"></script>
-<script src="scalini-dining.js?v=concerto-20260910"></script>
+<script src="scalini-dining.js?v=glass-dark-20260912"></script>
 <style>
 :root {
-  --bg: #F6F1E8;
-  --bg-elevated: #FFFDF8;
-  --bg-card: #FFFFFF;
-  --bg-card-hover: #F3EBDD;
-  --gold: #8A6A1F;
-  --gold-dim: #A07C2E;
-  --gold-glow: rgba(138,106,31,0.12);
-  --text-primary: #1C1917;
-  --text-secondary: #44403C;
-  --text-muted: #78716C;
-  --border: rgba(28,25,23,0.10);
-  --border-gold: rgba(138,106,31,0.28);
-  --wine: #8B3A4A;
-  --sage: #4F7A4F;
-  --shadow: 0 10px 28px rgba(28,25,23,0.08);
+  --bg: #0b0c0f;
+  --bg-elevated: #14161c;
+  --bg-card: #16181f;
+  --bg-card-hover: #1d2028;
+  --gold: #c4a574;
+  --gold-dim: #a89068;
+  --gold-glow: rgba(196,165,116,0.14);
+  --text-primary: #f5f2eb;
+  --text-secondary: #d8d3c8;
+  --text-muted: #9a958c;
+  --border: rgba(196,165,116,0.18);
+  --border-gold: rgba(196,165,116,0.38);
+  --wine: #c47884;
+  --sage: #7ea87e;
+  --shadow: 0 16px 40px rgba(0,0,0,0.45);
   --radius: 10px;
   --radius-lg: 16px;
-  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-script: 'Great Vibes', 'Snell Roundhand', cursive;
+  --font-display: 'Cinzel', 'Times New Roman', serif;
+  --font-desc: 'Cormorant Garamond', Georgia, serif;
   --font-body: 'Inter', 'Noto Sans SC', -apple-system, sans-serif;
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 }
@@ -46,17 +48,23 @@ body { font-family:var(--font-body); color:var(--text-primary); background:var(-
 
 /* ─── SETUP SCREEN ─── */
 #setup {
-  background:var(--bg);
+  background:
+    radial-gradient(ellipse at 50% 12%, rgba(196,165,116,0.16) 0%, transparent 46%),
+    linear-gradient(180deg, #1c1e26 0%, #0b0c0f 52%, #08090c 100%);
   align-items:center; justify-content:center; text-align:center;
   padding:2rem; position:relative;
 }
 #setup::before {
   content:''; position:absolute; inset:0;
-  background:radial-gradient(ellipse at 50% 30%, rgba(200,169,97,0.04) 0%, transparent 70%);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.04) 0%, transparent 28%),
+    repeating-linear-gradient(90deg, rgba(196,165,116,0.03) 0 1px, transparent 1px 7px);
+  pointer-events:none;
 }
 #setup h1 {
-  font-family:var(--font-display); font-size:3rem; font-weight:300;
-  letter-spacing:0.08em; color:var(--text-primary); position:relative;
+  font-family:var(--font-script); font-size:4.2rem; font-weight:400;
+  letter-spacing:0.02em; color:#f7f3ea; position:relative;
+  text-shadow:0 2px 24px rgba(196,165,116,0.22);
 }
 #setup .subtitle {
   font-family:var(--font-body); font-size:0.7rem; color:var(--text-muted);
@@ -88,7 +96,7 @@ body { font-family:var(--font-body); color:var(--text-primary); background:var(-
   color:var(--text-primary); font-size:0.85rem; margin-bottom:1rem;
   appearance:none; font-family:var(--font-body);
 }
-.setup-form select option { background:#fff; color:#1c1917; }
+.setup-form select option { background:#14161c; color:#f5f2eb; }
 .btn-open {
   width:100%; padding:1rem; border:none; border-radius:var(--radius);
   background:var(--gold); color:#FAF6EE; font-size:0.85rem; font-weight:500;
@@ -106,7 +114,7 @@ body { font-family:var(--font-body); color:var(--text-primary); background:var(-
 }
 .scoop-card {
   border:1px solid var(--border); border-radius:8px; padding:0.65rem 0.7rem;
-  background:#fff; cursor:pointer; text-align:left;
+  background:var(--bg-card); cursor:pointer; text-align:left;
 }
 .scoop-card.on { border-color:var(--gold); background:var(--gold-glow); }
 .scoop-kind {
@@ -118,7 +126,7 @@ body { font-family:var(--font-body); color:var(--text-primary); background:var(-
 .wine-find {
   width:100%; padding:0.7rem 0.85rem; border-radius:8px;
   border:1px solid var(--border); background:var(--bg-elevated);
-  font-size:0.85rem; margin:0 0 1rem; font-family:var(--font-body);
+  color:var(--text-primary); font-size:0.85rem; margin:0 0 1rem; font-family:var(--font-body);
 }
 .wine-count {
   color:var(--text-muted); font-size:0.75rem; margin:-0.35rem 0 0.85rem;
@@ -136,8 +144,8 @@ body { font-family:var(--font-body); color:var(--text-primary); background:var(-
   flex-shrink:0;
 }
 .menu-header .brand {
-  font-family:var(--font-display); font-size:1.2rem; color:var(--text-primary);
-  font-weight:300; letter-spacing:0.04em;
+  font-family:var(--font-script); font-size:1.85rem; color:#fff;
+  font-weight:400; letter-spacing:0.02em;
 }
 .menu-header .table-badge, .menu-header .table-edit {
   font-size:0.65rem; font-weight:500; color:var(--gold);
@@ -148,7 +156,7 @@ body { font-family:var(--font-body); color:var(--text-primary); background:var(-
   font-size:0.75rem; font-weight:500; color:var(--gold);
   letter-spacing:0.08em; text-transform:uppercase;
   border:1px solid var(--border-gold); border-radius:6px;
-  background:#fff; padding:0.28rem 0.45rem; min-width:5.2rem;
+  background:var(--bg-card); padding:0.28rem 0.45rem; min-width:5.2rem;
 }
 .call-server-btn {
   background:transparent; color:var(--text-secondary); border:1px solid var(--border);
@@ -185,12 +193,12 @@ body { font-family:var(--font-body); color:var(--text-primary); background:var(-
   margin-bottom:1.5rem; padding-bottom:1rem; border-bottom:1px solid var(--border);
 }
 .section-label {
-  font-size:0.6rem; letter-spacing:0.25em; text-transform:uppercase;
-  color:var(--gold-dim); margin-bottom:0.4rem; font-weight:400;
+  font-family:var(--font-display); font-size:0.62rem; letter-spacing:0.28em; text-transform:uppercase;
+  color:var(--gold-dim); margin-bottom:0.4rem; font-weight:500;
 }
 .section-title {
-  font-family:var(--font-display); font-size:2rem; font-weight:300;
-  color:var(--text-primary); letter-spacing:0.02em;
+  font-family:var(--font-script); font-size:2.85rem; font-weight:400;
+  color:#fff; letter-spacing:0.02em; line-height:1.05;
 }
 
 /* ─── REGULAR MENU GRID ─── */
@@ -205,12 +213,12 @@ body { font-family:var(--font-body); color:var(--text-primary); background:var(-
 .dish-row:hover { background:var(--bg-elevated); margin:0 -1rem; padding-left:1rem; padding-right:1rem; border-radius:var(--radius); }
 .dish-info { flex:1; }
 .dish-name {
-  font-family:var(--font-display); font-size:1.42rem; font-weight:500;
-  color:var(--text-primary); margin-bottom:0.3rem; letter-spacing:0.01em;
+  font-family:var(--font-display); font-size:0.92rem; font-weight:500;
+  color:#fff; margin-bottom:0.3rem; letter-spacing:0.16em; text-transform:uppercase;
 }
 .dish-desc {
-  font-size:0.98rem; color:var(--text-secondary); line-height:1.55;
-  font-weight:400; max-width:560px;
+  font-family:var(--font-desc); font-size:1.08rem; color:var(--text-secondary); line-height:1.55;
+  font-weight:400; font-style:italic; max-width:560px;
 }
 .dish-tags-row { display:flex; gap:0.4rem; margin-top:0.5rem; flex-wrap:wrap; }
 .dish-tag {
@@ -274,8 +282,8 @@ body { font-family:var(--font-body); color:var(--text-primary); background:var(-
 .tasting-card:hover { border-color:var(--gold); background:var(--bg-card-hover); }
 .tasting-card-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem; }
 .tasting-card-title {
-  font-family:var(--font-display); font-size:1.5rem; font-weight:400;
-  color:var(--text-primary);
+  font-family:var(--font-script); font-size:2.2rem; font-weight:400;
+  color:#fff;
 }
 .tasting-card-subtitle {
   font-size:0.7rem; color:var(--text-muted); letter-spacing:0.1em;
@@ -316,8 +324,8 @@ body { font-family:var(--font-body); color:var(--text-primary); background:var(-
 .prix-fixe-card:hover { border-color:var(--border-gold); }
 .prix-fixe-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.2rem; }
 .prix-fixe-title {
-  font-family:var(--font-display); font-size:1.4rem; font-weight:400;
-  color:var(--text-primary);
+  font-family:var(--font-script); font-size:2.15rem; font-weight:400;
+  color:#fff;
 }
 .prix-fixe-desc {
   font-size:0.75rem; color:var(--text-muted); margin-top:0.3rem; font-weight:300;
@@ -332,8 +340,12 @@ body { font-family:var(--font-body); color:var(--text-primary); background:var(-
 .prix-fixe-courses { margin-top:1rem; }
 .prix-fixe-course-group { margin-bottom:1rem; }
 .prix-fixe-course-label {
-  font-size:0.6rem; letter-spacing:0.2em; text-transform:uppercase;
-  color:var(--gold-dim); margin-bottom:0.4rem;
+  font-family:var(--font-display); font-size:0.72rem; letter-spacing:0.28em; text-transform:uppercase;
+  color:var(--gold); margin-bottom:0.15rem;
+}
+.course-subhead {
+  font-family:var(--font-desc); font-style:italic; font-size:1rem;
+  color:var(--text-muted); margin-bottom:0.55rem;
 }
 .prix-fixe-option {
   padding:0.4rem 0; font-size:1.05rem; color:var(--text-secondary);
@@ -347,19 +359,21 @@ body { font-family:var(--font-body); color:var(--text-primary); background:var(-
 }
 .pf-dish:hover { background:var(--bg-card-hover); margin:0 -0.6rem; padding-left:0.6rem; padding-right:0.6rem; border-radius:var(--radius); }
 .pf-dish-copy { flex:1; min-width:0; }
-.pf-dish-name { font-family:var(--font-display); font-size:1.28rem; color:var(--text-primary); font-weight:500; }
-.pf-dish-desc { font-size:0.95rem; color:var(--text-secondary); margin-top:0.2rem; line-height:1.45; }
+.pf-dish-name { font-family:var(--font-display); font-size:0.86rem; color:#fff; font-weight:500; letter-spacing:0.14em; text-transform:uppercase; }
+.pf-dish-desc { font-family:var(--font-desc); font-style:italic; font-size:1.02rem; color:var(--text-secondary); margin-top:0.2rem; line-height:1.45; }
+.pf-dish.is-heading { cursor:default; }
+.pf-dish.is-heading:hover { background:transparent; margin:0; padding-left:0; padding-right:0; }
 .dish-thumb {
   width:112px; height:84px; object-fit:cover; border-radius:8px;
-  flex-shrink:0; background:#E8DFD0; display:block;
+  flex-shrink:0; background:#2a2d36; display:block; border:1px solid var(--border);
 }
 .dish-thumb-empty {
-  background:linear-gradient(135deg,#EDE4D4,#D9CDB8);
+  background:linear-gradient(135deg,#2a2d36,#1a1c22);
   position:relative;
 }
 .dish-thumb-empty::after {
   content:''; position:absolute; inset:28% 22%;
-  border:1.5px solid rgba(138,106,31,0.35); border-radius:50%;
+  border:1.5px solid rgba(196,165,116,0.35); border-radius:50%;
 }
 .menu-item-card {
   display:flex; gap:1rem; align-items:flex-start;
@@ -386,7 +400,7 @@ body { font-family:var(--font-body); color:var(--text-primary); background:var(-
 }
 .dish-order-box {
   margin-top:0.9rem; padding:0.85rem 0.95rem; border-radius:var(--radius);
-  background:#fff; border:1px solid var(--border-gold);
+  background:var(--bg-card); border:1px solid var(--border-gold);
 }
 .dish-order-box h4 {
   font-size:0.72rem; letter-spacing:0.14em; text-transform:uppercase;
@@ -458,7 +472,7 @@ body { font-family:var(--font-body); color:var(--text-primary); background:var(-
 .guest-order-pad textarea {
   width:100%; min-height:92px; max-height:160px; resize:vertical;
   padding:0.75rem 0.85rem; border-radius:var(--radius);
-  border:1px solid var(--border); background:#fff;
+  border:1px solid var(--border); background:var(--bg-card);
   color:var(--text-primary); font-family:var(--font-body); font-size:1.15rem; line-height:1.5;
 }
 .pad-split { display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; }
@@ -469,7 +483,7 @@ body { font-family:var(--font-body); color:var(--text-primary); background:var(-
 .pad-english {
   min-height:92px; max-height:160px; overflow:auto;
   padding:0.75rem 0.85rem; border-radius:var(--radius);
-  border:1px solid var(--border); background:#fff;
+  border:1px solid var(--border); background:var(--bg-card);
   color:var(--text-primary); font-size:1.15rem; line-height:1.5;
 }
 @media (max-width:720px) { .pad-split { grid-template-columns:1fr; } }
@@ -497,7 +511,13 @@ body { font-family:var(--font-body); color:var(--text-primary); background:var(-
   max-width:560px; width:100%; max-height:86vh; overflow-y:auto;
   box-shadow:var(--shadow); position:relative;
 }
-.modal-card h2 { font-family:var(--font-display); font-size:1.85rem; font-weight:400; margin-bottom:0.5rem; }
+.modal-card h2 { font-family:var(--font-display); font-size:1.15rem; font-weight:500; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:0.5rem; color:#fff; }
+.origin-links { margin-top:0.75rem; display:flex; flex-wrap:wrap; gap:0.45rem; }
+.origin-link {
+  display:inline-block; color:var(--gold); font-size:0.82rem;
+  border-bottom:1px solid var(--border-gold); text-decoration:none; letter-spacing:0.02em;
+}
+.origin-link:hover { color:#fff; }
 .modifier-group { margin-top:1.2rem; }
 .modifier-group h4 {
   font-size:0.65rem; text-transform:uppercase; letter-spacing:0.15em;
@@ -521,11 +541,11 @@ body { font-family:var(--font-body); color:var(--text-primary); background:var(-
   color:var(--gold-dim); margin-bottom:0.3rem;
 }
 .tasting-modal-course-name {
-  font-family:var(--font-display); font-size:1.1rem; font-weight:400;
-  color:var(--text-primary); margin-bottom:0.2rem;
+  font-family:var(--font-display); font-size:0.88rem; font-weight:500;
+  color:#fff; margin-bottom:0.2rem; letter-spacing:0.14em; text-transform:uppercase;
 }
 .tasting-modal-course-desc {
-  font-size:0.75rem; color:var(--text-secondary); font-weight:300;
+  font-family:var(--font-desc); font-style:italic; font-size:1rem; color:var(--text-secondary); font-weight:400;
 }
 
 /* ─── TOAST & NOTIFICATION ─── */
@@ -887,6 +907,9 @@ function applyBohMenuPhotos(){
         var u = isUsablePhoto(d.photoUrl) || isUsablePhoto(d.photo);
         if (u) { o.photoUrl = u; o.photo = u; }
         if (d.story) o.story = d.story;
+        if (d.storyUrl && !o.storyUrl) o.storyUrl = d.storyUrl;
+        if (d.sourceUrl && !o.sourceUrl) o.sourceUrl = d.sourceUrl;
+        if (d.moreUrl && !o.moreUrl) o.moreUrl = d.moreUrl;
         if (d.ingredients && !o.ingredients) o.ingredients = d.ingredients;
         if (d.i18n && !o.i18n) o.i18n = d.i18n;
       }
@@ -1536,10 +1559,54 @@ function renderRegularMenu(container) {
 }
 function courseCaption(cg){
   var mode=courseModeOf(cg);
-  if (mode==='auto') return cg.label+' — '+t('servedAuto');
-  if (mode==='entremets') return cg.label+' — '+t('entremetsNote');
-  if (mode==='later') return cg.label+' — '+t('dessertLater');
-  return cg.label+' — '+t('choose')+' '+(cg.choose||1);
+  var label = cg.label || '';
+  if (mode==='auto') return escHtml(label)+' — '+escHtml(t('servedAuto'));
+  if (mode==='entremets' || /^entremet/i.test(label)) {
+    return '<span>'+escHtml(label)+'</span><div class="course-subhead">'+escHtml(t('entremetsNote'))+'</div>';
+  }
+  if (mode==='later' || /^dolce$/i.test(label)) {
+    return '<span>'+escHtml(t('dolce'))+'</span><div class="course-subhead">'+escHtml(t('dessertWord'))+'</div>';
+  }
+  return escHtml(label)+' — '+escHtml(t('choose'))+' '+(cg.choose||1);
+}
+function isDolceHeading(item){
+  if (!item) return false;
+  if (item.headingOnly) return true;
+  var name = String(item.name||item.label||'');
+  return (item.mode==='later' && !item.dishId && /^dolce$/i.test(name) && !(item.chooseCount) && !(item.scoops));
+}
+function isEntremetItem(item){
+  if (!item) return false;
+  if (item.mode==='entremets') return true;
+  if (item.id==='sf_e_sorbet' || item.dishId==='sf_e_sorbet') return true;
+  return /entremet/i.test(String(item.course||item.group||''));
+}
+function guestCanAddItem(item, kind){
+  if (!item) return false;
+  if (isDolceHeading(item)) return false;
+  if (isEntremetItem(item)) return false;
+  return true;
+}
+function originLinksHtml(item){
+  var seen = {};
+  var links = [];
+  function add(url, label){
+    url = String(url||'').trim();
+    if (!url || seen[url]) return;
+    if (!/^https?:\/\//i.test(url)) url = 'https://'+url.replace(/^\/+/,'');
+    seen[url] = 1;
+    var host = url.replace(/^https?:\/\//i,'').replace(/^www\./i,'').split('/')[0];
+    links.push({ url:url, label: label || host });
+  }
+  if (!item) return '';
+  add(item.sourceUrl);
+  add(item.moreUrl);
+  add(item.storyUrl);
+  (item.scoops||[]).forEach(function(s){ add(s.sourceUrl, s.name); });
+  if (!links.length) return '';
+  return '<div class="origin-links">'+links.map(function(l){
+    return '<a class="origin-link" href="'+escHtml(l.url)+'" target="_blank" rel="noopener noreferrer">'+escHtml(l.label)+'</a>';
+  }).join('')+'</div>';
 }
 function optionRowHtml(o, pfId){
   var loc=locText(o);
@@ -1548,12 +1615,14 @@ function optionRowHtml(o, pfId){
   if (o.upcharge) extra+='<span class="upcharge">+$'+o.upcharge+'</span>';
   if (o.chooseCount) extra+='<span class="upcharge">'+t('threeScoops')+'</span>';
   var photo = dishPhoto(o, pfId ? ['pfdish:'+pfId+'|'+(o.id||''), o.id] : [o.id]);
+  var entremet = isEntremetItem(o);
+  var hint = entremet ? t('tapForInfo') : t('tapForStory');
   return '<div class="pf-dish'+(hits.length?' has-allergen':'')+'" onclick="event.stopPropagation(); openGuestDish(\'pf\',\''+escHtml(pfId||'')+'\',\''+escHtml(o.id||'')+'\')">'+
     photoThumbHtml(photo, loc.name)+
     '<div class="pf-dish-copy">'+
       '<div class="pf-dish-name">'+escHtml(loc.name)+' '+extra+'</div>'+
       (loc.desc?'<div class="pf-dish-desc">'+escHtml(loc.desc)+(hits.length?' · ⚠ '+hits.join(', '):'')+'</div>':'')+
-      '<div class="tap-hint">'+t('tapForStory')+'</div>'+
+      '<div class="tap-hint">'+escHtml(hint)+'</div>'+
     '</div>'+
   '</div>';
 }
@@ -1571,13 +1640,21 @@ function renderTastingMenus(container) {
       '<ul class="tasting-courses-list">'+
         (tm.courses||[]).map(function(c){
           var loc=locText(c);
+          if (isDolceHeading(c)) {
+            return '<li class="pf-dish is-heading">'+
+              '<div class="pf-dish-copy">'+
+              '<span class="course-num">'+(c.num||'')+'</span>'+
+              '<div class="pf-dish-name">'+escHtml(t('dolce'))+'</div>'+
+              '<div class="course-subhead">'+escHtml(t('dessertWord'))+'</div></div></li>';
+          }
           var photo=dishPhoto(c, ['tmcourse:'+tm.id+'|'+(c.id||''), c.dishId, c.id]);
+          var hint = isEntremetItem(c) ? t('tapForInfo') : t('tapForStory');
           return '<li class="pf-dish '+(optionHasAllergen(c)?'has-allergen':'')+'" onclick="event.stopPropagation(); openGuestDish(\'tm\',\''+tm.id+'\',\''+(c.id||c.num)+'\')">'+
             photoThumbHtml(photo, loc.name)+
             '<div class="pf-dish-copy"><span class="course-num">'+(c.num||'')+'</span>'+
             '<div class="pf-dish-name">'+escHtml(loc.name)+'</div>'+
             (loc.desc?'<div class="pf-dish-desc">'+escHtml(loc.desc)+'</div>':'')+
-            '<div class="tap-hint">'+t('tapForStory')+'</div></div></li>';
+            '<div class="tap-hint">'+escHtml(hint)+'</div></div></li>';
         }).join('')+
       '</ul>'+
       ((tm.pairings||[]).length ? tm.pairings.map(function(p){
@@ -1640,6 +1717,9 @@ function findGuestItem(kind, menuId, itemId){
         bottlePrice: glass.bottlePrice || 0,
         ingredients: '',
         story: '',
+        storyUrl: glass.storyUrl || glass.moreUrl || glass.sourceUrl || '',
+        sourceUrl: glass.sourceUrl || glass.moreUrl || glass.storyUrl || '',
+        moreUrl: glass.moreUrl || glass.sourceUrl || glass.storyUrl || '',
         pairWhite: '', pairRed: '', pairDessert: '',
         allergens: glass.allergens && glass.allergens.length ? glass.allergens : ['Sulfites']
       });
@@ -1673,6 +1753,8 @@ function findGuestItem(kind, menuId, itemId){
           if (d && d.id===itemId) {
             if (d.story && !hit.story) hit.story = d.story;
             if (d.storyUrl && !hit.storyUrl) hit.storyUrl = d.storyUrl;
+            if (d.sourceUrl && !hit.sourceUrl) hit.sourceUrl = d.sourceUrl;
+            if (d.moreUrl && !hit.moreUrl) hit.moreUrl = d.moreUrl;
             if (d.ingredients && !hit.ingredients) hit.ingredients = d.ingredients;
             if (d.askTemp && !hit.askTemp) hit.askTemp = d.askTemp;
             if (d.pairWhite && !hit.pairWhite) hit.pairWhite = d.pairWhite;
@@ -1694,6 +1776,8 @@ function findGuestItem(kind, menuId, itemId){
       if (src) c = Object.assign({}, src, c, {
         story: c.story || src.story,
         storyUrl: c.storyUrl || src.storyUrl,
+        sourceUrl: c.sourceUrl || src.sourceUrl || src.storyUrl,
+        moreUrl: c.moreUrl || src.moreUrl || src.sourceUrl,
         ingredients: c.ingredients || src.ingredients,
         askTemp: c.askTemp || src.askTemp,
         pairWhite: c.pairWhite || src.pairWhite,
@@ -1728,7 +1812,6 @@ function composeDishExplanation(item){
   parts.push(name + (desc ? ': ' + desc.replace(/[.]$/,'') + '.' : '.'));
   if (item.story) parts.push(guestSafeText(item.story));
   if (item.scoops && item.scoops.length) {
-    parts.push(t('gelatoStyle'));
     item.scoops.forEach(function(s){
       var kind = s.kind==='sorbetto' ? t('scoopSorbetto') : t('scoopGelato');
       parts.push(s.name + ' (' + kind + '). ' + (s.desc || ''));
@@ -1792,18 +1875,7 @@ function wineSearchQuery(item){
   return q.replace(/\s+/g,' ').trim();
 }
 function fetchWineWebBrief(item){
-  var q=wineSearchQuery(item);
-  var search='https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch='+encodeURIComponent(q)+'&srlimit=1&format=json&origin=*';
-  return fetch(search).then(function(r){ return r.json(); }).then(function(data){
-    var hit=((data.query&&data.query.search)||[])[0];
-    if (!hit || !hit.title) return '';
-    return fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(hit.title.replace(/ /g,'_'))).then(function(r){ return r.json(); });
-  }).then(function(sum){
-    var extract=sum && (sum.extract || sum.description) || '';
-    if (!extract) return '';
-    var vintage = item.vintage && item.vintage!=='NV' ? String(item.vintage) : 'NV';
-    return stripLabelEcho(extract, item)+' Vintage '+vintage+'. Pairing: '+generalWinePairing(item);
-  }).catch(function(){ return ''; });
+  return Promise.resolve('');
 }
 function isWineItem(item, kind){
   return kind==='wine' || !!(item && (item.kind==='wine' || item.byTheGlass || item.glassPrice));
@@ -1848,7 +1920,8 @@ function openGuestDish(kind, menuId, itemId){
   _scoopSel = {};
   var scoopHtml = '';
   if (scoops.length) {
-    scoopHtml = '<p class="wine-brief">'+escHtml(t('gelatoStyle'))+'</p><p style="font-size:0.8rem;color:var(--gold);letter-spacing:0.08em;text-transform:uppercase;margin-top:0.6rem;">'+escHtml(t('threeScoops'))+'</p><div class="scoop-grid" id="scoop-grid">'+
+  if (scoops.length) {
+    scoopHtml = '<p style="font-size:0.8rem;color:var(--gold);letter-spacing:0.08em;text-transform:uppercase;margin-top:0.6rem;">'+escHtml(t('threeScoops'))+'</p><div class="scoop-grid" id="scoop-grid">'+
       scoops.map(function(s){
         var kind=s.kind==='sorbetto'?t('scoopSorbetto'):t('scoopGelato');
         return '<button type="button" class="scoop-card" data-scoop="'+escHtml(s.id)+'" onclick="toggleScoop(\''+escHtml(s.id)+'\')">'+
@@ -1872,17 +1945,20 @@ function openGuestDish(kind, menuId, itemId){
     return '<label><input type="radio" name="dish-temp" value="'+escHtml(tmp)+'"'+(i===1?' checked':'')+'> '+escHtml(tmp)+'</label>';
   }).join('')+'</div>' : '';
   var learnLabel = wine ? t('learnMoreWine') : t('learnMore');
+  var canAdd = guestCanAddItem(item, kind);
+  var addBox = canAdd
+    ? '<div class="dish-order-box">'+tempHtml+'<button type="button" class="dish-add" onclick="addDishFromModal()">'+t('addToOrder')+'</button></div>'
+    : (isEntremetItem(item) ? '<p class="wine-brief">'+escHtml(t('entremetsNote'))+'</p>' : '');
   content.innerHTML = '<button style="position:absolute;top:1rem;right:1.2rem;background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--text-muted);" onclick="closeDishModal()">×</button>'+
     (photo ? '<img src="'+escHtml(photo)+'" alt="'+escHtml(loc.name)+'" style="width:100%;height:160px;object-fit:cover;border-radius:var(--radius);margin-bottom:0.9rem;">' : photoThumbHtml('', loc.name))+
     '<div class="section-label" style="margin-bottom:0.3rem;">'+(wine?t('aboutWine'):t('aboutDish'))+'</div>'+
     '<h2>'+escHtml(loc.name)+'</h2>'+
-    '<p style="color:var(--text-secondary);margin-bottom:0.5rem;font-size:1.08rem;font-weight:400;line-height:1.6;">'+escHtml(loc.desc||'')+'</p>'+
-    wineBrief+wineMeta+price+allergenWarning+allergens+dietary+pairHtml+scoopHtml+
-    '<div class="dish-order-box">'+tempHtml+
-    '<button type="button" class="dish-add" onclick="addDishFromModal()">'+t('addToOrder')+'</button></div>'+
+    '<p style="color:var(--text-secondary);margin-bottom:0.5rem;font-size:1.08rem;font-weight:400;line-height:1.6;font-family:var(--font-desc);font-style:italic;">'+escHtml(loc.desc||'')+'</p>'+
+    wineBrief+wineMeta+price+allergenWarning+allergens+dietary+pairHtml+originLinksHtml(item)+scoopHtml+
+    addBox+
     (chips ? '<div class="ing-chips"><h4 style="font-size:0.72rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);margin-bottom:0.35rem;">'+t('ingredientsTitle')+'</h4>'+chips+'</div>' : '')+
     '<button type="button" class="learn-more-btn" id="dish-learn-btn" onclick="revealItemAi()">'+escHtml(learnLabel)+'</button>'+
-    '<div class="ai-block" id="dish-ai-block"><h4>'+(wine?t('aiExplainWine'):t('aiExplain'))+'</h4><p id="dish-ai-text"></p></div>';
+    '<div class="ai-block" id="dish-ai-block"><h4>'+(wine?t('aiExplainWine'):t('aiExplain'))+'</h4><p id="dish-ai-text"></p>'+originLinksHtml(item)+'</div>';
   modal.classList.add('open');
 }
 function revealItemAi(){
@@ -1912,9 +1988,7 @@ function revealItemAi(){
     });
     return;
   }
-  fetchWineWebBrief(item).then(function(web){
-    show(web ? (enExplain + ' ' + web) : enExplain);
-  });
+  show(enExplain);
 }
 var _scoopSel = {};
 function toggleScoop(id){
@@ -1945,6 +2019,7 @@ function addDishFromModal(){
   if (!resolvedTableNum()) { toast(t('needTable')); returnToSetup(); return; }
   var item = findGuestItem(_dishModal.kind, _dishModal.menuId, _dishModal.itemId);
   if (!item) return;
+  if (!guestCanAddItem(item, _dishModal.kind)) return;
   var loc = locText(item);
   var enName = englishItemName(item);
   var temps = tempOptionsFor(item);
@@ -1983,21 +2058,29 @@ function openTasting(tmId) {
   var content = document.getElementById('tasting-modal-content');
   content.innerHTML = '<button style="position:absolute;top:1rem;right:1.2rem;background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--text-muted);" onclick="closeTastingModal()">×</button>'+
     '<div class="section-label" style="margin-bottom:0.3rem;">'+t('tasting')+'</div>'+
-    '<h2 style="font-family:var(--font-display);font-size:1.8rem;font-weight:300;">'+escHtml(tm.name)+'</h2>'+
+    '<h2 style="font-family:var(--font-script);font-size:2.4rem;font-weight:400;letter-spacing:0.02em;">'+escHtml(tm.name)+'</h2>'+
     '<p style="color:var(--text-secondary);font-size:1rem;margin-top:0.3rem;">'+escHtml(locMenuCopy(tm).subtitle)+' · '+(tm.duration||'')+'</p>'+
     '<p style="font-family:var(--font-display);font-size:1.4rem;color:var(--gold);margin-top:1rem;">$'+tm.price+' <span style="font-size:0.75rem;color:var(--text-muted);font-family:var(--font-body);">'+t('perPerson')+'</span></p>'+
     '<div class="tasting-modal-courses">'+
       (tm.courses||[]).map(function(c){
         var loc=locText(c);
+        if (isDolceHeading(c)) {
+          return '<div class="tasting-modal-course pf-dish is-heading">'+
+            '<div class="pf-dish-copy">'+
+            '<div class="tasting-modal-course-num">Course '+(c.num||'')+'</div>'+
+            '<div class="tasting-modal-course-name">'+escHtml(t('dolce'))+'</div>'+
+            '<div class="course-subhead">'+escHtml(t('dessertWord'))+'</div></div></div>';
+        }
         var hits=(c.allergens||[]).filter(function(a){ return STATE.customerAllergies.indexOf(a)>-1; });
         var photo=dishPhoto(c, ['tmcourse:'+tm.id+'|'+(c.id||''), c.dishId, c.id]);
+        var hint = isEntremetItem(c) ? t('tapForInfo') : t('tapForStory');
         return '<div class="tasting-modal-course pf-dish '+(hits.length?'has-allergen':'')+'" onclick="openGuestDish(\'tm\',\''+tm.id+'\',\''+(c.id||c.num)+'\')">'+
           photoThumbHtml(photo, loc.name)+
           '<div class="pf-dish-copy">'+
           '<div class="tasting-modal-course-num">Course '+(c.num||'')+'</div>'+
           '<div class="tasting-modal-course-name">'+escHtml(loc.name)+'</div>'+
           '<div class="tasting-modal-course-desc">'+escHtml(loc.desc)+(hits.length?' · ⚠ '+hits.join(', '):'')+'</div>'+
-          '<div class="tap-hint">'+t('tapForStory')+'</div></div>'+
+          '<div class="tap-hint">'+escHtml(hint)+'</div></div>'+
         '</div>';
       }).join('')+
     '</div>';
@@ -2013,7 +2096,7 @@ function openPrixFixe(pfId) {
   var courses = getPfCourses(pf);
   content.innerHTML = '<button style="position:absolute;top:1rem;right:1.2rem;background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--text-muted);" onclick="closeTastingModal()">×</button>'+
     '<div class="section-label" style="margin-bottom:0.3rem;">'+t('prixFixe')+'</div>'+
-    '<h2 style="font-family:var(--font-display);font-size:1.8rem;font-weight:300;">'+escHtml(pf.name)+'</h2>'+
+    '<h2 style="font-family:var(--font-script);font-size:2.4rem;font-weight:400;letter-spacing:0.02em;">'+escHtml(pf.name)+'</h2>'+
     '<p style="color:var(--text-secondary);font-size:1rem;margin-top:0.3rem;">'+escHtml(getPfDesc(pf))+'</p>'+
     '<p style="font-family:var(--font-display);font-size:1.4rem;color:var(--gold);margin-top:1rem;">$'+pf.price+' <span style="font-size:0.75rem;color:var(--text-muted);font-family:var(--font-body);">'+t('perPerson')+'</span></p>'+
     '<div style="margin-top:1.5rem;">'+
