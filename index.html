@@ -1957,7 +1957,7 @@ function openGuestDish(kind, menuId, itemId){
     addBox+
     (chips ? '<div class="ing-chips"><h4 style="font-size:0.72rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);margin-bottom:0.35rem;">'+t('ingredientsTitle')+'</h4>'+chips+'</div>' : '')+
     '<button type="button" class="learn-more-btn" id="dish-learn-btn" onclick="revealItemAi()">'+escHtml(learnLabel)+'</button>'+
-    '<div class="ai-block" id="dish-ai-block"><h4>'+(wine?t('aiExplainWine'):t('aiExplain'))+'</h4><p id="dish-ai-text"></p>'+originLinksHtml(item)+'</div>';
+    '<div class="ai-block" id="dish-ai-block"><h4>'+(wine?t('aiExplainWine'):t('aiExplain'))+'</h4><p id="dish-ai-text"></p></div>';
   modal.classList.add('open');
 }
 function revealItemAi(){
