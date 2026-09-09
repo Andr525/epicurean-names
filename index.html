@@ -12,7 +12,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
 <script src="cellar.js?v=binwise-375-park-v1"></script>
-<script src="scalini-dining.js?v=glass-dark-20260912"></script>
+<script src="scalini-dining.js?v=menu-ai-maps-20260913"></script>
 <style>
 :root {
   --bg: #0b0c0f;
@@ -512,12 +512,45 @@ body { font-family:var(--font-body); color:var(--text-primary); background:var(-
   box-shadow:var(--shadow); position:relative;
 }
 .modal-card h2 { font-family:var(--font-display); font-size:1.15rem; font-weight:500; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:0.5rem; color:#fff; }
-.origin-links { margin-top:0.75rem; display:flex; flex-wrap:wrap; gap:0.45rem; }
-.origin-link {
-  display:inline-block; color:var(--gold); font-size:0.82rem;
-  border-bottom:1px solid var(--border-gold); text-decoration:none; letter-spacing:0.02em;
+.origin-links { margin-top:0.75rem; display:flex; flex-direction:column; gap:0.5rem; position:relative; z-index:8; pointer-events:auto; }
+.origin-link, .visit-site-btn {
+  display:inline-flex; align-items:center; justify-content:center; gap:0.4rem;
+  color:#fff; font-size:0.82rem; text-decoration:none; letter-spacing:0.04em;
+  pointer-events:auto; position:relative; z-index:9; cursor:pointer;
 }
-.origin-link:hover { color:#fff; }
+.visit-site-btn {
+  width:100%; border:1px solid var(--border-gold); background:rgba(196,165,116,0.16);
+  padding:0.85rem 1rem; border-radius:var(--radius); text-transform:uppercase;
+  font-weight:500; font-family:var(--font-body);
+}
+.visit-site-btn:hover, .origin-link:hover { color:#fff; background:rgba(196,165,116,0.28); }
+.dish-tabs {
+  display:flex; gap:0; margin:0.85rem 0 0.55rem; border-bottom:1px solid var(--border);
+}
+.dish-tab {
+  flex:1; background:transparent; border:none; border-bottom:2px solid transparent;
+  color:var(--text-muted); padding:0.55rem 0.4rem; cursor:pointer;
+  letter-spacing:0.1em; text-transform:uppercase; font-size:0.72rem; font-weight:500;
+}
+.dish-tab.active { color:var(--gold); border-bottom-color:var(--gold); }
+.dish-tab-panel { display:none; }
+.dish-tab-panel.open { display:block; }
+.ai-chips { display:flex; flex-wrap:wrap; gap:0.4rem; margin:0.55rem 0; }
+.ai-chip {
+  border:1px solid var(--border-gold); background:transparent; color:var(--text-secondary);
+  border-radius:999px; padding:0.35rem 0.7rem; font-size:0.78rem; cursor:pointer;
+}
+.ai-ask-row { display:flex; gap:0.4rem; margin-top:0.45rem; }
+.ai-ask-row input {
+  flex:1; background:var(--bg); border:1px solid var(--border); color:var(--text-primary);
+  border-radius:var(--radius); padding:0.65rem 0.75rem; font-size:0.9rem;
+}
+.wine-name-row { display:flex; align-items:center; gap:0.55rem; }
+.wine-label-thumb {
+  width:36px; height:48px; object-fit:cover; border-radius:3px; flex-shrink:0;
+  border:1px solid var(--border-gold); background:#1a1c22;
+}
+.wine-label-thumb.is-empty { display:inline-block; }
 .modifier-group { margin-top:1.2rem; }
 .modifier-group h4 {
   font-size:0.65rem; text-transform:uppercase; letter-spacing:0.15em;
@@ -639,7 +672,7 @@ body { font-family:var(--font-body); color:var(--text-primary); background:var(-
       <select id="menu-table-input" onchange="onMenuTableChange(this)"></select>
     </label>
     <button class="allergy-filter-btn" id="allergy-btn" onclick="openAllergyFilter()">Allergies</button>
-    <button class="call-server-btn" id="call-server-btn" onclick="callServer()">Call Server</button>
+    <button class="call-server-btn" id="call-server-btn" onclick="callServer()">Call Food Master</button>
   </div>
   <div class="menu-nav" id="menu-nav"></div>
   <div class="menu-content" id="menu-content"></div>
@@ -848,7 +881,7 @@ function createNamedFirestoreAdapter(){
 
 if (typeof fbReady !== 'undefined' && fbReady) fbDb = createNamedFirestoreAdapter();
 // ─── State ──────────────────────────────────────────────────────
-var STATE = { lang:'en', tableNum:0, menuItems:[], menuCategories:[], messages:[], tastingMenus:[], prixFixeMenus:[], customerAllergies:[], menuPhotos:{}, wines:[], wineBottles:[], barDrinks:[] };
+var STATE = { lang:'en', tableNum:0, menuItems:[], menuCategories:[], messages:[], tastingMenus:[], prixFixeMenus:[], customerAllergies:[], menuPhotos:{}, wines:[], wineBottles:[], barDrinks:[], wineLabels:{} };
 
 function isUsablePhoto(u){
   if (!u || typeof u !== 'string') return '';
@@ -1433,6 +1466,58 @@ function renderContent() {
   if (isWineBottleNav(currentNav)) { renderWineBottles(c); return; }
   renderRegularMenu(c);
 }
+function wineLabelSrc(item){
+  if (!item) return '';
+  return isUsablePhoto(item.photoUrl) || isUsablePhoto(item.labelUrl) || isUsablePhoto(STATE.wineLabels[item.id]) || '';
+}
+function wineLabelHtml(item){
+  var src = wineLabelSrc(item);
+  var id = (item && item.id) || '';
+  if (src) return '<img class="wine-label-thumb" data-wine-label="'+escHtml(id)+'" src="'+escHtml(src)+'" alt="'+escHtml(t('wineLabelAlt'))+'">';
+  return '<span class="wine-label-thumb is-empty" data-wine-label="'+escHtml(id)+'"></span>';
+}
+function looksLikeWinePage(title, extract){
+  var blob = String(title||'')+' '+String(extract||'');
+  var low = blob.toLowerCase();
+  if (/yoshiki|musician|singer|pianist|drummer|rapper|actor|album|film score|heavy metal/.test(low) && !/wine|winery|vineyard|sparkling|champagne|prosecco|lambrusco/.test(low)) return false;
+  return /wine|winery|vineyard|sparkling|champagne|prosecco|lambrusco|pinot|chardonnay|merlot|port wine|icewine|ice wine|vino|cuvée|brut|cellar|appellation|denomination|viticulture|oenolog/.test(low);
+}
+function fetchWineLabel(item){
+  if (!item || !item.id) return Promise.resolve('');
+  if (STATE.wineLabels[item.id]) return Promise.resolve(STATE.wineLabels[item.id]);
+  var preset = wineLabelSrc(item);
+  if (preset) { STATE.wineLabels[item.id] = preset; return Promise.resolve(preset); }
+  var q = [item.producer, item.name, item.vintage && item.vintage!=='NV' ? item.vintage : '', 'wine'].filter(Boolean).join(' ');
+  var api = 'https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&prop=pageimages|extracts&exintro=1&explaintext=1&exchars=280&pithumbsize=320&generator=search&gsrlimit=8&gsrsearch='+encodeURIComponent(q);
+  return fetch(api).then(function(r){ return r.json(); }).then(function(data){
+    var pages = (data && data.query && data.query.pages) || {};
+    var list = Object.keys(pages).map(function(k){ return pages[k]; }).sort(function(a,b){ return (a.index||0)-(b.index||0); });
+    for (var i=0;i<list.length;i++){
+      var p = list[i];
+      if (!looksLikeWinePage(p.title||'', p.extract||'')) continue;
+      if (p.thumbnail && p.thumbnail.source) return p.thumbnail.source;
+    }
+    return '';
+  }).catch(function(){ return ''; }).then(function(url){
+    if (url) STATE.wineLabels[item.id] = url;
+    return url || '';
+  });
+}
+function paintWineLabel(id, url){
+  if (!id || !url) return;
+  document.querySelectorAll('[data-wine-label="'+id+'"]').forEach(function(el){
+    if (el.tagName==='IMG') { el.src = url; el.classList.remove('is-empty'); return; }
+    var img = document.createElement('img');
+    img.className = 'wine-label-thumb';
+    img.setAttribute('data-wine-label', id);
+    img.alt = t('wineLabelAlt');
+    img.src = url;
+    if (el.parentNode) el.parentNode.replaceChild(img, el);
+  });
+}
+function ensureWineLabel(item){
+  fetchWineLabel(item).then(function(url){ if (url && item) paintWineLabel(item.id, url); });
+}
 function wineCardHtml(w, kind){
   var glass = Number(w.glassPrice||0);
   var bottle = Number(w.bottlePrice || (kind==='bottle' ? w.price : 0) || 0);
@@ -1447,9 +1532,10 @@ function wineCardHtml(w, kind){
   } else {
     priceHtml = '$'+(bottle||w.price||0)+'<small style="display:block;font-size:0.65rem;letter-spacing:0.06em;">'+escHtml(cellarGroup(w)==='Wine'?t('bottlePrice'):(w.unit||t('bottlePrice')))+'</small>';
   }
+  ensureWineLabel(w);
   return '<div class="menu-item-card" onclick="openGuestDish(\'wine\',\'\',\''+escHtml(w.id)+'\')">'+
     '<div class="dish-info">'+
-      '<div class="dish-name">'+escHtml(name)+'</div>'+
+      '<div class="dish-name wine-name-row">'+wineLabelHtml(w)+'<span>'+escHtml(name)+'</span></div>'+
       '<div class="dish-desc">'+escHtml(desc)+'</div>'+
       '<div class="tap-hint">'+(kind==='glass'?t('tapForWine'):'Tap to add this bottle')+'</div>'+
     '</div>'+
@@ -1560,7 +1646,10 @@ function renderRegularMenu(container) {
 function courseCaption(cg){
   var mode=courseModeOf(cg);
   var label = cg.label || '';
-  if (mode==='auto') return escHtml(label)+' — '+escHtml(t('servedAuto'));
+  if (mode==='auto') {
+    return '<span>'+escHtml(label)+'</span><div class="course-subhead">'+escHtml(t('servedAuto'))+'</div>'+
+      (/primi piccolo/i.test(label) ? '<div class="course-subhead">'+escHtml(t('primiPiccoloNote'))+'</div>' : '');
+  }
   if (mode==='entremets' || /^entremet/i.test(label)) {
     return '<span>'+escHtml(label)+'</span><div class="course-subhead">'+escHtml(t('entremetsNote'))+'</div>';
   }
@@ -1581,11 +1670,43 @@ function isEntremetItem(item){
   if (item.id==='sf_e_sorbet' || item.dishId==='sf_e_sorbet') return true;
   return /entremet/i.test(String(item.course||item.group||''));
 }
+function isPrimiPiccoloItem(item){
+  if (!item) return false;
+  if (item.mode==='auto' || item.fireEach) return true;
+  return /primi piccolo/i.test(String(item.course||item.group||'')) || /^welcome$/i.test(String(item.group||''));
+}
+function isTastingDessertItem(item){
+  return !!(item && (item._tastingDessert || (item.group==='Dolce' && !item.headingOnly && !isEntremetItem(item) && item.dishId)));
+}
 function guestCanAddItem(item, kind){
   if (!item) return false;
   if (isDolceHeading(item)) return false;
   if (isEntremetItem(item)) return false;
+  if (kind==='tm') return isTastingDessertItem(item);
+  if (isPrimiPiccoloItem(item) && kind==='pf') return false;
   return true;
+}
+function guestCanSendTemp(item, kind){
+  return kind==='tm' && !!(item && item.askTemp) && !isTastingDessertItem(item);
+}
+function tapHintFor(item, kind){
+  if (kind==='tm' && guestCanSendTemp(item, kind)) return t('tastingTempHint');
+  if (kind==='tm' && isTastingDessertItem(item)) return t('tastingDessertHint');
+  if (kind==='tm' || isEntremetItem(item) || (kind==='pf' && isPrimiPiccoloItem(item))) return t('tapForInfo');
+  return t('tapForStory');
+}
+function openOriginLink(url, ev){
+  if (ev) { ev.preventDefault(); ev.stopPropagation(); }
+  url = String(url||'').trim();
+  if (!url) return false;
+  if (!/^https?:\/\//i.test(url)) url = 'https://'+url.replace(/^\/+/,'');
+  var w = window.open(url, '_blank', 'noopener,noreferrer');
+  if (!w) {
+    var a = document.createElement('a');
+    a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+    document.body.appendChild(a); a.click(); a.remove();
+  }
+  return false;
 }
 function originLinksHtml(item){
   var seen = {};
@@ -1602,22 +1723,34 @@ function originLinksHtml(item){
   add(item.sourceUrl);
   add(item.moreUrl);
   add(item.storyUrl);
+  add(item.vintageUrl, t('vintageLookup'));
   (item.scoops||[]).forEach(function(s){ add(s.sourceUrl, s.name); });
   if (!links.length) return '';
-  return '<div class="origin-links">'+links.map(function(l){
-    return '<a class="origin-link" href="'+escHtml(l.url)+'" target="_blank" rel="noopener noreferrer">'+escHtml(l.label)+'</a>';
+  return '<div class="origin-links">'+links.map(function(l, i){
+    var label = i===0 ? (t('visitSite')+' — '+l.label) : l.label;
+    return '<button type="button" class="visit-site-btn" onclick="openOriginLink(\''+escHtml(l.url)+'\', event)">'+escHtml(label)+'</button>';
   }).join('')+'</div>';
 }
-function optionRowHtml(o, pfId){
+function prixFixeDolceOptions(){
+  var menus = STATE.prixFixeMenus.length ? STATE.prixFixeMenus : SEED_PRIX_FIXE;
+  var pf = (menus||[]).filter(function(p){ return p.id==='pf_scalini_89'; })[0] || (menus||[])[0];
+  if (!pf) return [];
+  var hit=[];
+  getPfCourses(pf).forEach(function(cg){
+    if (/dolce/i.test(cg.label||'')) hit = (cg.options||[]).slice();
+  });
+  return hit;
+}
+function optionRowHtml(o, pfId, kind){
+  kind = kind || 'pf';
   var loc=locText(o);
   var hits=(o.allergens||[]).filter(function(a){ return STATE.customerAllergies.indexOf(a)>-1; });
   var extra='';
   if (o.upcharge) extra+='<span class="upcharge">+$'+o.upcharge+'</span>';
   if (o.chooseCount) extra+='<span class="upcharge">'+t('threeScoops')+'</span>';
   var photo = dishPhoto(o, pfId ? ['pfdish:'+pfId+'|'+(o.id||''), o.id] : [o.id]);
-  var entremet = isEntremetItem(o);
-  var hint = entremet ? t('tapForInfo') : t('tapForStory');
-  return '<div class="pf-dish'+(hits.length?' has-allergen':'')+'" onclick="event.stopPropagation(); openGuestDish(\'pf\',\''+escHtml(pfId||'')+'\',\''+escHtml(o.id||'')+'\')">'+
+  var hint = tapHintFor(o, kind);
+  return '<div class="pf-dish'+(hits.length?' has-allergen':'')+'" onclick="event.stopPropagation(); openGuestDish(\''+escHtml(kind)+'\',\''+escHtml(pfId||'')+'\',\''+escHtml(o.id||'')+'\')">'+
     photoThumbHtml(photo, loc.name)+
     '<div class="pf-dish-copy">'+
       '<div class="pf-dish-name">'+escHtml(loc.name)+' '+extra+'</div>'+
@@ -1625,6 +1758,12 @@ function optionRowHtml(o, pfId){
       '<div class="tap-hint">'+escHtml(hint)+'</div>'+
     '</div>'+
   '</div>';
+}
+function tastingDessertRows(tm){
+  return prixFixeDolceOptions().map(function(o){
+    var fake = Object.assign({}, o, { _tastingDessert:true, id:'dessert:'+o.id, dishId:o.id, group:'Dolce' });
+    return optionRowHtml(fake, tm.id, 'tm');
+  }).join('');
 }
 function renderTastingMenus(container) {
   var menus = STATE.tastingMenus.length ? STATE.tastingMenus : SEED_TASTING_MENUS;
@@ -1637,6 +1776,7 @@ function renderTastingMenus(container) {
         '<div class="tasting-card-subtitle">'+escHtml(locMenuCopy(tm).subtitle)+'</div></div>'+
         '<div class="tasting-card-price">$'+tm.price+'<small>'+t('perPerson')+'</small></div>'+
       '</div>'+
+      '<p class="wine-brief" style="padding:0 0.2rem 0.6rem;">'+escHtml(t('tastingAsIs'))+'</p>'+
       '<ul class="tasting-courses-list">'+
         (tm.courses||[]).map(function(c){
           var loc=locText(c);
@@ -1645,10 +1785,11 @@ function renderTastingMenus(container) {
               '<div class="pf-dish-copy">'+
               '<span class="course-num">'+(c.num||'')+'</span>'+
               '<div class="pf-dish-name">'+escHtml(t('dolce'))+'</div>'+
-              '<div class="course-subhead">'+escHtml(t('dessertWord'))+'</div></div></li>';
+              '<div class="course-subhead">'+escHtml(t('dessertWord'))+' — '+escHtml(t('tastingDessertHint'))+'</div></div></li>'+
+              tastingDessertRows(tm);
           }
           var photo=dishPhoto(c, ['tmcourse:'+tm.id+'|'+(c.id||''), c.dishId, c.id]);
-          var hint = isEntremetItem(c) ? t('tapForInfo') : t('tapForStory');
+          var hint = tapHintFor(c, 'tm');
           return '<li class="pf-dish '+(optionHasAllergen(c)?'has-allergen':'')+'" onclick="event.stopPropagation(); openGuestDish(\'tm\',\''+tm.id+'\',\''+(c.id||c.num)+'\')">'+
             photoThumbHtml(photo, loc.name)+
             '<div class="pf-dish-copy"><span class="course-num">'+(c.num||'')+'</span>'+
@@ -1690,7 +1831,7 @@ function renderPrixFixe(container) {
         courses.map(function(cg){
           return '<div class="prix-fixe-course-group">'+
             '<div class="prix-fixe-course-label">'+courseCaption(cg)+'</div>'+
-            (cg.options||[]).map(function(o){ return optionRowHtml(o, pf.id); }).join('')+
+            (cg.options||[]).map(function(o){ return optionRowHtml(Object.assign({}, o, {course:cg.label, mode:cg.mode, fireEach:cg.fireEach}), pf.id, 'pf'); }).join('')+
           '</div>';
         }).join('')+
         scaliniBtgSectionHtml()+
@@ -1720,6 +1861,8 @@ function findGuestItem(kind, menuId, itemId){
         storyUrl: glass.storyUrl || glass.moreUrl || glass.sourceUrl || '',
         sourceUrl: glass.sourceUrl || glass.moreUrl || glass.storyUrl || '',
         moreUrl: glass.moreUrl || glass.sourceUrl || glass.storyUrl || '',
+        vintageUrl: glass.vintageUrl || '',
+        labelUrl: glass.labelUrl || glass.photoUrl || '',
         pairWhite: '', pairRed: '', pairDessert: '',
         allergens: glass.allergens && glass.allergens.length ? glass.allergens : ['Sulfites']
       });
@@ -1770,6 +1913,11 @@ function findGuestItem(kind, menuId, itemId){
     var tms = STATE.tastingMenus.length ? STATE.tastingMenus : SEED_TASTING_MENUS;
     var tm = tms.filter(function(x){ return x.id===menuId; })[0];
     if (!tm) return null;
+    if (String(itemId).indexOf('dessert:')===0){
+      var did = String(itemId).slice(9);
+      var src = findGuestItem('pf', tm.dessertMenuId || 'pf_scalini_89', did);
+      if (src) return Object.assign({}, src, { _tastingDessert:true, id:itemId, dishId:did, group:'Dolce' });
+    }
     var c = (tm.courses||[]).filter(function(x){ return x.id===itemId || String(x.num)===String(itemId); })[0];
     if (c && c.dishId){
       var src = findGuestItem('pf', 'pf_scalini_89', c.dishId);
@@ -1852,6 +2000,12 @@ function stripLabelEcho(text, item){
 function composeWineExplanation(item){
   var notes = (typeof EPICUREAN_SCALINI !== 'undefined' && EPICUREAN_SCALINI.wineNotes) || {};
   var note = stripLabelEcho(notes[item.id] || item.note || item.story || '', item);
+  [item.country, item.region, wineRegionOf(item)].filter(Boolean).forEach(function(place){
+    var safe = String(place).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    note = note.replace(new RegExp('\\bfrom (the )?'+safe+'\\b[,.]?','ig'), '');
+    note = note.replace(new RegExp('\\b'+safe+'\\b[,.]?\\s*','i'), function(m, offset){ return offset<40 ? '' : m; });
+  });
+  note = note.replace(/\s+/g,' ').trim();
   if (note) return note;
   var vintage = item.vintage && item.vintage !== 'NV' ? String(item.vintage) : 'Non-vintage';
   var grape = item.varietal || item.grape || '';
@@ -1888,6 +2042,61 @@ function tempOptionsFor(item){
   return [];
 }
 function openDish(itemId){ openGuestDish('item','',itemId); }
+function suggestedAiQuestions(item, wine){
+  var name = String((item && item.name) || '').toLowerCase();
+  if (wine) {
+    if (/lambrusco/.test(name)) return ['What is Lambrusco?', 'Is this sweet?', 'What food goes with this?'];
+    if (/ice wine|icewine|inniskillin/.test(name)) return ['What is ice wine?', 'How sweet is this?', 'What should I pair it with?'];
+    if (/port|tawny|ruby/.test(name)) return ['What is Port?', 'Tawny or ruby — what is the difference?', 'When do I drink this?'];
+    return ['What is vintage?', 'How should I drink this?', 'What food goes with this wine?'];
+  }
+  if (/filet|mignon|giambotta|beef|veal/.test(name)) return ['What is filet mignon?', 'What is veal?', 'Best types of beef in the world?'];
+  if (/salmon/.test(name)) return ['What is Faroe Island salmon?', 'How should salmon be cooked?', 'Is salmon oily?'];
+  if (/truffle|porcini/.test(name)) return ['What is a truffle?', 'What are porcini?', 'Why is truffle so expensive?'];
+  if (/gelato|sorbet|dolce|tiramisu/.test(name)) return ['What is gelato?', 'What is sorbetto?', 'What is tiramisu?'];
+  return ['What is in this dish?', 'Any allergens I should know?', 'What wine goes with this?'];
+}
+function grokChatUrl(q){
+  return 'https://grok.com/?q='+encodeURIComponent(q||'');
+}
+function openGrokAsk(q, ev){
+  if (ev) { ev.preventDefault(); ev.stopPropagation(); }
+  openOriginLink(grokChatUrl(q), ev);
+}
+function answerGuestQuestion(item, q){
+  var explain = (typeof EPICUREAN_SCALINI !== 'undefined' && EPICUREAN_SCALINI.explainMore) || {};
+  var notes = (typeof EPICUREAN_SCALINI !== 'undefined' && EPICUREAN_SCALINI.ingredientNotes) || {};
+  var qn = String(q||'').toLowerCase();
+  var keys = Object.keys(explain).sort(function(a,b){ return b.length-a.length; });
+  for (var i=0;i<keys.length;i++){
+    if (qn.indexOf(keys[i])>=0) return explain[keys[i]];
+  }
+  var nkeys = Object.keys(notes).sort(function(a,b){ return b.length-a.length; });
+  for (var j=0;j<nkeys.length;j++){
+    if (qn.indexOf(nkeys[j])>=0) return notes[nkeys[j]];
+  }
+  if (/wine|vintage|grape|pair/.test(qn) && isWineItem(item, _dishModal.kind)) return composeWineExplanation(item);
+  return composeDishExplanation(item)+' If you want a deeper answer, tap Ask Grok.';
+}
+function switchDishTab(tab){
+  document.querySelectorAll('.dish-tab').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-tab')===tab); });
+  document.querySelectorAll('.dish-tab-panel').forEach(function(p){ p.classList.toggle('open', p.id==='dish-panel-'+tab); });
+  if (tab==='ai') revealItemAi();
+}
+function submitAiQuestion(){
+  var item = findGuestItem(_dishModal.kind, _dishModal.menuId, _dishModal.itemId);
+  var inp = document.getElementById('dish-ai-q');
+  var q = inp ? inp.value.trim() : '';
+  var el = document.getElementById('dish-ai-text');
+  if (!item || !el) return;
+  if (!q) { el.textContent = isWineItem(item, _dishModal.kind) ? composeWineExplanation(item) : composeDishExplanation(item); return; }
+  el.textContent = answerGuestQuestion(item, q);
+}
+function askChip(q){
+  var inp = document.getElementById('dish-ai-q');
+  if (inp) inp.value = q;
+  submitAiQuestion();
+}
 function openGuestDish(kind, menuId, itemId){
   var item = findGuestItem(kind, menuId, itemId);
   if (!item) return;
@@ -1909,6 +2118,7 @@ function openGuestDish(kind, menuId, itemId){
     } else {
       price = '<div class="wine-prices">$'+(b||item.price||0)+' <small>'+t('bottlePrice')+'</small></div>';
     }
+    ensureWineLabel(item);
   } else if (item.price!=null && item.price!=='' && Number(item.price)>0) {
     price = '<p style="font-family:var(--font-display);font-size:1.4rem;color:var(--gold);margin-top:0.8rem;">$'+Number(item.price).toFixed(2)+'</p>';
   } else if (item.upcharge) {
@@ -1922,9 +2132,9 @@ function openGuestDish(kind, menuId, itemId){
   if (scoops.length) {
     scoopHtml = '<p style="font-size:0.8rem;color:var(--gold);letter-spacing:0.08em;text-transform:uppercase;margin-top:0.6rem;">'+escHtml(t('threeScoops'))+'</p><div class="scoop-grid" id="scoop-grid">'+
       scoops.map(function(s){
-        var kind=s.kind==='sorbetto'?t('scoopSorbetto'):t('scoopGelato');
+        var sk=s.kind==='sorbetto'?t('scoopSorbetto'):t('scoopGelato');
         return '<button type="button" class="scoop-card" data-scoop="'+escHtml(s.id)+'" onclick="toggleScoop(\''+escHtml(s.id)+'\')">'+
-          '<div class="scoop-kind">'+escHtml(kind)+'</div>'+
+          '<div class="scoop-kind">'+escHtml(sk)+'</div>'+
           '<div class="scoop-name">'+escHtml(s.name)+'</div>'+
           '<div class="scoop-desc">'+escHtml(s.desc||'')+'</div></button>';
       }).join('')+'</div>';
@@ -1940,54 +2150,78 @@ function openGuestDish(kind, menuId, itemId){
   }
   var chips = wine ? '' : String(item.ingredients||'').split(',').map(function(s){ return s.trim(); }).filter(Boolean).map(function(p){ return '<span class="ing-chip">'+escHtml(p)+'</span>'; }).join('');
   var temps = wine ? [] : tempOptionsFor(item);
-  var tempHtml = temps.length ? '<h4>'+t('chooseTemp')+'</h4><div class="temp-row" id="dish-temp-row">'+temps.map(function(tmp,i){
+  var showTemp = temps.length && (guestCanAddItem(item, kind) || guestCanSendTemp(item, kind));
+  var tempHtml = showTemp ? '<h4>'+t('chooseTemp')+'</h4><div class="temp-row" id="dish-temp-row">'+temps.map(function(tmp,i){
     return '<label><input type="radio" name="dish-temp" value="'+escHtml(tmp)+'"'+(i===1?' checked':'')+'> '+escHtml(tmp)+'</label>';
   }).join('')+'</div>' : '';
-  var learnLabel = wine ? t('learnMoreWine') : t('learnMore');
   var canAdd = guestCanAddItem(item, kind);
-  var addBox = canAdd
-    ? '<div class="dish-order-box">'+tempHtml+'<button type="button" class="dish-add" onclick="addDishFromModal()">'+t('addToOrder')+'</button></div>'
-    : (isEntremetItem(item) ? '<p class="wine-brief">'+escHtml(t('entremetsNote'))+'</p>' : '');
-  content.innerHTML = '<button style="position:absolute;top:1rem;right:1.2rem;background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--text-muted);" onclick="closeDishModal()">×</button>'+
-    (photo ? '<img src="'+escHtml(photo)+'" alt="'+escHtml(loc.name)+'" style="width:100%;height:160px;object-fit:cover;border-radius:var(--radius);margin-bottom:0.9rem;">' : photoThumbHtml('', loc.name))+
-    '<div class="section-label" style="margin-bottom:0.3rem;">'+(wine?t('aboutWine'):t('aboutDish'))+'</div>'+
-    '<h2>'+escHtml(loc.name)+'</h2>'+
-    '<p style="color:var(--text-secondary);margin-bottom:0.5rem;font-size:1.08rem;font-weight:400;line-height:1.6;font-family:var(--font-desc);font-style:italic;">'+escHtml(loc.desc||'')+'</p>'+
-    wineBrief+wineMeta+price+allergenWarning+allergens+dietary+pairHtml+originLinksHtml(item)+scoopHtml+
-    addBox+
-    (chips ? '<div class="ing-chips"><h4 style="font-size:0.72rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);margin-bottom:0.35rem;">'+t('ingredientsTitle')+'</h4>'+chips+'</div>' : '')+
-    '<button type="button" class="learn-more-btn" id="dish-learn-btn" onclick="revealItemAi()">'+escHtml(learnLabel)+'</button>'+
-    '<div class="ai-block" id="dish-ai-block"><h4>'+(wine?t('aiExplainWine'):t('aiExplain'))+'</h4><p id="dish-ai-text"></p></div>';
+  var canTemp = guestCanSendTemp(item, kind);
+  var addBox = '';
+  if (canAdd) {
+    addBox = '<div class="dish-order-box">'+tempHtml+'<button type="button" class="dish-add" onclick="addDishFromModal()">'+t('addToOrder')+'</button></div>';
+  } else if (canTemp) {
+    addBox = '<div class="dish-order-box"><p class="wine-brief">'+escHtml(t('tastingTempHint'))+'</p>'+tempHtml+
+      '<button type="button" class="dish-add" onclick="sendTempFromModal()">'+t('sendTemp')+'</button></div>';
+  } else if (isEntremetItem(item)) {
+    addBox = '<p class="wine-brief">'+escHtml(t('entremetsNote'))+'</p>';
+  } else if (kind==='pf' && isPrimiPiccoloItem(item)) {
+    addBox = '<p class="wine-brief">'+escHtml(t('primiPiccoloNote'))+'</p>';
+  } else if (kind==='tm') {
+    addBox = '<p class="wine-brief">'+escHtml(t('tastingAsIs'))+'</p>';
+  }
+  var chips = suggestedAiQuestions(item, wine);
+  var chipHtml = chips.map(function(q){
+    return '<button type="button" class="ai-chip" onclick="askChip(\''+escHtml(q.replace(/'/g, "\\'"))+'\')">'+escHtml(q)+'</button>';
+  }).join('');
+  var grokQ = (loc.name||item.name||'')+' — '+(wine?'wine':'dish')+' at Scalini Fedeli';
+  var heading = wine
+    ? '<h2 class="wine-name-row">'+wineLabelHtml(item)+'<span>'+escHtml(loc.name)+'</span></h2>'
+    : '<h2>'+escHtml(loc.name)+'</h2>';
+  content.innerHTML = '<button style="position:absolute;top:1rem;right:1.2rem;background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--text-muted);z-index:12;" onclick="closeDishModal()">×</button>'+
+    (photo ? '<img src="'+escHtml(photo)+'" alt="'+escHtml(loc.name)+'" style="width:100%;height:160px;object-fit:cover;border-radius:var(--radius);margin-bottom:0.9rem;">' : (wine?'':photoThumbHtml('', loc.name)))+
+    '<div class="dish-tabs">'+
+      '<button type="button" class="dish-tab active" data-tab="about" onclick="switchDishTab(\'about\')">'+escHtml(t('aboutTab'))+'</button>'+
+      '<button type="button" class="dish-tab" data-tab="ai" onclick="switchDishTab(\'ai\')">'+escHtml(t('askAi'))+'</button>'+
+    '</div>'+
+    '<div class="dish-tab-panel open" id="dish-panel-about">'+
+      '<div class="section-label" style="margin-bottom:0.3rem;">'+(wine?t('aboutWine'):t('aboutDish'))+'</div>'+
+      heading+
+      '<p style="color:var(--text-secondary);margin-bottom:0.5rem;font-size:1.08rem;font-weight:400;line-height:1.6;font-family:var(--font-desc);font-style:italic;">'+escHtml(loc.desc||'')+'</p>'+
+      wineBrief+wineMeta+price+allergenWarning+allergens+dietary+pairHtml+originLinksHtml(item)+scoopHtml+
+      addBox+
+      (chips && !wine ? '<div class="ing-chips"><h4 style="font-size:0.72rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);margin-bottom:0.35rem;">'+t('ingredientsTitle')+'</h4>'+String(item.ingredients||'').split(',').map(function(s){ return s.trim(); }).filter(Boolean).map(function(p){ return '<span class="ing-chip">'+escHtml(p)+'</span>'; }).join('')+'</div>' : '')+
+    '</div>'+
+    '<div class="dish-tab-panel" id="dish-panel-ai">'+
+      '<div class="ai-block open" id="dish-ai-block"><h4>'+(wine?t('aiExplainWine'):t('aiExplain'))+'</h4>'+
+      '<div class="ai-chips">'+chipHtml+'</div>'+
+      '<div class="ai-ask-row"><input id="dish-ai-q" placeholder="'+escHtml(t('aiPlaceholder'))+'" onkeydown="if(event.key===\'Enter\'){event.preventDefault();submitAiQuestion();}">'+
+      '<button type="button" class="visit-site-btn" style="width:auto;padding:0.65rem 0.9rem;" onclick="submitAiQuestion()">'+escHtml(t('askAi'))+'</button></div>'+
+      '<p id="dish-ai-text" style="margin-top:0.7rem;"></p>'+
+      '<button type="button" class="visit-site-btn" id="dish-grok-btn">'+escHtml(t('openGrok'))+'</button></div>'+
+    '</div>';
   modal.classList.add('open');
+  var grokBtn = document.getElementById('dish-grok-btn');
+  if (grokBtn) grokBtn.onclick = function(ev){
+    var qel = document.getElementById('dish-ai-q');
+    openGrokAsk((qel && qel.value.trim()) || grokQ, ev);
+  };
 }
 function revealItemAi(){
   var item = findGuestItem(_dishModal.kind, _dishModal.menuId, _dishModal.itemId);
   if (!item) return;
   var wine = isWineItem(item, _dishModal.kind);
-  var block = document.getElementById('dish-ai-block');
   var ai = document.getElementById('dish-ai-text');
-  var btn = document.getElementById('dish-learn-btn');
-  if (btn) btn.style.display='none';
-  if (block) block.classList.add('open');
   var enExplain = wine ? composeWineExplanation(item) : composeDishExplanation(item);
-  if (ai) ai.textContent = STATE.lang==='en' ? enExplain : t('translatingLive');
-  function show(txt){
-    var el=document.getElementById('dish-ai-text');
-    if (!el) return;
-    if (STATE.lang==='en') { el.textContent = txt; return; }
-    translateText(txt, 'en', STATE.lang).then(function(tr){
-      if (el) el.textContent = tr || txt;
-    });
-  }
+  if (ai && !ai.textContent) ai.textContent = STATE.lang==='en' ? enExplain : t('translatingLive');
   if (!wine) {
-    if (STATE.lang==='en') return;
+    if (STATE.lang==='en') { if (ai && !ai.dataset.ready) { ai.textContent = enExplain; ai.dataset.ready='1'; } return; }
     translateText(enExplain, 'en', STATE.lang).then(function(txt){
       var el=document.getElementById('dish-ai-text');
-      if (el) el.textContent = txt || enExplain;
+      if (el && !el.dataset.ready) { el.textContent = txt || enExplain; el.dataset.ready='1'; }
     });
     return;
   }
-  show(enExplain);
+  if (ai && !ai.dataset.ready) { ai.textContent = enExplain; ai.dataset.ready='1'; }
 }
 var _scoopSel = {};
 function toggleScoop(id){
@@ -2049,6 +2283,19 @@ function addDishFromModal(){
   closeDishModal();
   toast(t('addedToOrder'), 2200);
 }
+function sendTempFromModal(){
+  if (!resolvedTableNum()) { toast(t('needTable')); returnToSetup(); return; }
+  var item = findGuestItem(_dishModal.kind, _dishModal.menuId, _dishModal.itemId);
+  if (!item || !guestCanSendTemp(item, _dishModal.kind)) return;
+  var loc = locText(item);
+  var enName = englishItemName(item);
+  var sel = document.querySelector('#dish-temp-row input:checked');
+  var temp = sel ? sel.value : '';
+  if (!temp){ toast(t('chooseTemp'), 2500); return; }
+  appendGuestOrder((loc.name||enName)+' — '+temp, 'Temperature for '+(enName||loc.name)+': '+temp+' (tasting — do not add the dish)');
+  closeDishModal();
+  toast(t('tempSent'), 2200);
+}
 
 function openTasting(tmId) {
   var tm = (STATE.tastingMenus.length?STATE.tastingMenus:SEED_TASTING_MENUS).find(function(x){return x.id===tmId;});
@@ -2059,6 +2306,7 @@ function openTasting(tmId) {
     '<div class="section-label" style="margin-bottom:0.3rem;">'+t('tasting')+'</div>'+
     '<h2 style="font-family:var(--font-script);font-size:2.4rem;font-weight:400;letter-spacing:0.02em;">'+escHtml(tm.name)+'</h2>'+
     '<p style="color:var(--text-secondary);font-size:1rem;margin-top:0.3rem;">'+escHtml(locMenuCopy(tm).subtitle)+' · '+(tm.duration||'')+'</p>'+
+    '<p class="wine-brief">'+escHtml(t('tastingAsIs'))+'</p>'+
     '<p style="font-family:var(--font-display);font-size:1.4rem;color:var(--gold);margin-top:1rem;">$'+tm.price+' <span style="font-size:0.75rem;color:var(--text-muted);font-family:var(--font-body);">'+t('perPerson')+'</span></p>'+
     '<div class="tasting-modal-courses">'+
       (tm.courses||[]).map(function(c){
@@ -2068,11 +2316,12 @@ function openTasting(tmId) {
             '<div class="pf-dish-copy">'+
             '<div class="tasting-modal-course-num">Course '+(c.num||'')+'</div>'+
             '<div class="tasting-modal-course-name">'+escHtml(t('dolce'))+'</div>'+
-            '<div class="course-subhead">'+escHtml(t('dessertWord'))+'</div></div></div>';
+            '<div class="course-subhead">'+escHtml(t('dessertWord'))+' — '+escHtml(t('tastingDessertHint'))+'</div></div></div>'+
+            tastingDessertRows(tm);
         }
         var hits=(c.allergens||[]).filter(function(a){ return STATE.customerAllergies.indexOf(a)>-1; });
         var photo=dishPhoto(c, ['tmcourse:'+tm.id+'|'+(c.id||''), c.dishId, c.id]);
-        var hint = isEntremetItem(c) ? t('tapForInfo') : t('tapForStory');
+        var hint = tapHintFor(c, 'tm');
         return '<div class="tasting-modal-course pf-dish '+(hits.length?'has-allergen':'')+'" onclick="openGuestDish(\'tm\',\''+tm.id+'\',\''+(c.id||c.num)+'\')">'+
           photoThumbHtml(photo, loc.name)+
           '<div class="pf-dish-copy">'+
@@ -2102,7 +2351,7 @@ function openPrixFixe(pfId) {
       courses.map(function(cg){
         return '<div style="margin-bottom:1.5rem;">'+
           '<div class="prix-fixe-course-label">'+courseCaption(cg)+'</div>'+
-          (cg.options||[]).map(function(o){ return optionRowHtml(o, pf.id); }).join('')+
+          (cg.options||[]).map(function(o){ return optionRowHtml(Object.assign({}, o, {course:cg.label, mode:cg.mode, fireEach:cg.fireEach}), pf.id, 'pf'); }).join('')+
         '</div>';
       }).join('')+
       scaliniBtgSectionHtml()+
@@ -2314,9 +2563,23 @@ function sendGuestOrder(){
 // ─── Call Server ────────────────────────────────────────────────
 function callServer() {
   if (!resolvedTableNum()) { toast(t('needTable')); returnToSetup(); return; }
-  var call = { table:STATE.tableNum, time:Date.now(), status:'active' };
-  if (fbReady) fbDb.collection('calls').add(call);
-  toast('Server has been notified');
+  var table = resolvedTableNum();
+  var call = {
+    table: table,
+    time: Date.now(),
+    status: 'active',
+    source: 'ipad',
+    kind: 'waiter_call',
+    message: 'Guest at table '+table+' is calling the Food Master'
+  };
+  toast(t('callingFm'));
+  if (!fbReady || !fbDb) { toast(t('callFailed'), 3200); return; }
+  fbDb.collection('calls').add(call).then(function(){
+    toast(t('calledFm'));
+  }).catch(function(err){
+    console.error('iPad call Food Master', err);
+    toast(t('callFailed'), 3200);
+  });
 }
 
 // ─── Messages from server ───────────────────────────────────────
