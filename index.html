@@ -1920,7 +1920,6 @@ function openGuestDish(kind, menuId, itemId){
   _scoopSel = {};
   var scoopHtml = '';
   if (scoops.length) {
-  if (scoops.length) {
     scoopHtml = '<p style="font-size:0.8rem;color:var(--gold);letter-spacing:0.08em;text-transform:uppercase;margin-top:0.6rem;">'+escHtml(t('threeScoops'))+'</p><div class="scoop-grid" id="scoop-grid">'+
       scoops.map(function(s){
         var kind=s.kind==='sorbetto'?t('scoopSorbetto'):t('scoopGelato');
