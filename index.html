@@ -545,6 +545,13 @@ body { font-family:var(--font-body); color:var(--text-primary); background:var(-
   flex:1; background:var(--bg); border:1px solid var(--border); color:var(--text-primary);
   border-radius:var(--radius); padding:0.65rem 0.75rem; font-size:0.9rem;
 }
+.ai-action-btn {
+  width:100%; border:1px solid var(--border-gold); background:transparent; color:var(--gold);
+  padding:0.75rem 1rem; border-radius:var(--radius); text-transform:uppercase;
+  font-weight:500; font-family:var(--font-body); letter-spacing:0.04em; cursor:pointer;
+  margin-top:0.45rem; pointer-events:auto; position:relative; z-index:9;
+}
+.ai-ask-row .ai-action-btn { width:auto; margin-top:0; padding:0.65rem 0.9rem; }
 .wine-name-row { display:flex; align-items:center; gap:0.55rem; }
 .wine-label-thumb {
   width:36px; height:48px; object-fit:cover; border-radius:3px; flex-shrink:0;
@@ -2195,9 +2202,9 @@ function openGuestDish(kind, menuId, itemId){
       '<div class="ai-block open" id="dish-ai-block"><h4>'+(wine?t('aiExplainWine'):t('aiExplain'))+'</h4>'+
       '<div class="ai-chips">'+chipHtml+'</div>'+
       '<div class="ai-ask-row"><input id="dish-ai-q" placeholder="'+escHtml(t('aiPlaceholder'))+'" onkeydown="if(event.key===\'Enter\'){event.preventDefault();submitAiQuestion();}">'+
-      '<button type="button" class="visit-site-btn" style="width:auto;padding:0.65rem 0.9rem;" onclick="submitAiQuestion()">'+escHtml(t('askAi'))+'</button></div>'+
+      '<button type="button" class="ai-action-btn" onclick="submitAiQuestion()">'+escHtml(t('askAi'))+'</button></div>'+
       '<p id="dish-ai-text" style="margin-top:0.7rem;"></p>'+
-      '<button type="button" class="visit-site-btn" id="dish-grok-btn">'+escHtml(t('openGrok'))+'</button></div>'+
+      '<button type="button" class="ai-action-btn" id="dish-grok-btn">'+escHtml(t('openGrok'))+'</button></div>'+
     '</div>';
   modal.classList.add('open');
   var grokBtn = document.getElementById('dish-grok-btn');
